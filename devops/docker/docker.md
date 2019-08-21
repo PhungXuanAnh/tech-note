@@ -26,7 +26,7 @@ docker container ls
 
 ## 1.2. create a container from an image
 
-```ruby
+```css
 docker run -it --name {container_name} \
                --hostname {container_hostname} \
                --net=host \
@@ -52,7 +52,7 @@ ctrl + P and ctrl + Q
 
 ## 1.5. delete all stopped containers
 
-```ruby
+```css
 docker rm `docker ps --no-trunc -aq`
 ```
 
@@ -66,7 +66,7 @@ docker images
 
 ## 2.2. pull image
 
-```ruby
+```css
 docker pull ubuntu:14.04 (by default, it will download offical ubuntu)
 docker pull {author_name}/{image_name} # ex: docker pull binhcao/docker-whale
 ```
@@ -79,7 +79,7 @@ docker pull {author_name}/{image_name} # ex: docker pull binhcao/docker-whale
 
 Push an exist image to a repo in Docker hub
 
-```ruby
+```css
 docker login <username>
 # change tag of an exist image
 docker tag <image_id> username/image_name:tag
@@ -88,20 +88,20 @@ docker push username/image_name
 
 ## 2.5. save image to archive file
 
-```ruby
+```css
 docker save <image_name/image_id> > name_archive_file.tar
 ```
 
 ## 2.6. load image from archive file
 
-```ruby
+```css
 docker load < name_archive_file.tar.gz
 docker load --input name_archive_file.tar.gz
 ```
 
 output:
 
-```ruby
+```css
 d197921d5af2: Loading layer [==================================================>]    386kB/386kB
 821d8d203aa6: Loading layer [==================================================>]  108.9MB/108.9MB
 9b1c75c3a754: Loading layer [==================================================>]  3.584kB/3.584kB
@@ -119,19 +119,19 @@ Loaded image ID: sha256:802ce49cc0586fa2ae51757aeba8352c9614822caa9c884f0b4ba284
 
 then rename image above image:
 
-```ruby
+```css
 docker tag 802ce49cc0586fa2ae51757aeba8352c9614822caa9c884f0b4ba284f023eca6 test1:0.1
 ```
 
 then run above image:
 
-```ruby
+```css
 docker run -it --name test11 test1:0.1 bash
 ```
 
 ## 2.7. build image from Dockerfile
 
-```ruby
+```css
 docker build -t {author}/{image_name}:{tag} .   # chu y dau cham
 ```
 
@@ -141,10 +141,10 @@ docker build -t {author}/{image_name}:{tag} .   # chu y dau cham
 
 # 3. Dockerfile sample
 
-```ruby
+```css
 FROM ubuntu:16.04
 
-ruby ["/bin/bash", "-c"]
+css ["/bin/bash", "-c"]
 RUN apt-get update && apt-get install -y \
 	wget \
 	expect \
