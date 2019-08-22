@@ -1,0 +1,24 @@
+[mysqld]
+server-id = 2
+auto-increment-increment = 2
+auto-increment-offset = 2
+
+binlog-do-db = demo
+innodb_flush_log_at_trx_commit=1
+sync_binlog=1
+log-bin = /var/log/mysql/bin/bin.log
+
+# The Error Log. It contains information about errors that occur while the server is running (also server start and stop)
+log-error = /var/log/mysql/error.log
+
+# The General Query Log. This is a general record of what mysqld is doing (connect, disconnect, queries)
+general_log_file = /var/log/mysql/general.log
+general_log     =1
+
+relay-log = /var/log/mysql/relay/relay.log
+relay-log-index = /var/log/mysql/slave-relay-log.index
+
+# The Slow Query Log. Ιt consists of "slow" SQL statements (as indicated by its name).
+long_query_time =2
+slow_query_log  =1
+slow_query_log_file=/var/log/mysql/slow_query.log
