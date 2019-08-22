@@ -57,7 +57,7 @@ Một cách tiếp cận tốt hơn để bảo trì tập lệnh là tạo mộ
 
 Cách tiếp cận này được gọi là mô hình đối tượng trang (POM). Nó giúp làm cho code dễ đọc hơn, có thể bảo trì và sử dụng lại được.
 
-![](../../images/programing/selenium/2018-09-07-selenium-webdriver-40.png)
+![](../../images/programming/selenium/2018-09-07-selenium-webdriver-40.png)
 
 # 2. Page Object Model (POM) là gì?
 

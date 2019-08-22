@@ -42,7 +42,7 @@ Bây giờ chúng ta hãy hiểu cách sử dụng thực tế của mỗi phư�
 driver.findElement(By.id("email")).sendKeys("tuttut@gmail.com");
 ```
 
-![](../../images/programing/selenium/2018-09-07-selenium-webdriver-20.png)
+![](../../images/programming/selenium/2018-09-07-selenium-webdriver-20.png)
 
 
 ## 1.2. Theo Name
@@ -53,7 +53,7 @@ driver.findElement(By.id("email")).sendKeys("tuttut@gmail.com");
 driver.findElement(By.name("email")).sendKeys("tuttut@gmail.com");
 ```
 
-![](../../images/programing/selenium/2018-09-07-selenium-webdriver-21.png)
+![](../../images/programming/selenium/2018-09-07-selenium-webdriver-21.png)
 
 ## 1.3. Theo class name
 Ở đây một đối tượng được truy cập với sự giúp đỡ của Class Names. Trong trường hợp này, nó là tên lớp của WebElement. Giá trị có thể được truy cập với sự trợ giúp của phương thức gettext.
@@ -62,7 +62,7 @@ driver.findElement(By.name("email")).sendKeys("tuttut@gmail.com");
 List<WebElement> byclass = driver.findElements(By.className("inputtext")));
 ```
 
-![](../../images/programing/selenium/2018-09-07-selenium-webdriver-22.png)
+![](../../images/programming/selenium/2018-09-07-selenium-webdriver-22.png)
 
 ## 1.4. Theo tag name
 
@@ -82,7 +82,7 @@ Phương pháp này giúp xác định phần tử liên kết với văn bản 
 driver.findElement(By.linkText("JSON Formatter")).click();
 ```
 
-![](../../images/programing/selenium/2018-09-07-selenium-webdriver-23.png)
+![](../../images/programming/selenium/2018-09-07-selenium-webdriver-23.png)
 
 ## 1.6. Bằng văn bản liên kết một phần
 
@@ -92,7 +92,7 @@ Phương pháp này giúp định vị phần tử liên kết với văn bản 
 List<WebElement> listLinks = driver.findElements(By.partialLinkText("XPath"));
 ```
 
-![](../../images/programing/selenium/2018-09-07-selenium-webdriver-24.png)
+![](../../images/programming/selenium/2018-09-07-selenium-webdriver-24.png)
 
 ## 1.7. Theo CSS
 CSS được sử dụng như một phương thức để xác định webobject, tuy nhiên KHÔNG phải tất cả các trình duyệt đều hỗ trợ nhận dạng CSS.
@@ -112,7 +112,7 @@ driver.findElement(By.xpath("//a[@href='/json-formatter.html']"
         + "[contains(text(),'JSON Formatter')]")).click();
 ```
 
-![](../../images/programing/selenium/2018-09-07-selenium-webdriver-25.png)
+![](../../images/programming/selenium/2018-09-07-selenium-webdriver-25.png)
 
 # 2. Reference
 

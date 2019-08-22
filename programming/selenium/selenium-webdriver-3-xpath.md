@@ -30,7 +30,7 @@ Trong bài này, chúng ta sử dụng ChroPath plugin trên trình duyệt Chro
 # 2. XPath là gì?
 XPath được định nghĩa là đường dẫn XML. Nó là một cú pháp hoặc ngôn ngữ để tìm kiếm bất kỳ phần tử nào trên trang web bằng cách sử dụng biểu thức XML path. XPath được sử dụng để tìm vị trí của bất kỳ phần tử nào trên trang web bằng cách sử dụng cấu trúc DOM HTML. Định dạng cơ bản của XPath được giải thích bên dưới.
 
-![](../../images/programing/selenium/2018-09-07-selenium-webdriver-30.png)
+![](../../images/programming/selenium/2018-09-07-selenium-webdriver-30.png)
 
 Cú pháp XPath
 
@@ -67,7 +67,7 @@ Dưới đây là ví dụ về biểu thức xpath tuyệt đối của phần 
 /html/body/div[2]/div[1]/div[1]/ul[2]/li[4]/a
 ```
 
-![](../../images/programing/selenium/2018-09-07-selenium-webdriver-31.png)
+![](../../images/programming/selenium/2018-09-07-selenium-webdriver-31.png)
 
 ## 3.2. XPath tương đối
 
@@ -81,7 +81,7 @@ Dưới đây là ví dụ về biểu thức XPath tương đối của cùng m
 //a[@href='/xpath-tester.html']
 ```
 
-![](../../images/programing/selenium/2018-09-07-selenium-webdriver-32.png)
+![](../../images/programming/selenium/2018-09-07-selenium-webdriver-32.png)
 
 # 4. Sử dụng XPath xử lý các phần tử phức tạp và động trong Selenium
 
@@ -120,7 +120,7 @@ Ví dụ giá trị của thuộc tính name là ‘btnLogin’, nhưng chúng t
 Xpath=.//*[contains(@name,'btn')]
 ```
 
-![](../../images/programing/selenium/2018-09-07-selenium-webdriver-33.png)
+![](../../images/programming/selenium/2018-09-07-selenium-webdriver-33.png)
 
 Các ví dụ khác:
 
@@ -162,7 +162,7 @@ Trong đó, các ký tự bắt đầu giống thì giống nhau.
 
 Ví dụ sau tìm thấy 2 phần tử trên trang web [https://demo.moodle.net/login/index.php](https://demo.moodle.net/login/index.php)
 
-![](../../images/programing/selenium/2018-09-07-selenium-webdriver-34.png)
+![](../../images/programming/selenium/2018-09-07-selenium-webdriver-34.png)
 
 ```xml
 Xpath = //div[starts-with(@class, 'mt')]
@@ -171,7 +171,7 @@ Xpath = //div[starts-with(@class, 'mt')]
 ## 4.5. Hàm text() trong XPath
 Với phương thức này, chúng ta có thể tìm thấy phần tử có văn bản khớp với văn bản được chỉ định. Ví dụ sau tìm phần tử có text = ‘Nhớ tài khoản’.
 
-![](../../images/programing/selenium/2018-09-07-selenium-webdriver-34.png)
+![](../../images/programming/selenium/2018-09-07-selenium-webdriver-34.png)
 
 ```xml
 Xpath = //*[text()='Nhớ tài khoản']

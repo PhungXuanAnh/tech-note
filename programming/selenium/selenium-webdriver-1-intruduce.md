@@ -25,7 +25,7 @@ Selenium Webdriver 1: Introduce
 # 3. Architecture
 
 
-![](../../images/programing/selenium/201-09-07-selenium-webdriver-1-selenium-webdriver-architecture.png)
+![](../../images/programming/selenium/201-09-07-selenium-webdriver-1-selenium-webdriver-architecture.png)
 
 # 4. Example
 
