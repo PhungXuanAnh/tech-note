@@ -36,7 +36,8 @@ Tải bộ cài đặt tại [https://www.vpn.net/linux](https://www.vpn.net/lin
 Chạy lệnh `sudo dpkg -i logmein-hamachi_*_amd64.deb`
 
 ## 3.2. Dùng Docker
-[https://github.com/PhungXuanAnh/hamachi](https://github.com/PhungXuanAnh/hamachi)
+
+[demo](../../sample/devops/hamachi)
 
 # 4. Connect to network
 

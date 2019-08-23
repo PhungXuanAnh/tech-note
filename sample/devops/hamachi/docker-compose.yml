@@ -1,0 +1,22 @@
+# Docker compose file for Sender services
+# Author: cuongnguyen@sigma-solutions.eu
+
+
+version: '3'
+services:
+  agent:
+    image: cuongnb14/hamachi:0.1
+    build: .
+    hostname: hamachi
+    network_mode: "host"
+    # restart: always
+    privileged: true
+    # command: ping fb.com
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100M"
+        max-file: "3"
+
+    
+
