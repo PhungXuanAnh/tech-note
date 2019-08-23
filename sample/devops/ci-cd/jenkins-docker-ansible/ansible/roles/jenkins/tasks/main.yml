@@ -1,0 +1,65 @@
+- name: Directories are present
+  file:
+    path="{{ item }}"
+    state=directory
+    mode=0777
+  with_items: "{{ directories }}"
+  tags: [jenkins]
+
+- name: Config files are present
+  copy:
+    src='{{ item }}'
+    dest='{{ jenkins_directory }}/{{ item }}'
+    mode=0777
+  with_items: "{{ configs }}"
+  tags: [jenkins]
+
+- name: Plugins are present
+  copy:
+    src='{{ item }}'
+    dest='{{ jenkins_directory }}/plugins/{{ item }}'
+    mode=0777
+  with_items: "{{ plugins }}"
+  tags: [jenkins]
+
+- name: Build job directories are present
+  file:
+    path='{{ jenkins_directory }}/jobs/{{ item }}'
+    state=directory
+    mode=0777
+  with_items: "{{ jobs }}"
+  tags: [jenkins]
+
+- name: Build jobs are present
+  template:
+    src=build.xml.j2
+    dest='{{ jenkins_directory }}/jobs/{{ item }}/config.xml'
+    mode=0777
+    backup=yes
+  with_items: "{{ jobs }}"
+  tags: [jenkins]
+
+- name: Deployment job directories are present
+  file:
+    path='{{ jenkins_directory }}/jobs/{{ item }}-deployment'
+    state=directory
+    mode=0777
+  with_items: "{{ jobs }}"
+  tags: [jenkins]
+
+- name: Deployment jobs are present
+  template:
+    src=deployment.xml.j2
+    dest='{{ jenkins_directory }}/jobs/{{ item }}-deployment/config.xml'
+    backup=yes
+    mode=0777
+  with_items: "{{ jobs }}"
+  tags: [jenkins]
+
+- name: Container is running
+  docker_container:
+    name=jenkins
+    image=jenkins:1.642.4
+    ports=8080:8080
+    volumes=/data/jenkins:/var/jenkins_home
+  tags: [jenkins]
