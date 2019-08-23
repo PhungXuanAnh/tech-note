@@ -1,0 +1,25 @@
+{
+  "common": {
+    "box": "ubuntu/trusty64",
+    "vagrant_api_version": "2",
+    "bridge": "enp2s0"
+  },
+  "nodes": {
+    "node01": {
+      "private_ip": "192.168.32.10",
+      "publish_ip": "192.168.1.201",
+      "ports": [],
+      "memory": 1024,
+      "cpus": 2,
+      "provision": "provision.sh"
+    },
+    "node02": {
+      "private_ip": "192.168.32.11",
+      "publish_ip": "192.168.1.202",
+      "ports": [],
+      "memory": 1024,
+      "cpus": 2,
+      "provision": "provision.sh"
+    }
+  }
+}
