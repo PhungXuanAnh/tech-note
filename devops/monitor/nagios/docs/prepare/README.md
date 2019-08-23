@@ -1,0 +1,1 @@
+# ghichep-nagios
