@@ -68,7 +68,7 @@ Used by Vagrant and VirtualBox. To create additional forwarding ports, add them 
 
 # Sample
 
-[sample here](../../sample/devops/multiple-vm)
+[sample here](../../sample/devops/vagrant/multiple-vm)
 
 # Useful multiple vm commands
 

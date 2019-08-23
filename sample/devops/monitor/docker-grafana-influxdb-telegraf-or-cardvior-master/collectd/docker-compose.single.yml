@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  collectd:
+    image: fr3nd/collectd
+    privileged: true
+    volumes:
+      - /proc:/mnt/proc:ro
+      - ./collectd.conf:/etc/collectd/collectd.conf      
+    networks:
+      - monitoring-tier

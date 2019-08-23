@@ -1,0 +1,53 @@
+version: "3"
+
+services:
+  influxdb:
+    image: influxdb:alpine 
+    restart: always
+    volumes:
+      - "influxdb-data:/var/lib/influxdb"
+    environment:
+      - INFLUXDB_DB=cadvisor
+    networks:
+      - monitoring-tier
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+
+  cadvisor:
+    image: google/cadvisor
+    restart: always
+    depends_on:
+      - influxdb
+    networks:
+      - monitoring-tier
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    command: -storage_driver=influxdb -storage_driver_db=cadvisor -storage_driver_host=influxdb:8086
+    deploy:
+      mode: global
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - monitoring-tier
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+
+volumes:
+  influxdb-data:
+  grafana-data:
+networks:
+  monitoring-tier:
