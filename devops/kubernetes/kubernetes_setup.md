@@ -45,8 +45,11 @@ Install using command [here](https://gist.github.com/PhungXuanAnh/ed5750833dfaf3
 
 ## 2.4. Install kubernetes
 
-Cài đặt các thành phần của kubernetes
+Trên tất cả các node sẽ cài các thành phần: docker, kubelet, kubeadm và kubectl. Trong đó:
 
+- kubeadm: Được sử dụng để thiết lập cụm cluster cho K8S. (Cluster là một cụm máy thực hiện chung một mục đích). Các tài liệu chuyên môn gọi kubeadm là bột bootstrap (bootstrap tạm hiểu một tools đóng gói để tự động làm việc gì đó)
+- kubelet: Là thành phần chạy trên các host, có nhiệm vụ kích hoạt các pod và container trong cụm Cluser của K8S.
+- kubectl: Là công cụ cung cấp CLI (Giao diện dòng lệnh) để tương tác với K8S.
 
 ```shell
 apt-get update && apt-get install -y apt-transport-https
