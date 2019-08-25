@@ -24,17 +24,17 @@ database
 devops
 ---
 
-[kubernetes_architecutre_concepts.md](devops/kubernetes/kubernetes_architecutre_concepts.md)
+[kubernetes-command.md](devops/kubernetes/kubernetes-command.md)
 
-[kubernetes_yaml_file.md](devops/kubernetes/kubernetes_yaml_file.md)
+[kubernetes-volume-and-network.md](devops/kubernetes/kubernetes-volume-and-network.md)
 
-[kubernetes_setup_using_kubeadm.md](devops/kubernetes/kubernetes_setup_using_kubeadm.md)
+[kubernetes-architecture-concepts.md](devops/kubernetes/kubernetes-architecture-concepts.md)
 
-[kubernetes_volume_and_network.md](devops/kubernetes/kubernetes_volume_and_network.md)
+[kubernetes-setup-using-kubeadm.md](devops/kubernetes/kubernetes-setup-using-kubeadm.md)
 
-[kubernetes_command.md](devops/kubernetes/kubernetes_command.md)
+[kubernetes-yaml-file.md](devops/kubernetes/kubernetes-yaml-file.md)
 
-[kubernetes_setup_using_minikube.md](devops/kubernetes/kubernetes_setup_using_minikube.md)
+[kubernetes-setup-using-minikube.md](devops/kubernetes/kubernetes-setup-using-minikube.md)
 
 [deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md](devops/monitor/deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md)
 
@@ -88,6 +88,8 @@ devops
 
 [haproxy-load-balancing.md](devops/haproxy/haproxy-load-balancing.md)
 
+[docker-command.md](devops/docker/docker-command.md)
+
 [docker-supervisor.md](devops/docker/docker-supervisor.md)
 
 [docker-swarm__deploy-on-multiple-host.md](devops/docker/docker-swarm__deploy-on-multiple-host.md)
@@ -95,8 +97,6 @@ devops
 [deploy-haproxy-nginx-using-docker.md](devops/docker/deploy-haproxy-nginx-using-docker.md)
 
 [docker-swarm.md](devops/docker/docker-swarm.md)
-
-[docker.md](devops/docker/docker.md)
 
 [jenkins-add-user-and-configure-security.md](devops/jenkins/jenkins-add-user-and-configure-security.md)
 
