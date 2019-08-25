@@ -23,8 +23,8 @@ Kubeadm là một công cụ giúp tự động hóa quá trình cài đặt và
 
 | hostname | ip              |
 | -------- | --------------- |
-| master   | 188.166.238.142 |
-| node     | 178.128.212.211 |
+| master   | 188.166.238.211 |
+| node     | 178.128.212.142 |
 
 # 3. Prepare
 
@@ -40,8 +40,8 @@ Chạy các lệnh sau trên tất cả các node
 ```shell
 vim /etc/hosts
 
-188.166.238.142       k8s-master
-178.128.212.211       k8s-node
+188.166.238.211       k8s-master
+178.128.212.142       k8s-node
 ```
 
 ## 3.3. Install docker
@@ -74,13 +74,13 @@ apt-get install -y kubelet kubeadm kubectl
 On **k8s-master**:
 
 ```shell
-kubeadm init --apiserver-advertise-address 188.166.238.142 --pod-network-cidr=10.244.0.0/16
+kubeadm init --apiserver-advertise-address 188.166.238.211 --pod-network-cidr=10.244.0.0/16
 ```
 
 output:
 
 ```shell
-➜  ~ kubeadm init --apiserver-advertise-address 188.166.238.142 --pod-network-cidr=10.244.0.0/16
+➜  ~ kubeadm init --apiserver-advertise-address 188.166.238.211 --pod-network-cidr=10.244.0.0/16
 [init] Using Kubernetes version: v1.15.3
 [preflight] Running pre-flight checks
         [WARNING IsDockerSystemdCheck]: detected "cgroupfs" as the Docker cgroup driver. The recommended driver is "systemd". Please follow the guide at https://kubernetes.io/docs/setup/cri/
@@ -94,15 +94,15 @@ output:
 [certs] Using certificateDir folder "/etc/kubernetes/pki"
 [certs] Generating "ca" certificate and key
 [certs] Generating "apiserver" certificate and key
-[certs] apiserver serving cert is signed for DNS names [sender kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local] and IPs [10.96.0.1 188.166.238.142]
+[certs] apiserver serving cert is signed for DNS names [sender kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local] and IPs [10.96.0.1 188.166.238.211]
 [certs] Generating "apiserver-kubelet-client" certificate and key
 [certs] Generating "front-proxy-ca" certificate and key
 [certs] Generating "front-proxy-client" certificate and key
 [certs] Generating "etcd/ca" certificate and key
 [certs] Generating "etcd/server" certificate and key
-[certs] etcd/server serving cert is signed for DNS names [sender localhost] and IPs [188.166.238.142 127.0.0.1 ::1]
+[certs] etcd/server serving cert is signed for DNS names [sender localhost] and IPs [188.166.238.211 127.0.0.1 ::1]
 [certs] Generating "etcd/peer" certificate and key
-[certs] etcd/peer serving cert is signed for DNS names [sender localhost] and IPs [188.166.238.142 127.0.0.1 ::1]
+[certs] etcd/peer serving cert is signed for DNS names [sender localhost] and IPs [188.166.238.211 127.0.0.1 ::1]
 [certs] Generating "etcd/healthcheck-client" certificate and key
 [certs] Generating "apiserver-etcd-client" certificate and key
 [certs] Generating "sa" key and public key
@@ -146,7 +146,7 @@ Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
 
 Then you can join any number of worker nodes by running the following on each as root:
 
-kubeadm join 188.166.238.142:6443 --token wqx8uf.uh9mcsp2t4p9wz3l \
+kubeadm join 188.166.238.211:6443 --token wqx8uf.uh9mcsp2t4p9wz3l \
     --discovery-token-ca-cert-hash sha256:bb8de2584add531ee5effb0ae8a4dd5998e0f6b6d930edd4869cbdfeabf090ff 
 ➜  ~ 
 ```
@@ -190,13 +190,13 @@ kubeadm token create --print-join-command
 output:
 
 ```shell
-kubeadm join 188.166.238.142:6443 --token 9oiok2.6i1k4iwr826cycn1     --discovery-token-ca-cert-hash sha256:bb8de2584add531ee5effb0ae8a4dd5998e0f6b6d930edd4869cbdfeabf090ff 
+kubeadm join 188.166.238.211:6443 --token 9oiok2.6i1k4iwr826cycn1     --discovery-token-ca-cert-hash sha256:bb8de2584add531ee5effb0ae8a4dd5998e0f6b6d930edd4869cbdfeabf090ff 
 ```
 
 Chạy lệnh trên ở các node, ouput:
 
 ```shell
-➜  ~ kubeadm join 188.166.238.142:6443 --token 9oiok2.6i1k4iwr826cycn1     --discovery-token-ca-cert-hash sha256:bb8de2584add531ee5effb0ae8a4dd5998e0f6b6d930edd4869cbdfeabf090ff 
+➜  ~ kubeadm join 188.166.238.211:6443 --token 9oiok2.6i1k4iwr826cycn1     --discovery-token-ca-cert-hash sha256:bb8de2584add531ee5effb0ae8a4dd5998e0f6b6d930edd4869cbdfeabf090ff 
 [preflight] Running pre-flight checks
         [WARNING IsDockerSystemdCheck]: detected "cgroupfs" as the Docker cgroup driver. The recommended driver is "systemd". Please follow the guide at https://kubernetes.io/docs/setup/cri/
 [preflight] Reading configuration from the cluster...
@@ -253,7 +253,7 @@ Name:                 kube-scheduler-sender
 Namespace:            kube-system
 Priority:             2000000000
 Priority Class Name:  system-cluster-critical
-Node:                 sender/188.166.238.142
+Node:                 sender/188.166.238.211
 Start Time:           Sat, 24 Aug 2019 14:23:08 +0000
 Labels:               component=kube-scheduler
                       tier=control-plane
@@ -262,7 +262,7 @@ Annotations:          kubernetes.io/config.hash: 7d5d3c0a6786e517a8973fa06754cb7
                       kubernetes.io/config.seen: 2019-08-24T14:23:07.061867253Z
                       kubernetes.io/config.source: file
 Status:               Running
-IP:                   188.166.238.142
+IP:                   188.166.238.211
 Containers:
   kube-scheduler:
     Container ID:  docker://9e7305a0c7cef9745736e13559770568552babb669d72ef8bb3ac53e0c67df00
@@ -468,7 +468,7 @@ tcp    LISTEN     0      128      :::30315                :::*
 root@k8s-master:~#
 ```
 
-Đứng trên máy Laptop hoặc máy khác cùng dải mạng với dải IP của các node trong cụ K8S, mở trình duyệt web và truy cập với địa chỉ: http://188.166.238.142:30315 hoặc http://178.128.212.211:30315, chúng ta sẽ thấy kết quả:
+Đứng trên máy Laptop hoặc máy khác cùng dải mạng với dải IP của các node trong cụ K8S, mở trình duyệt web và truy cập với địa chỉ: http://188.166.238.211:30315 hoặc http://178.128.212.142:30315, chúng ta sẽ thấy kết quả:
 
 ```shell
 Welcome to nginx!
@@ -567,8 +567,8 @@ apache2   1/1     1            1           63s
 Sử dụng port ở kết quả để truy cập bằng curl hoặc bằng trình duyệt
 
 ```shell
-curl http://188.166.238.142:30301
-curl http://178.128.212.211:30301
+curl http://188.166.238.211:30301
+curl http://178.128.212.142:30301
 ```
 
 Như vậy ta đã hoàn tất bước sử dụng file để triển khai các container
@@ -624,7 +624,7 @@ kubernetes-dashboard   NodePort   10.97.92.188   <none>        443:31738/TCP   8
 
 Từ trình duyệt trên máy cá nhân, bạn vào đường dẫn sau:
 
-https://188.166.238.142:31738
+https://188.166.238.211:31738
 
 Nhớ là phải xài HTTPS và thay IP, port tương ứng của Master node.
 
