@@ -60,9 +60,9 @@ devops
 
 [byobu.md](devops/byobu/byobu.md)
 
-[git-merge-vs-git-rebase.md](devops/git/git-merge-vs-git-rebase.md)
+[git-undo-commit-or-remove-commit.md](devops/git/git-undo-commit-or-remove-commit.md)
 
-[undo-commit-or-remove-commit.md](devops/git/undo-commit-or-remove-commit.md)
+[git-merge-vs-git-rebase.md](devops/git/git-merge-vs-git-rebase.md)
 
 [git-fork.md](devops/git/git-fork.md)
 
