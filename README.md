@@ -24,9 +24,17 @@ database
 devops
 ---
 
-[kubernetes_setup.md](devops/kubernetes/kubernetes_setup.md)
+[kubernetes_architecutre_concepts.md](devops/kubernetes/kubernetes_architecutre_concepts.md)
 
-[kubernetes-architecture.md](devops/kubernetes/kubernetes-architecture.md)
+[kubernetes_yaml_file.md](devops/kubernetes/kubernetes_yaml_file.md)
+
+[kubernetes_setup_using_kubeadm.md](devops/kubernetes/kubernetes_setup_using_kubeadm.md)
+
+[kubernetes_volume_and_network.md](devops/kubernetes/kubernetes_volume_and_network.md)
+
+[kubernetes_command.md](devops/kubernetes/kubernetes_command.md)
+
+[kubernetes_setup_using_minikube.md](devops/kubernetes/kubernetes_setup_using_minikube.md)
 
 [deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md](devops/monitor/deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md)
 
