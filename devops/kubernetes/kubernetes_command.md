@@ -1,6 +1,24 @@
-# Câu lệnh về kubectl
+Câu lệnh về  kubectl
 
-#### View cluster info
+- [1. View cluster info](#1-view-cluster-info)
+- [2. List the nodes in cluster:](#2-list-the-nodes-in-cluster)
+- [3. List all Containers in all namespaces](#3-list-all-containers-in-all-namespaces)
+- [4. List Containers filtering by Pod namespace](#4-list-containers-filtering-by-pod-namespace)
+- [5. List cluster events:](#5-list-cluster-events)
+- [6. List deployments, pods, svc](#6-list-deployments-pods-svc)
+- [7. Delete nodes](#7-delete-nodes)
+- [8. Delete deployments, pods, svc](#8-delete-deployments-pods-svc)
+- [9. Get describe deployments pods, svc,...](#9-get-describe-deployments-pods-svc)
+- [10. Get a shell to the running Container:](#10-get-a-shell-to-the-running-container)
+- [11. Scale](#11-scale)
+- [12. Auto scale](#12-auto-scale)
+- [13. Port Forwarding: Forward one or more local ports to a pod.](#13-port-forwarding-forward-one-or-more-local-ports-to-a-pod)
+- [14. Expose: Expose a resource as a new Kubernetes service.](#14-expose-expose-a-resource-as-a-new-kubernetes-service)
+- [15. Rollout](#15-rollout)
+- [16. Rolling-update](#16-rolling-update)
+- [17. Reference](#17-reference)
+
+# 1. View cluster info
 ```sh
 root@master:~# kubectl cluster-info
 Kubernetes master is running at https://172.16.69.237:6443
@@ -11,7 +29,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 root@master:~# 
 ```
 
-#### List the nodes in cluster:
+# 2. List the nodes in cluster:
 ```sh
 root@master:~# kubectl get nodes
 NAME      STATUS    AGE       VERSION
@@ -22,19 +40,19 @@ root@master:~#
 ```
 
 
-#### List all Containers in all namespaces
+# 3. List all Containers in all namespaces
 ```sh
 kubectl get pods --all-namespaces
 ```
 
-#### List Containers filtering by Pod namespace
+# 4. List Containers filtering by Pod namespace
 ```sh
 kubectl get pods --namespace kube-system
 ```
 
 Trong đó, `kube-system` là tên namespace.
 
-#### List cluster events:
+# 5. List cluster events:
 ```sh
 root@master:/opt/heapster/deploy# kubectl get events
 LASTSEEN   FIRSTSEEN   COUNT     NAME                              KIND                      SUBOBJECT                         TYPE      REASON                         SOURCE                      MESSAGE
@@ -46,28 +64,28 @@ LASTSEEN   FIRSTSEEN   COUNT     NAME                              KIND         
 3m         3m          1         php-apache-3580908300             ReplicaSet                                                  Normal    SuccessfulCreate               replicaset-controller       Created pod: php-apache-3580908300-x6tmd
 ```
 
-#### List deployments, pods, svc 
+# 6. List deployments, pods, svc 
 ```sh
 kubectl get deployments
 kubectl get pods
 kubectl get svc
 ```
 
-#### Delete nodes
+# 7. Delete nodes
 ```sh
 root@master:~# kubectl delete nodes minion1
 node "minion1" deleted
 root@master:~# 
 ```
 
-#### Delete deployments, pods, svc
+# 8. Delete deployments, pods, svc
 ```sh
 root@master:~# kubectl delete svc monitoring-grafana --namespace=kube-system
 service "monitoring-grafana" deleted
 root@master:~# 
 ```
 
-#### Get describe deployments pods, svc,...
+# 9. Get describe deployments pods, svc,...
 ```sh
 root@master:~# kubectl describe deployments php-apache
 Name:                   php-apache
@@ -105,14 +123,14 @@ root@master:~#
 
 ```
 
-#### Get a shell to the running Container:
+# 10. Get a shell to the running Container:
 ```sh
 kubectl exec -it shell-demo /bin/bash
 ```
 
 Trong đó `shell-demo` là tên container.
 
-#### Scale
+# 11. Scale
 ```sh
 # Scale a replicaset named 'foo' to 3.
 root@master:~# kubectl scale --replicas=3 rs/foo
@@ -121,7 +139,7 @@ root@master:~# kubectl scale --replicas=3 rs/foo
 root@master:~# kubectl scale --current-replicas=2 --replicas=3 deployment/mysql
 ```
 
-#### auto scale
+# 12. Auto scale
 ```sh
 # Auto scale a replication controller "foo", with the number of pods between 1
 and 5, target CPU utilization at 80%:
@@ -129,20 +147,20 @@ root@master:~# kubectl autoscale rc foo --max=5 --cpu-percent=80
 ```
 
 
-#### Port Forwarding: Forward one or more local ports to a pod.
+# 13. Port Forwarding: Forward one or more local ports to a pod.
 ```sh
 # Listen on port 8888 locally, forwarding to 5000 in the pod
 root@master:~# kubectl port-forward mypod 8888:5000
 ```
 
-#### Expose: Expose a resource as a new Kubernetes service. 
+# 14. Expose: Expose a resource as a new Kubernetes service. 
 ```sh
 # Create a service for an nginx deployment, which serves on port 80 and connects to the containe
 rs on port 8000.
 root@master:~# kubectl expose deployment nginx --port=80 --target-port=8000
 ```
 
-#### Rollout
+# 15. Rollout
 kubectl rollout supports both Deployment and DaemonSet. It has the following subcommands:
 
 - `kubectl rollout undo` works like rollback; it allows the users to rollback to a previous version of deployment.
@@ -157,7 +175,7 @@ root@master:~# kubectl rollout undo deployment/abc
 - `kubectl rollout history` shows meaningful version information of all previous deployments. See development version.
 - `kubectl rollout retry` retries a failed deployment. See perm-failed deployments.
 
-#### Rolling-update
+# 16. Rolling-update
 - Note that kubectl rolling-update only supports Replication Controllers.
 - A rolling update works by:
   - 1. Creating a new replication controller with the updated configuration.
@@ -175,5 +193,5 @@ $ kubectl rolling-update frontend-v1 frontend-v2 --image=image:v2
 $ kubectl rolling-update frontend --image=image:v2
 ```
 
-# Reference
+# 17. Reference
 - https://kubernetes.io/docs/tasks/

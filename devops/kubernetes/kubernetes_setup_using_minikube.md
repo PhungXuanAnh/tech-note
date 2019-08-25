@@ -1,4 +1,12 @@
-# Minikube
+- [1. Giới thiệu](#1-giới-thiệu)
+- [2. Cài đặt](#2-cài-đặt)
+  - [2.1. Cài đặt các ứng dụng yêu cầu](#21-cài-đặt-các-ứng-dụng-yêu-cầu)
+  - [2.2. Cài đặt Minikube](#22-cài-đặt-minikube)
+- [3. Deploy](#3-deploy)
+- [4. Demo deploy ứng dụng nginx](#4-demo-deploy-ứng-dụng-nginx)
+
+# 1. Giới thiệu
+
 - Minikube là công cụ giúp bạn dễ dàng chạy kubernetes ngay trên máy tính của bạn.
 - Các tính năng mà minikube cung cấp đó là:
   - DNS
@@ -9,10 +17,11 @@
   - Enabling CNI (Container Network Interface)
   - Ingress
 
-# 1. Cài đặt
+# 2. Cài đặt
 Trong bài hướng dẫn này, tôi chạy minikube trên môi trường ubuntu 14.04.
 
-# 1.1 Cài đặt các ứng dụng yêu cầu:
+## 2.1. Cài đặt các ứng dụng yêu cầu
+
 - Máy tính phải hỗ trợ tính năng VT-x/AMD-v virtualization trong BIOS
 ```sh
 root@adk:/home/adk# cat /proc/cpuinfo | grep 'vmx\|svm'
@@ -34,11 +43,11 @@ chmod +x ./kubectl
 sudo mv ./kubectl /usr/local/bin/kubectl
 ``` 
 
-# 1.2 Cài đặt Minikube
+## 2.2. Cài đặt Minikube
 ```sh
 curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.18.0/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
 ```
-# 2. Deploy
+# 3. Deploy
 - Start local Kubernetes cluster:
 ```sh
 root@adk:/home/adk# minikube start
@@ -99,7 +108,7 @@ $ minikube stop
 Stopping local Kubernetes cluster...
 Machine stopped.
 ```
-# 3. Demo deploy ứng dụng nginx
+# 4. Demo deploy ứng dụng nginx
 
 - Tạo `deployment` có tên là nginx từ image nginx. Ngay lập tức, 1 pod có tên là nginx-xxxx được tạo ra. 
 

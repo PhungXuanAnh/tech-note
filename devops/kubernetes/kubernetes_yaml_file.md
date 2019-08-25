@@ -1,7 +1,13 @@
-# Viết file cấu hình tạo Deployments, pod, services.
+- [1. Viết file cấu hình tạo Deployments, pod, services.](#1-viết-file-cấu-hình-tạo-deployments-pod-services)
+  - [1.1. File Pods.](#11-file-pods)
+  - [1.2. File Deployments](#12-file-deployments)
+  - [1.3. File Service](#13-file-service)
+- [2. Giải thích thêm các thông số trong type](#2-giải-thích-thêm-các-thông-số-trong-type)
+- [3. Reference](#3-reference)
 
+# 1. Viết file cấu hình tạo Deployments, pod, services.
 
-## 1. Ví dụ file Pods.
+## 1.1. File Pods.
 ```sh
 ---
 apiVersion: v1
@@ -46,7 +52,7 @@ spec:
 
 **Ở trên, tôi chỉ giới thiệu các thuộc tính đặc trưng. Để hiểu rõ hơn, các bạn vào đọc tài liệu api của k8s. Tài liệu được viết rất rõ ràng và chi tiết tại địa chỉ https://kubernetes.io/docs/api-reference/v1.6/**
 
-## 2. File Deployments
+## 1.2. File Deployments
 ```sh
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -74,7 +80,7 @@ spec:
   - `replicas: 3`: 3Pods sẽ được tạo ra.
   - `template`: Template định nghĩ pod sẽ được tạo từ template này. Các thông tin trong mục template tương ứng với phần định nghĩa ở File pod ở trên. Tạo ra containers từ image nào, xuất ra port nào, có các labels nào,...
 
-## 3. File Service
+## 1.3. File Service
 
 ```sh
 apiVersion: v1
@@ -103,7 +109,8 @@ Ta chỉ tập trung vào các thông số:
 - `type: NodePort`: type determines how the Service is exposed. Defaults to ClusterIP. NodePort sẽ expose port 5555 trên tất cả các node (cả cụm cluster).
 
 
-###### Giải thích thêm các thông số trong type:
+# 2. Giải thích thêm các thông số trong type
+
 Trong type có 3 dạng đó là: 
 
 - ClusterIP: "ClusterIP" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object. If clusterIP is "None", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a stable IP. 
@@ -112,6 +119,6 @@ Trong type có 3 dạng đó là:
 
 - LoadBalancer: on top of having a cluster-internal IP and exposing service on a NodePort also, ask the cloud provider for a load balancer which forwards to the Service exposed as a NodeIP:NodePort for each Node.
 
-# Reference
+# 3. Reference
 - https://kubernetes.io/docs/reference/api-overview/
 - https://kubernetes.io/docs/api-reference/v1.6

@@ -1,6 +1,14 @@
+- [1. Volume](#1-volume)
+  - [1.1. Các loại volume trong kubernetes:](#11-các-loại-volume-trong-kubernetes)
+    - [1.1.1. emptyDir](#111-emptydir)
+    - [1.1.2. hostPath](#112-hostpath)
+  - [1.2. PersistentVolume](#12-persistentvolume)
+- [2. Network](#2-network)
+- [3. Reference](#3-reference)
+
 # 1. Volume
 
-## 1.1 Các loại volume trong kubernetes:
+## 1.1. Các loại volume trong kubernetes:
 - emptyDir
 - hostPath
 - gcePersistentDisk
@@ -22,7 +30,8 @@
 - PortworxVolume
 - ScaleIO
 
-### 1.1.1 emptyDir
+### 1.1.1. emptyDir
+
 - Là dạng volume được tạo ra khi 1 Pod được gán vào 1 node, tồn tại trong suốt quá trình Pod chạy trên node.
 - Volume trống.
 - Container trong Pod có thể đọc và viết vào volume này.
@@ -47,7 +56,8 @@ spec:
     emptyDir: {}
 ```
 
-### 1.2.1 hostPath
+### 1.1.2. hostPath
+
 - Là dạng volume sẽ mount file or thư mục trên máy host vào pod. Tương tự docker.
 
 ```sh
@@ -69,7 +79,7 @@ spec:
       path: /data
 ```
 
-## 1.2 PersistentVolume
+## 1.2. PersistentVolume
 - PersistentVolume (PV) là nguồn tài nguyên lưu trữ qua mạng (networked storage) được cung cấp bởi admin trong 1 cluster.
 - PersistentVolumeClaim (PVC) là yêu cầu của user về volume để sử dụng trong một pod.
 
@@ -93,7 +103,7 @@ spec:
   - Romana
   - Weave Net from Weaveworks
 
-# Reference
+# 3. Reference
 - https://kubernetes.io/docs/concepts/storage/volumes/
 - https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 - https://kubernetes.io/docs/concepts/cluster-administration/networking/
