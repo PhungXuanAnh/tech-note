@@ -17,6 +17,8 @@ def find_pattern(pattern, path):
 
 with open('README.md', 'w+') as f:
     f.write("# Tech note\n\nThis repo is my note about technical\n\n")
+    f.write("**NOTE**: The easy way to get all document about any tool is search with key work: 'awesome-[tool name]'")
+    f.write("**Chú ý: Cách nhanh nhất để tìm tài liệu đầy đủ về một công cụ nào đó là tìm với từ khóa: 'awesome-[tên công cụ]'")
 
     f.write("database\n---\n\n")
     results = find_pattern("*.md", "database")

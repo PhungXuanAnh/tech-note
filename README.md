@@ -2,7 +2,7 @@
 
 This repo is my note about technical
 
-database
+**NOTE**: The easy way to get all document about any tool is search with key work: 'awesome-[tool name]'**Chú ý: Cách nhanh nhất để tìm tài liệu đầy đủ về một công cụ nào đó là tìm với từ khóa: 'awesome-[tên công cụ]'database
 ---
 
 [mongodb-command.md](database/mongo/mongodb-command.md)
