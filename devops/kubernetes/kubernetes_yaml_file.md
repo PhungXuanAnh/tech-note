@@ -8,7 +8,7 @@
 # 1. Viết file cấu hình tạo Deployments, pod, services.
 
 ## 1.1. File Pods.
-```sh
+```yaml
 ---
 apiVersion: v1
 kind: Pod
@@ -53,7 +53,7 @@ spec:
 **Ở trên, tôi chỉ giới thiệu các thuộc tính đặc trưng. Để hiểu rõ hơn, các bạn vào đọc tài liệu api của k8s. Tài liệu được viết rất rõ ràng và chi tiết tại địa chỉ https://kubernetes.io/docs/api-reference/v1.6/**
 
 ## 1.2. File Deployments
-```sh
+```yaml
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
@@ -82,7 +82,7 @@ spec:
 
 ## 1.3. File Service
 
-```sh
+```yaml
 apiVersion: v1
 kind: Service
 metadata:
