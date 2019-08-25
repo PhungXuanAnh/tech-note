@@ -5,7 +5,7 @@ This repo is my note about technical
 database
 ---
 
-[mongodb.md](database/mongo/mongodb.md)
+[mongodb-command.md](database/mongo/mongodb-command.md)
 
 [mysql-replication.md](database/mysql/mysql-replication.md)
 
