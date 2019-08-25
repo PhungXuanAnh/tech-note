@@ -24,6 +24,10 @@ database
 devops
 ---
 
+[kubernetes_setup.md](devops/kubernetes/kubernetes_setup.md)
+
+[kubernetes-architecture.md](devops/kubernetes/kubernetes-architecture.md)
+
 [deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md](devops/monitor/deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md)
 
 [nagios.md](devops/monitor/nagios/nagios.md)
