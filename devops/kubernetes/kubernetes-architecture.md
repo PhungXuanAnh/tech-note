@@ -8,6 +8,7 @@
   - [1.7. CLI](#17-cli)
 - [2. Pod network](#2-pod-network)
 - [3. Tại sao trên node master cũng có các thành phần `kubelet` và `kube-proxy`](#3-tại-sao-trên-node-master-cũng-có-các-thành-phần-kubelet-và-kube-proxy)
+- [4. Các khái niệm trong K8S](#4-các-khái-niệm-trong-k8s)
 
 # 1. Kiến trúc và các thành phần trong K8S
 
@@ -96,59 +97,80 @@ Câu trả lời là: Do các node master cũng có các service (ứng dụng) 
 
 Ta có thể sử dụng lệnh `kubectl get pod --all-namespaces -o wide` để quan sát việc này. Kết quả của lệnh như dưới.
 
-  ```sh
-  export KUBECONFIG=/etc/kubernetes/admin.conf
+```sh
+export KUBECONFIG=/etc/kubernetes/admin.conf
 
-  kubectl get pod --all-namespaces -o wide
+kubectl get pod --all-namespaces -o wide
 ```
 
 Kết quả như sau (chú ý quan sát ở cột `NODE`): 
-  ```sh
-  NAMESPACE     NAME                             READY     STATUS    RESTARTS   AGE       IP              NODE
-  kube-system   etcd-master                      1/1       Running   0          1d        172.16.68.130   master
-  kube-system   kube-apiserver-master            1/1       Running   0          1d        172.16.68.130   master
-  kube-system   kube-controller-manager-master   1/1       Running   0          1d        172.16.68.130   master
-  kube-system   kube-dns-6f4fd4bdf-ctxx7         3/3       Running   0          1d        10.244.0.2      master
-  kube-system   kube-flannel-ds-kjnhs            1/1       Running   0          1d        172.16.68.130   master
-  kube-system   kube-flannel-ds-wz648            1/1       Running   0          1d        172.16.68.131   node1
-  kube-system   kube-flannel-ds-xtcj9            1/1       Running   0          1d        172.16.68.132   node2
-  kube-system   kube-proxy-5slwp                 1/1       Running   0          1d        172.16.68.132   node2
-  kube-system   kube-proxy-5trrj                 1/1       Running   0          1d        172.16.68.130   master
-  kube-system   kube-proxy-b54bs                 1/1       Running   0          1d        172.16.68.131   node1
-  kube-system   kube-scheduler-master            1/1       Running   0          1d        172.16.68.130   master
-  ```
+```sh
+NAMESPACE     NAME                             READY     STATUS    RESTARTS   AGE       IP              NODE
+kube-system   etcd-master                      1/1       Running   0          1d        172.16.68.130   master
+kube-system   kube-apiserver-master            1/1       Running   0          1d        172.16.68.130   master
+kube-system   kube-controller-manager-master   1/1       Running   0          1d        172.16.68.130   master
+kube-system   kube-dns-6f4fd4bdf-ctxx7         3/3       Running   0          1d        10.244.0.2      master
+kube-system   kube-flannel-ds-kjnhs            1/1       Running   0          1d        172.16.68.130   master
+kube-system   kube-flannel-ds-wz648            1/1       Running   0          1d        172.16.68.131   node1
+kube-system   kube-flannel-ds-xtcj9            1/1       Running   0          1d        172.16.68.132   node2
+kube-system   kube-proxy-5slwp                 1/1       Running   0          1d        172.16.68.132   node2
+kube-system   kube-proxy-5trrj                 1/1       Running   0          1d        172.16.68.130   master
+kube-system   kube-proxy-b54bs                 1/1       Running   0          1d        172.16.68.131   node1
+kube-system   kube-scheduler-master            1/1       Running   0          1d        172.16.68.130   master
+```
 
 Ngoài ra, riêng thành phần kubelet trên `master node` thì không chạy trong container, thay vào đó thì kubelet chạy như một service trong hệ điều hành. Ta có thể kiểm tra bằng lệnh kiểm tra hoạt động của service kubelet.
 
-  ```sh
-   systemctl status kubelet
-  ```
+```sh
+  systemctl status kubelet
+```
 
 Kết quả: 
 
-  ```sh
-  ● kubelet.service - kubelet: The Kubernetes Node Agent
-     Loaded: loaded (/lib/systemd/system/kubelet.service; enabled; vendor preset: enabled)
-    Drop-In: /etc/systemd/system/kubelet.service.d
-             └─10-kubeadm.conf
-     Active: active (running) since Thu 2018-01-25 23:50:36 +07; 1 day 21h ago
-       Docs: http://kubernetes.io/docs/
-   Main PID: 11378 (kubelet)
-      Tasks: 16
-     Memory: 46.7M
-        CPU: 1h 45min 52.258s
-     CGroup: /system.slice/kubelet.service
-             └─11378 /usr/bin/kubelet --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --pod-manifest-path=/etc/kubernetes/manife
+```sh
+● kubelet.service - kubelet: The Kubernetes Node Agent
+    Loaded: loaded (/lib/systemd/system/kubelet.service; enabled; vendor preset: enabled)
+  Drop-In: /etc/systemd/system/kubelet.service.d
+            └─10-kubeadm.conf
+    Active: active (running) since Thu 2018-01-25 23:50:36 +07; 1 day 21h ago
+      Docs: http://kubernetes.io/docs/
+  Main PID: 11378 (kubelet)
+    Tasks: 16
+    Memory: 46.7M
+      CPU: 1h 45min 52.258s
+    CGroup: /system.slice/kubelet.service
+            └─11378 /usr/bin/kubelet --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --pod-manifest-path=/etc/kubernetes/manife
 
-  Jan 26 00:14:03 master kubelet[11378]: W0126 00:14:03.070593   11378 kubelet.go:1592] Deleting mirror pod "etcd-master_kube-system(2141fb05-01f3-11e8-a135-525400811cc0)" because it i
-  Jan 26 00:14:03 master kubelet[11378]: W0126 00:14:03.162630   11378 kubelet.go:1592] Deleting mirror pod "kube-apiserver-master_kube-system(217a6f08-01f3-11e8-a135-525400811cc0)" be
-  Jan 26 00:14:03 master kubelet[11378]: W0126 00:14:03.216007   11378 kubelet.go:1592] Deleting mirror pod "kube-controller-manager-master_kube-system(21b796d0-01f3-11e8-a135-52540081
-  Jan 26 00:14:03 master kubelet[11378]: W0126 00:14:03.317123   11378 kubelet.go:1592] Deleting mirror pod "kube-scheduler-master_kube-system(21d62e54-01f3-11e8-a135-525400811cc0)" be
-  Jan 26 00:14:12 master kubelet[11378]: W0126 00:14:12.846969   11378 conversion.go:110] Could not get instant cpu stats: different number of cpus
-  Jan 26 00:14:29 master kubelet[11378]: I0126 00:14:29.425093   11378 reconciler.go:217] operationExecutor.VerifyControllerAttachedVolume started for volume "kube-dns-config" (UniqueN
-  Jan 26 00:14:29 master kubelet[11378]: I0126 00:14:29.427162   11378 reconciler.go:217] operationExecutor.VerifyControllerAttachedVolume started for volume "kube-dns-token-tpdkw" (Un
-  Jan 26 00:14:30 master kubelet[11378]: W0126 00:14:30.147023   11378 pod_container_deletor.go:77] Container "7cb2acf1d1e6fa6183dcde381bbf120ff60308ac77a55921f23de2618130df52" not fou
-  Jan 26 00:14:53 master kubelet[11378]: W0126 00:14:53.026037   11378 conversion.go:110] Could not get instant cpu stats: different number of cpus
-  Jan 26 00:15:03 master kubelet[11378]: W0126 00:15:03.045872   11378 conversion.go:110] Could not get instant cpu stats: different number of cpus
-  lines 1-23/23 (END)
-  ````
+Jan 26 00:14:03 master kubelet[11378]: W0126 00:14:03.070593   11378 kubelet.go:1592] Deleting mirror pod "etcd-master_kube-system(2141fb05-01f3-11e8-a135-525400811cc0)" because it i
+Jan 26 00:14:03 master kubelet[11378]: W0126 00:14:03.162630   11378 kubelet.go:1592] Deleting mirror pod "kube-apiserver-master_kube-system(217a6f08-01f3-11e8-a135-525400811cc0)" be
+Jan 26 00:14:03 master kubelet[11378]: W0126 00:14:03.216007   11378 kubelet.go:1592] Deleting mirror pod "kube-controller-manager-master_kube-system(21b796d0-01f3-11e8-a135-52540081
+Jan 26 00:14:03 master kubelet[11378]: W0126 00:14:03.317123   11378 kubelet.go:1592] Deleting mirror pod "kube-scheduler-master_kube-system(21d62e54-01f3-11e8-a135-525400811cc0)" be
+Jan 26 00:14:12 master kubelet[11378]: W0126 00:14:12.846969   11378 conversion.go:110] Could not get instant cpu stats: different number of cpus
+Jan 26 00:14:29 master kubelet[11378]: I0126 00:14:29.425093   11378 reconciler.go:217] operationExecutor.VerifyControllerAttachedVolume started for volume "kube-dns-config" (UniqueN
+Jan 26 00:14:29 master kubelet[11378]: I0126 00:14:29.427162   11378 reconciler.go:217] operationExecutor.VerifyControllerAttachedVolume started for volume "kube-dns-token-tpdkw" (Un
+Jan 26 00:14:30 master kubelet[11378]: W0126 00:14:30.147023   11378 pod_container_deletor.go:77] Container "7cb2acf1d1e6fa6183dcde381bbf120ff60308ac77a55921f23de2618130df52" not fou
+Jan 26 00:14:53 master kubelet[11378]: W0126 00:14:53.026037   11378 conversion.go:110] Could not get instant cpu stats: different number of cpus
+Jan 26 00:15:03 master kubelet[11378]: W0126 00:15:03.045872   11378 conversion.go:110] Could not get instant cpu stats: different number of cpus
+lines 1-23/23 (END)
+```
+
+# 4. Các khái niệm trong K8S
+
+- Nắm được các khái niệm trong K8S sẽ giúp bạn tìm hiểu K8S một cách chắc chắn và am hiểu hơn khi đọc thêm các tài liệu khác (ngoài tài liệu này)
+- Có rất nhiều khái niệm mới khi tiếp cận với Kubernetes (K8S) cần nắm được khi mới bắt đầu tìm hiểu. 
+- Trong tài liệu này sẽ giới thiệu một cách đơn giản nhất về các khái niệm này, có thể trong quá trình giới thiệu sẽ kèm theo các hình ảnh hoặc kết quả lệnh.
+- Ta nên có một cụm K8S đã được triển khai để cùng thực hành hoặc cùng quan sát khi các ví dụ được minh họa.
+- Có các khái niệm chính như sau trong K8S:
+  - Pods
+  - Labels
+  - Replica Controllers
+  - Replica Sets
+  - Deployments
+  - Services
+  - Volumes
+  - Config Maps
+  - Daemons
+  - Jobs
+  - Cron Jobs
+  - Namespaces
+  - Quotas and Limits
