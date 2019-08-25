@@ -1,4 +1,4 @@
-# my-note
+# Tech note
 
 This repo is my note about technical
 

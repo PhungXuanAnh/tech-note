@@ -16,7 +16,7 @@ def find_pattern(pattern, path):
 # print(json.dumps(result, indent=4, sort_keys=True))
 
 with open('README.md', 'w+') as f:
-    f.write("# my-note\n\nThis repo is my note about technical\n\n")
+    f.write("# Tech note\n\nThis repo is my note about technical\n\n")
 
     f.write("database\n---\n\n")
     results = find_pattern("*.md", "database")
