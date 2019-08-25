@@ -51,7 +51,7 @@ sudo puppet cert list --all # check for signed cert(s)
 
 Used by Vagrant and VirtualBox. To create additional forwarding ports, add them to the 'ports' array. For example:
  
- ```shell
+ ```json
  "ports": [
         {
           ":host": 1234,
