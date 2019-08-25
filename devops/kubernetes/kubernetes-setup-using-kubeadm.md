@@ -15,7 +15,6 @@
   - [6.1. setup](#61-setup)
   - [6.2. cấu hình](#62-cấu-hình)
 
-
 # 1. Giới thiệu
 
 Kubeadm là một công cụ giúp tự động hóa quá trình cài đặt và triển khai kubernetes trên môi trường Linux, do chính kubernetes hỗ trợ.

@@ -39,7 +39,7 @@
 - Container bị crashing, dữ liệu không bị mất.
 - emptyDir lưu trữ trên thư mục `/var/lib/kubelet` của host.
 - Ví dụ:
-```sh
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -60,7 +60,7 @@ spec:
 
 - Là dạng volume sẽ mount file or thư mục trên máy host vào pod. Tương tự docker.
 
-```sh
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
