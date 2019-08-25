@@ -1,4 +1,16 @@
-## Kiến trúc và các thành phần trong K8S
+- [1. Kiến trúc và các thành phần trong K8S](#1-kiến-trúc-và-các-thành-phần-trong-k8s)
+  - [1.1. etcd](#11-etcd)
+  - [1.2. API-server](#12-api-server)
+  - [1.3. Controller-manager](#13-controller-manager)
+  - [1.4. Scheduler](#14-scheduler)
+  - [1.5. Agent - kubelet](#15-agent---kubelet)
+  - [1.6. Proxy](#16-proxy)
+  - [1.7. CLI](#17-cli)
+- [2. Pod network](#2-pod-network)
+- [3. Tại sao trên node master cũng có các thành phần `kubelet` và `kube-proxy`](#3-tại-sao-trên-node-master-cũng-có-các-thành-phần-kubelet-và-kube-proxy)
+
+# 1. Kiến trúc và các thành phần trong K8S
+
 Phần này sẽ mô tả về kiến trúc và các thành phần trong K8S. Muốn hiểu phần này được tốt nhất thì nên đọc phần bài về [giới thiệu K8S](./01.Gioithieuve_Kubernetes.md/) và [cài đặt K8S](./02.Caidat-Kubernetes.md/)
 
 Như trong phần [cài đặt K8S](./02.Caidat-Kubernetes.md/) chúng ta có thể nhìn thấy các thành phần `kubeadm, kubelet, kube-proxy, ectd, flannet` nằm trên các node. Trong phần này ta sẽ làm rõ hơn về chúng.
@@ -28,17 +40,17 @@ Các thành phần chính trong cụm cluster K8S bao gồm:
 Tuy một số thành phần kể tên ở trên không được liệt kê trong hình vẽ nhưng chúng là thành phần cần phải có để đảm bảo hoạt động của cụm Cluseter K8S. Sau đây chúng ta sẽ mô tả về vài trò của các thành phần chính trong kiến trúc của K8S. Sau khi hoàn tất phần này, chúng ta sẽ tìm hiểu về các khái niệm chính, mục tiêu là để người đọc hiểu được các thuật ngữ khi làm việc này này với K8S. 
 
 
-#### etcd
+## 1.1. etcd
 - Etcd là một thành phần database phân tán, sử dụng ghi dữ liệu theo cơ chế `key/value` trong K8S cluster. Etcd được cài trên node master và lưu tất cả các thông tin trong Cluser. Etcd sử dụng port 2380 để listening từng request và port 2379 để client gửi request tới.
 - Ectd nằm trên node master.
 
-#### API-server
+## 1.2. API-server
 - API server là thành phần tiếp nhận yêu cầu của hệ thống K8S thông qua REST, tức là nó tiếp nhận các chỉ thị từ người dùng cho đến các services trong hệ thống Cluster thông qua API - có nghĩa là người dùng hoặc các service khác trong cụm cluster có thể tương tác tới K8S thông qua HTTP/HTTPS.
 
 - API-server hoạt động trên port 6443 (HTTPS) và 8080 (HTTP).
 - API-server nằm trên node master.
 
-#### Controller-manager
+## 1.3. Controller-manager
 - Thành phần controller-manager là thành phần quản lý trong K8S, nó có nhiệm vụ xử lý các tác vụ trong cụm cluster để đảm bảo hoạt động của các tài nguyên trong cụm cluster. Controller-manager có các thành phần bên trong như sau:
 
   - Node Controller: Tiếp nhận và trả lời các thông báo khi có một node bị down.
@@ -48,11 +60,11 @@ Tuy một số thành phần kể tên ở trên không được liệt kê tron
 
 - Thành phần controller-manager hoạt động trên node master và sử dụng port 10252.
 
-#### Scheduler
+## 1.4. Scheduler
 
 kube-scheduler có nhiệm vụ quan sát để lựa chọn ra các node mỗi khi có yêu cầu tạo pod. Nó sẽ lựa chọn các node sao cho phù hợp nhất dựa vào các cơ chế lập lịch mà nó có. Kube-scheduler được cài đặt trên node master và sử dụng port 10251.
 
-#### Agent - kubelet
+## 1.5. Agent - kubelet
 - Agent hay chính là kubelet, một thành phần chạy chính trên các node worker. Khi kube-scheduler đã xác định được một pod được chạy trên node nào thì nó sẽ gửi các thông tin về cấu hình (images, volume ...) tới kubelet trên node đó. Dựa vào thông tin nhận được thì kubelet sẽ tiến hành tạo các container theo yêu cầu.
 - Vai trò chính của kubelet là: 
   - Dõi theo các pod trên node được gán để hoạt động. 
@@ -62,20 +74,20 @@ kube-scheduler có nhiệm vụ quan sát để lựa chọn ra các node mỗi 
 
 - Kubelet chạy trên các node worker và sử dụng port 10250 và 10255.
 
-#### Proxy 
+## 1.6. Proxy 
 - Các service chỉ hoạt động ở chế độ logic, do vậy muốn bên ngoài có thể truy cập được vào các service này thì cần có thành phần chuyển tiếp các request từ bên ngoài và bên trong. 
 - Kube-proxy được cài đặt trên các node worker, sử dụng port 31080
 
-#### CLI
+## 1.7. CLI
 
 - kubectl là thành phần cung cấp câu lệnh để người dùng tương tác với K8S. kubectl có thể chạy trên bất cứ máy nào, miễn là có kết nối được với K8S API-server
 
-### Pod network
+# 2. Pod network
 
 Như trong các phần trước, chúng ta còn thấy một thành phần khác đó là pod network, đây là thành phần xử lý về network trong cụm K8S cluster. Pod network đảm bảo cho các container có thể truyền thông được với nhau. Có nhiều lựa chọn về pod network, nhưng trong tài liệu này chỉ giới thiệu về `flannet`
 
 
-### Tại sao trên node master cũng có các thành phần `kubelet` và `kube-proxy`
+# 3. Tại sao trên node master cũng có các thành phần `kubelet` và `kube-proxy`
 - Trong hình dưới ta có thể thấy trên node master có các thành phần là `kubelet` và `kube-proxy`. Tại sao lại như vậy.
 
 ![K8S-topology](../../images/devops/kubernetes/kubernetes-topology.png)
