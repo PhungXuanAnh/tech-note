@@ -1,35 +1,41 @@
-- [1. Server info](#1-server-info)
-- [2. Prepare](#2-prepare)
-  - [2.1. Disable swap](#21-disable-swap)
-  - [2.2. Setup hostname](#22-setup-hostname)
-  - [2.3. Install docker](#23-install-docker)
-  - [2.4. Install kubernetes](#24-install-kubernetes)
-- [3. Thiết lập cluster](#3-thiết-lập-cluster)
-- [4. Chạy thử ứng dụng](#4-chạy-thử-ứng-dụng)
-  - [4.1. Tạo ứng dụng web server với image là nginx trên K8S bằng lệnh kubectl](#41-tạo-ứng-dụng-web-server-với-image-là-nginx-trên-k8s-bằng-lệnh-kubectl)
-    - [4.1.1. Bước 1: Tạo container](#411-bước-1-tạo-container)
-    - [4.1.2. Bước 2: Thực hiện deploy ứng dụng trên](#412-bước-2-thực-hiện-deploy-ứng-dụng-trên)
-  - [4.2. Ví dụ tạo các ứng dụng với file yaml](#42-ví-dụ-tạo-các-ứng-dụng-với-file-yaml)
-- [5. Cài đặt Kubernetes Dashboard](#5-cài-đặt-kubernetes-dashboard)
-  - [5.1. setup](#51-setup)
-  - [5.2. cấu hình](#52-cấu-hình)
+- [1. Giới thiệu](#1-giới-thiệu)
+- [2. Server info](#2-server-info)
+- [3. Prepare](#3-prepare)
+  - [3.1. Disable swap](#31-disable-swap)
+  - [3.2. Setup hostname](#32-setup-hostname)
+  - [3.3. Install docker](#33-install-docker)
+  - [3.4. Install kubernetes](#34-install-kubernetes)
+- [4. Thiết lập cluster](#4-thiết-lập-cluster)
+- [5. Chạy thử ứng dụng](#5-chạy-thử-ứng-dụng)
+  - [5.1. Tạo ứng dụng bằng lệnh kubectl](#51-tạo-ứng-dụng-bằng-lệnh-kubectl)
+    - [5.1.1. Bước 1: Tạo container](#511-bước-1-tạo-container)
+    - [5.1.2. Bước 2: Thực hiện deploy ứng dụng trên](#512-bước-2-thực-hiện-deploy-ứng-dụng-trên)
+  - [5.2. Tạo các ứng dụng với file yaml](#52-tạo-các-ứng-dụng-với-file-yaml)
+- [6. Cài đặt Kubernetes Dashboard](#6-cài-đặt-kubernetes-dashboard)
+  - [6.1. setup](#61-setup)
+  - [6.2. cấu hình](#62-cấu-hình)
 
-# 1. Server info
+
+# 1. Giới thiệu
+
+Kubeadm là một công cụ giúp tự động hóa quá trình cài đặt và triển khai kubernetes trên môi trường Linux, do chính kubernetes hỗ trợ.
+
+# 2. Server info
 
 | hostname | ip              |
 | -------- | --------------- |
 | master   | 188.166.238.142 |
 | node     | 178.128.212.211 |
 
-# 2. Prepare
+# 3. Prepare
 
 Chạy các lệnh sau trên tất cả các node
 
-## 2.1. Disable swap
+## 3.1. Disable swap
 
 ` swapoff -a`
 
-## 2.2. Setup hostname
+## 3.2. Setup hostname
 
 
 ```shell
@@ -39,11 +45,11 @@ vim /etc/hosts
 178.128.212.211       k8s-node
 ```
 
-## 2.3. Install docker
+## 3.3. Install docker
 
 Install using command [here](https://gist.github.com/PhungXuanAnh/ed5750833dfaf39b9044396cb6ab227e)
 
-## 2.4. Install kubernetes
+## 3.4. Install kubernetes
 
 Trên tất cả các node sẽ cài các thành phần: docker, kubelet, kubeadm và kubectl. Trong đó:
 
@@ -64,7 +70,7 @@ apt-get update  -y
 apt-get install -y kubelet kubeadm kubectl
 ```
 
-# 3. Thiết lập cluster
+# 4. Thiết lập cluster
 
 On **k8s-master**:
 
@@ -304,7 +310,7 @@ Events:
 
 Tới đây chúng ta đã có môi trường để bắt đầu thực hành với K8S rồi.
 
-# 4. Chạy thử ứng dụng
+# 5. Chạy thử ứng dụng
 
 Có 2 cách để tạo ra các tài nguyên để phục vụ các ứng dụng trên cụm cluster K8S:
 
@@ -319,11 +325,11 @@ Trong phạm vi phần này, sẽ giới thiệu cách 1, cách 2 sẽ được 
 
 - Cuối cùng, ta sẽ thực hiện xóa hoặc hủy các ứng dụng để sẵn sàng cho phần tiếp theo
 
-## 4.1. Tạo ứng dụng web server với image là nginx trên K8S bằng lệnh kubectl
+## 5.1. Tạo ứng dụng bằng lệnh kubectl
 
-Chúng ta sẽ tạo ra một ứng dụng với vai trò là web server, sau đó sẽ thực hiện các thao tác quản trị các container, truy cập vào ứng dụng đó từ các môi trường bên trong vào bên ngoài để kiểm tra hoạt động
+Chúng ta sẽ tạo ra một ứng dụng với vai trò là web server với image là nginx trên K8S, sau đó sẽ thực hiện các thao tác quản trị các container, truy cập vào ứng dụng đó từ các môi trường bên trong vào bên ngoài để kiểm tra hoạt động
 
-### 4.1.1. Bước 1: Tạo container
+### 5.1.1. Bước 1: Tạo container
 
 Tạo 02 container với images là nginx, 2 container này chạy dự phòng cho nhau, port của các container là 80
 
@@ -358,7 +364,7 @@ NAME         READY   UP-TO-DATE   AVAILABLE   AGE
 test-nginx   2/2     2            2           7m57s
 ```
 
-### 4.1.2. Bước 2: Thực hiện deploy ứng dụng trên
+### 5.1.2. Bước 2: Thực hiện deploy ứng dụng trên
 
 Chính là bước phơi các port của container ra.
 
@@ -505,7 +511,7 @@ No resources found.
 
 Tới đây, ta đã kết thúc bước cơ bản để thực hiện tạo và quản lý một ứng dụng cơ bản trên cụm cluster K8S
 
-## 4.2. Ví dụ tạo các ứng dụng với file yaml
+## 5.2. Tạo các ứng dụng với file yaml
 
 Tạo 1 file tên là apache-app.yaml
 
@@ -542,9 +548,9 @@ spec:
 Sau đó thực hiện lệnh dưới để deploy ứng dụng
 
 ```shell
- root@k8s-master:~# kubectl create -f apache-app.yaml
- deployment.apps "apache-app" created
- service "apache-app" created
+root@k8s-master:~# kubectl create -f apache-app.yaml
+deployment.apps "apache-app" created
+service "apache-app" created
 ```
 
 Kiểm tra thêm bằng các lệnh
@@ -568,9 +574,9 @@ curl http://178.128.212.211:30301
 
 Như vậy ta đã hoàn tất bước sử dụng file để triển khai các container
 
-# 5. Cài đặt Kubernetes Dashboard
+# 6. Cài đặt Kubernetes Dashboard
 
-## 5.1. setup
+## 6.1. setup
 
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml
@@ -591,7 +597,7 @@ service/kubernetes-dashboard created
 
 container này sẽ chạy trong namespace của k8s là kube-system.
 
-## 5.2. cấu hình
+## 6.2. cấu hình
 
 Bạn chạy lệnh sau để bắt đầu vào giao diện website:
 

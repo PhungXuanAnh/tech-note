@@ -9,6 +9,13 @@
 - [2. Pod network](#2-pod-network)
 - [3. Tại sao trên node master cũng có các thành phần `kubelet` và `kube-proxy`](#3-tại-sao-trên-node-master-cũng-có-các-thành-phần-kubelet-và-kube-proxy)
 - [4. Các khái niệm trong K8S](#4-các-khái-niệm-trong-k8s)
+  - [4.1. Pod](#41-pod)
+  - [4.2. Replication Controllers](#42-replication-controllers)
+  - [4.3. Services](#43-services)
+  - [4.4. Volumes](#44-volumes)
+  - [4.5. Namespaces](#45-namespaces)
+  - [4.6. ConfigMap (cm) - Secret](#46-configmap-cm---secret)
+  - [4.7. Labels - Annotations](#47-labels---annotations)
 
 # 1. Kiến trúc và các thành phần trong K8S
 
@@ -174,3 +181,50 @@ lines 1-23/23 (END)
   - Cron Jobs
   - Namespaces
   - Quotas and Limits
+
+## 4.1. Pod
+- Pod là 1 nhóm (1 trở lên) các container chứa ứng dụng cùng chia sẽ các tài nguyên lưu trữ, địa chỉ ip...
+- Pod có thể chạy theo 2 cách sau:
+  - **Pods that run a single container.**: 1 container tương ứng với 1 pod.
+  - **Pods that run multiple containers that need to work together.**: Một Pod có thể là một ứng dụng bao gồm nhiều container
+  được kết nối chặt chẽ và cần phải chia sẻ tài nguyên với nhau giữa các container.
+
+- Pods cung cấp hai loại tài nguyên chia sẻ cho các containers: networking và storage.
+- **Networking**: Mỗi pod sẽ được cấp 1 địa chỉ ip. Các container trong cùng 1 Pod cùng chia sẽ network namespace (địa chỉ ip và port).
+Các container trong cùng pod có thể giao tiếp với nhau và có thể giao tiếp với các container ở pod khác (use the shared network resources).
+
+- **Storage**: Pod có thể chỉ định một `shared storage volumes`. Các container trong pod có thể truy cập vào volume này.
+
+## 4.2. Replication Controllers
+- Replication controller đảm bảo rằng số lượng các pod replicas đã định nghĩa luôn luôn chạy đủ số lượng tại bất kì thời điểm nào. 
+- Thông qua Replication controller, Kubernetes sẽ quản lý vòng đời của các pod, bao gồm scaling up and down, rolling deployments, and monitoring.
+
+## 4.3. Services
+- Vì pod có tuổi thọ ngắn nên không đảm bảo về địa chỉ IP mà chúng được cung cấp. 
+- Service là khái niệm được thực hiện bởi : domain name, và port. Service sẽ tự động "tìm" các pod được đánh label phù hợp (trùng với label của service), rồi chuyển các connection tới đó.
+- Nếu tìm được 5 pods thoả mã label, service sẽ thực hiện load-balancing: chia connection tới từng pod theo chiến lược được chọn (VD: round-robin: lần lượt vòng tròn).
+- Mỗi service sẽ được gán 1 domain do người dùng lựa chọn, khi ứng dụng cần kết nối đến service, ta chỉ cần dùng domain là xong. Domain được quản lý bởi hệ thống name server SkyDNS nội bộ của k8s - một thành phần sẽ được cài khi ta cài k8s.
+- Đây là nơi bạn có thể định cấu hình cân bằng tải cho nhiều pod và `expose` các pod đó.
+
+
+## 4.4. Volumes
+- Volumes thể hiện vị trí nơi mà các container có thể truy cập và lưu trữ thông tin.
+- Volumes có thể là local filesystem,local storage, Ceph, Gluster, Elastic Block Storage,..
+- Persistent volume (PV)  là khái niệm để đưa ra một dung lượng lưu trữ THỰC TẾ 1GB, 10GB ...
+- Persistent volume claim (PVC) là khái niệm ảo, đưa ra một dung lượng CẦN THIẾT, mà ứng dụng yêu cầu.
+
+Khi 1 PV thoả mãn yêu cầu của 1 PVC thì chúng "match" nhau, rồi "bound" (buộc / kết nối) lại với nhạu. 
+
+## 4.5. Namespaces
+- Namespace hoạt động như một cơ chế nhóm bên trong Kubernetes.
+- Các Services, pods, replication controllers, và volumes có thể dễ dàng cộng tác trong cùng một namespace.
+- Namespace cung cấp một mức độ cô lập với các phần khác của cluster.
+
+## 4.6. ConfigMap (cm) - Secret
+- ConfigMap là giải pháp để nhét 1 file config / đặt các ENVironment var hay set các argument khi gọi câu lệnh. ConfigMap là một cục config, mà pod nào cần, thì chỉ định là nó cần - giúp dễ dàng chia sẻ file cấu hình.
+- secret dùng để lưu trữ các mật khẩu, token, ... hay những gì cần giữ bí mật. Nó nằm bên trong container.
+
+## 4.7. Labels - Annotations
+- Labels: Là các cặp  **key-value** được Kubernetes đính kèm vào pods, replication controllers,...
+- Annotations: You can use Kubernetes annotations to attach arbitrary non-identifying metadata to objects. Clients such as tools and libraries can retrieve this metadata.
+- Labels can be used to select objects and to find collections of objects that satisfy certain conditions. In contrast, annotations are not used to identify and select objects. 
