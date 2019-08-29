@@ -1,18 +1,23 @@
 Architecture of angular
 ---
-- [1. Module](#1-module)
-- [2. Components](#2-components)
-- [3. Templates](#3-templates)
-- [4. Data binding](#4-data-binding)
-- [5. Metadata](#5-metadata)
-- [6. Directives](#6-directives)
-- [7. Services](#7-services)
-- [8. Dependency injection](#8-dependency-injection)
-- [9. Routing and Navigation](#9-routing-and-navigation)
-- [10. Tham khảo](#10-tham-khảo)
+- [1. Overview](#1-overview)
+- [2. Module](#2-module)
+- [3. Components](#3-components)
+- [4. Templates](#4-templates)
+- [5. Data binding](#5-data-binding)
+- [6. Metadata](#6-metadata)
+- [7. Directives](#7-directives)
+- [8. Services](#8-services)
+- [9. Dependency injection](#9-dependency-injection)
+- [10. Routing and Navigation](#10-routing-and-navigation)
+- [11. Tham khảo](#11-tham-khảo)
 
 
-# 1. Module
+# 1. Overview
+
+https://www.draw.io/?lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1#G1CQWIBZKoUWoKe9NqngZUr1Rw5lLw391y
+
+# 2. Module
 
 - Các Angular app có tính module và Angular có hệ thống module của nó gọi là Angular module hoặc NgModules
 - Mọi Angular app có ít nhất một module là root module, quy ước đặt tên là AppModule
@@ -52,7 +57,7 @@ import {AppModule} from './app.module';
 platformBrowserDynamic().bootstrapModule(AppModule);
 ```
 
-# 2. Components
+# 3. Components
 
 - Components là một khối xây dựng cơ bản của giao diện người dùng
 - Một component điều khiển một đường dẫn của màn hình gọi là view. 
@@ -108,7 +113,7 @@ export class ProductAlertsComponent implements OnInit {
 - **styleUrls**: khai báo đường dẫn đến file CSS cho component này
 - **styles**: tương tự template phía trên, không cần tạo 1 file css riêng.
 
-# 3. Templates
+# 4. Templates
 
 Mỗi component có 1 template, nó là 1 file html bình thường, ngoại trừ 1 vài thứ linh tinh khác thêm vào như: directives, events, interpolation, data binding, và các component tag khác.
 Ví dụ:
@@ -139,7 +144,7 @@ Template là một cái cây như sau:
 
 ![architecture2](../../images/programming/angular/architecture-2.png)
 
-# 4. Data binding
+# 5. Data binding
 
 Angular hỗ trợ data binding cho việc điều phối giữa các phần của **template/DOM** với các phần của **component**, xem hình dưới:
 
@@ -151,7 +156,7 @@ Angular hỗ trợ 4 kiểu data binding sau:
 - **Event Binding**: dùng để tạo ra các sự kiện từ một phần tử, ví dụ sự kiện button click hoặc key up hoặc input control....Ví dụ `(click)="share()"` chính là event binding trong bộ điều khiển button, mỗi khi click button thì chạy method `share()` để xử lý sự kiện này.
 - **Two-way Data Binding**: phần lớn được sử dụng khi làm việc với template-driven forms. Trong kiểu này, component property được map tới template control. dẫn tới, mỗi khi ta update giá trị trên màn hình (template), nó sẽ tự động được update trong component và ngược lại. Cú pháp của two-way data binding là  `[(ngModel)]='property'`
 
-# 5. Metadata
+# 6. Metadata
 
 Nói chung, tất cả các thành phần của Angular như component, directive, module hoặc service, chúng đều là class typescript, câu hỏi ở đây là làm thế nào Angular biết kiểu class là của thành phần nào? Câu trả lời đó là **Metadata** 
 
@@ -161,7 +166,7 @@ Trong **typescript**, chúng ta gắn **metadata** bằng cách sử dụng `@Co
 
 ![architecture4](../../images/programming/angular/architecture-4.png)
 
-# 6. Directives
+# 7. Directives
 
 Angular **Templates** là động. Khi Angular render template, nó chuyển đổi **DOM** theo chỉ thị đưa ra bởi các directive
 
@@ -173,7 +178,7 @@ Angular cung cấp 2 kiểu directive:
 
 Một component là một directive-with-a-template, bởi vì decorator `@Component` thực chất là decorator `@Directive` mở rộng với các thành phần hướng template (template-oriented features)
 
-# 7. Services
+# 8. Services
 
 - Các service là các class hoặc function có thể sử dụng lại, để chia sẻ giữa các component trong app.
 - Để khai báo bất kỳ typescript class nào là một **Service**, sử dụng decorator `@Injectable`
@@ -185,7 +190,7 @@ Một component là một directive-with-a-template, bởi vì decorator `@Compo
 
 Đoạn code Service trên chứa 2 method, một là `addUser()` và một là `getUsers()` sử dụng cuộc gọi HTTP get đến server
 
-# 8. Dependency injection
+# 9. Dependency injection
 
 - **Dependency injection** là một cách để cung cấp instance của một class mà component đó yêu cầu, mà không cần phải khởi tạo instance đó trong constructor của component
 - Phần lớn các dependency là các services
@@ -201,12 +206,12 @@ Tham khảo thêm ở đây:
 https://angular.io/guide/architecture-services
 https://angular.io/guide/dependency-injection
 
-# 9. Routing and Navigation
+# 10. Routing and Navigation
 
 https://angular.io/guide/router
 
 
-# 10. Tham khảo
+# 11. Tham khảo
 
 https://www.ngdevelop.tech/angular/architecture/
 
