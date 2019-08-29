@@ -15,7 +15,9 @@ Architecture of angular
 
 # 1. Overview
 
-https://www.draw.io/?lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1#G1CQWIBZKoUWoKe9NqngZUr1Rw5lLw391y
+![architecture0](../../images/programming/angular/architecture-0.png)
+
+https://drive.google.com/open?id=1CQWIBZKoUWoKe9NqngZUr1Rw5lLw391y
 
 # 2. Module
 
