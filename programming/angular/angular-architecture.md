@@ -10,7 +10,7 @@ Architecture of angular
 - [7. Directives](#7-directives)
 - [8. Services](#8-services)
 - [9. Dependency injection](#9-dependency-injection)
-- [10. Routing and Navigation](#10-routing-and-navigation)
+- [10. Next](#10-next)
 - [11. Tham khảo](#11-tham-khảo)
 
 
@@ -276,9 +276,9 @@ Tham khảo thêm ở đây:
 https://angular.io/guide/architecture-0services
 https://angular.io/guide/dependency-injection
 
-# 10. Routing and Navigation
+# 10. Next
 
-https://angular.io/guide/router
+xem phần này [angular-fundamentals.md](angular-fundamentals.md)
 
 
 # 11. Tham khảo

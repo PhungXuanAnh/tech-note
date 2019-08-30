@@ -103,5 +103,7 @@ programming
 
 [django-nginx-gunicorn-postgres.md](programming/django/django-nginx-gunicorn-postgres.md)
 
+[angular-fundamentals.md](programming/angular/angular-fundamentals.md)
+
 [angular-architecture.md](programming/angular/angular-architecture.md)
 
