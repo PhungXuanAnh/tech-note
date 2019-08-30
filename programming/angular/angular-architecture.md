@@ -2,7 +2,7 @@ Architecture of angular
 ---
 - [1. Overview](#1-overview)
 - [2. Module](#2-module)
-  - [angular library](#angular-library)
+  - [2.1. angular library](#21-angular-library)
 - [3. Components](#3-components)
 - [4. Templates](#4-templates)
 - [5. Data binding](#5-data-binding)
@@ -60,7 +60,7 @@ import {AppModule} from './app.module';
 platformBrowserDynamic().bootstrapModule(AppModule);
 ```
 
-## angular library
+## 2.1. angular library
 
 - angular library có tiền tố là *@angular*, ví dụ: *@angular/core, @angular/compiler, @angular/compiler-cli, @angular/http, @angular/router*
 - cài đặt bằng cách dùng **npm**
