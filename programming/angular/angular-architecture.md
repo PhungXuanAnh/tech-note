@@ -2,6 +2,7 @@ Architecture of angular
 ---
 - [1. Overview](#1-overview)
 - [2. Module](#2-module)
+  - [angular library](#angular-library)
 - [3. Components](#3-components)
 - [4. Templates](#4-templates)
 - [5. Data binding](#5-data-binding)
@@ -15,7 +16,7 @@ Architecture of angular
 
 # 1. Overview
 
-![architecture0](../../images/programming/angular/architecture-0.png)
+![architecture0](../../images/programming/angular/architecture-00.png)
 
 https://drive.google.com/open?id=1CQWIBZKoUWoKe9NqngZUr1Rw5lLw391y
 
@@ -59,13 +60,22 @@ import {AppModule} from './app.module';
 platformBrowserDynamic().bootstrapModule(AppModule);
 ```
 
+## angular library
+
+- angular library có tiền tố là *@angular*, ví dụ: *@angular/core, @angular/compiler, @angular/compiler-cli, @angular/http, @angular/router*
+- cài đặt bằng cách dùng **npm**
+- import như sau
+```typescript
+import { Component } from '@angular/core';
+```
+
 # 3. Components
 
 - Components là một khối xây dựng cơ bản của giao diện người dùng
 - Một component điều khiển một đường dẫn của màn hình gọi là view. 
 - Mỗi component đước map với template
 
-![architecture1](../../images/programming/angular/architecture-1.png)
+![architecture1](../../images/programming/angular/architecture-01.png)
 
 - Angular app là một cây Angular component
 - Ví dụ, ảnh trên, Root Component  được tải ban đầu, các component khác như Header Component, Sidebar Component, và Product Component là component con của Page Component
@@ -144,13 +154,13 @@ Ví dụ:
 
 Template là một cái cây như sau:
 
-![architecture2](../../images/programming/angular/architecture-2.png)
+![architecture2](../../images/programming/angular/architecture-02.png)
 
 # 5. Data binding
 
 Angular hỗ trợ data binding cho việc điều phối giữa các phần của **template/DOM** với các phần của **component**, xem hình dưới:
 
-![architecture3](../../images/programming/angular/architecture-3.png)
+![architecture3](../../images/programming/angular/architecture-03.png)
 
 Angular hỗ trợ 4 kiểu data binding sau:
 - **Interpolation**: để hiển thị giá trị của các component property lên màn hình, ví dụ `{{ title }}` để hiển thị giá trị title lên màn hình
@@ -166,7 +176,7 @@ Nói chung, tất cả các thành phần của Angular như component, directiv
 
 Trong **typescript**, chúng ta gắn **metadata** bằng cách sử dụng `@Component, @NgModule, @Injecttable, @Directive ` tương ứng với các phần trên.
 
-![architecture4](../../images/programming/angular/architecture-4.png)
+![architecture4](../../images/programming/angular/architecture-04.png)
 
 # 7. Directives
 
@@ -185,10 +195,19 @@ Một component là một directive-with-a-template, bởi vì decorator `@Compo
 - Các service là các class hoặc function có thể sử dụng lại, để chia sẻ giữa các component trong app.
 - Để khai báo bất kỳ typescript class nào là một **Service**, sử dụng decorator `@Injectable`
 - Service chủ yếu sử dụng cho các cuộc gọi đến server, hoặc thực hiện các logic.
-- Service cũng có thể sử dụng như 1 class chia sẻ dữ liệu, để chia sẻ dữ liệu giữa các component trong app cũng như viết các logic nghiệp vụ.
+- Bất cứ cái gì cũng có thể là một service:
+  - logging service
+  - data service: chia sẻ data giữa các component
+  - message bus
+  - tax calculator
+  - application configuration
+  
+
+![architecture50](../../images/programming/angular/architecture-05.0.png)
+
 - Service là không đồng bộ bất biến (invariable asynchronous). Chúng ta có thể trả về dữ liệu như một lời hứa (promise) hoặc quan sát sử dụng RxJS (Observable using RxJS), như bên dưới.
 
-![architecture5](../../images/programming/angular/architecture-5.png)
+![architecture5](../../images/programming/angular/architecture-05.png)
 
 Đoạn code Service trên chứa 2 method, một là `addUser()` và một là `getUsers()` sử dụng cuộc gọi HTTP get đến server
 
@@ -197,15 +216,64 @@ Một component là một directive-with-a-template, bởi vì decorator `@Compo
 - **Dependency injection** là một cách để cung cấp instance của một class mà component đó yêu cầu, mà không cần phải khởi tạo instance đó trong constructor của component
 - Phần lớn các dependency là các services
 
-![architecture6](../../images/programming/angular/architecture-6.png)
+![architecture6](../../images/programming/angular/architecture-06.png)
 
 Trong ví dụ trên, **UserComponent** phụ thuộc vào **UserService**
 
 Angular sử dụng **dependency injection** để cung cấp cho các **components** với các **service** mà nó cần.
-- **Injector** lưu danh sách các service mà ta sẽ dùng trong application. Khi nào mà component nào đó yêu cầu service, injector sẽ đưa instance cho component đó
+- Một **injector** giữ một bình chứa (container of) các **service instance** đã tạo ra trước đó.
+- Nếu  **service instance** không có trong bình chứa, **injector** tạo một cái là thêm nó vào bình chứa trước khi trả về service này cho Angular
+
+Trong ví dụ bên dưới, ta đăng ký một **provider** của **Firebase Service** với **injector**:
+- **provider** thường là một class định nghĩa một service
+- **provider** có thể được đăng ký trong **component** hoặc trong **module**
+- Thường thì ta thêm **provider** vào **root module**, sau đấy thì service này có thể sử dụng bởi tất cả các thành phần khác của app, như ví dụ bên dưới:
+
+```typescript
+@NgModule({
+    declarations: [
+        AppComponent,
+        HomeComponent,
+        MoviesComponent,
+        NavbarComponent,
+        MovieDetailsComponent,
+        AboutComponent,
+        BoldTextDirective,
+        MovieSearchComponent,
+    ],
+    imports: [
+        BrowserModule,
+        FormsModule,
+        HttpModule,
+        RouterModule.forRoot(routes),
+        AngularFireModule.initializeApp(firebaseConfig,firebaseAuthConfig),
+        FlashMessagesModule
+    ],
+    providers: [FirebaseService],
+    bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+Hoặc có thể đăng ký trong **component** trong thuộc tính *providers* như bên dưới:
+
+```typescript
+import { Component } from '@angular/core';
+import { FirebaseService } from './services/firebase.service';
+ 
+@Component({
+selector:'app-root',
+templateUrl:'./app.component.html',
+styleUrls: ['./app.component.css'],
+providers: [FirebaseService]
+})
+export class AppComponent {
+title = 'app works!';
+}
+```
+
 
 Tham khảo thêm ở đây:
-https://angular.io/guide/architecture-services
+https://angular.io/guide/architecture-0services
 https://angular.io/guide/dependency-injection
 
 # 10. Routing and Navigation
@@ -216,4 +284,4 @@ https://angular.io/guide/router
 # 11. Tham khảo
 
 https://www.ngdevelop.tech/angular/architecture/
-
+https://www.edureka.co/blog/angular-tutorial/
