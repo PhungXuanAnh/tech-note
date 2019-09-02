@@ -21,6 +21,7 @@ Bài viết này giới thiệu các bạn cách dùng lệnh **sed** trên h
   - [3.3. Xóa lệnh trong **sed**](#33-xóa-lệnh-trong-sed)
   - [3.4. Ngừng xử lý và thoát (quit) trong sed](#34-ngừng-xử-lý-và-thoát-quit-trong-sed)
 - [4. Tham khảo](#4-tham-khảo)
+- [5. Thực hành](#5-thực-hành)
 
 # 1. Giới thiệu
 
@@ -160,9 +161,11 @@ xuananh@K53SD:~$ sed -n '2p; 4p' temp.log
 # IN DÒNG CUỐI
 xuananh@K53SD:~$ sed -n '$p' temp.log
 1 2 3 4 5 6 7 8 9 line 4
-# IN DÒNG SÔ 3
-xuananh@K53SD:~$ sed '3!d' temp.log
+# IN DÒNG SÔ 2 ĐẾN DÒNG 4
+xuananh@K53SD:~$ sed '2,4!d' temp.log
+1 2 3 4 5 6 7 8 9 line 2
 1 2 3 4 5 6 7 8 9 line 3
+1 2 3 4 5 6 7 8 9 line 4
 # TÌM KIẾM BẮT ĐẦU TỪ DÒNG 2 VÀ THAY THẾ CHUỖI XUẤT HIỆN ĐẦU TIÊN
 xuananh@K53SD:~$ sed '2 s/line/LINE/' temp.log
 1 2 3 4 5 6 7 8 9 line 1
@@ -396,3 +399,7 @@ xuananh@K53SD:~$ seq 50 | tac | sed '/6/Q' | tac
 # 4. Tham khảo
 
 https://blogd.net/linux/su-dung-lenh-sed/
+
+# 5. Thực hành
+
+https://vietjack.com/unix/regular_expression_trong_unix_linux.jsp
