@@ -89,6 +89,8 @@ devops
 programming
 ---
 
+[shellscript-sed.md](programming/shellscript/shellscript-sed.md)
+
 [shellscript-awk.md](programming/shellscript/shellscript-awk.md)
 
 [rest-api-best-practice.md](programming/rest-api/rest-api-best-practice.md)
