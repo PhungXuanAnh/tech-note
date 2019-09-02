@@ -1,7 +1,28 @@
 Bài viết này giới thiệu các bạn cách dùng lệnh **sed** trên hệ điều hành Linux.
 ---
 
-# Giới thiệu
+- [1. Giới thiệu](#1-giới-thiệu)
+- [2. Cách sử dụng cơ bản](#2-cách-sử-dụng-cơ-bản)
+- [3. Ví dụ](#3-ví-dụ)
+  - [3.1. Tùy chọn lọc dòng và in](#31-tùy-chọn-lọc-dòng-và-in)
+    - [3.1.1. Lệnh in](#311-lệnh-in)
+    - [3.1.2. Lệnh in(print)](#312-lệnh-inprint)
+    - [3.1.3. Sử dụng in và thay thế](#313-sử-dụng-in-và-thay-thế)
+    - [3.1.4. Sao chép mọi dòng đầu vào](#314-sao-chép-mọi-dòng-đầu-vào)
+    - [3.1.5. Lọc theo số dòng](#315-lọc-theo-số-dòng)
+  - [3.2. Tìm kiếm và thay thế](#32-tìm-kiếm-và-thay-thế)
+    - [3.2.1. Chỉnh sửa string](#321-chỉnh-sửa-string)
+    - [3.2.2. Chỉnh sửa đầu vào tập tin](#322-chỉnh-sửa-đầu-vào-tập-tin)
+    - [3.2.3. Chỉnh sửa đặt tên bản sao với hậu tố](#323-chỉnh-sửa-đặt-tên-bản-sao-với-hậu-tố)
+    - [3.2.4. Chỉnh sửa đặt tên bản sao với tiền tố](#324-chỉnh-sửa-đặt-tên-bản-sao-với-tiền-tố)
+    - [3.2.5. Chỉnh sửa và đặt bản sao lưu trong thư mục](#325-chỉnh-sửa-và-đặt-bản-sao-lưu-trong-thư-mục)
+    - [3.2.6. Chỉnh sửa không có bản sao lưu](#326-chỉnh-sửa-không-có-bản-sao-lưu)
+    - [3.2.7. Chỉnh sửa nhiều tập tin](#327-chỉnh-sửa-nhiều-tập-tin)
+  - [3.3. Xóa lệnh trong **sed**](#33-xóa-lệnh-trong-sed)
+  - [3.4. Ngừng xử lý và thoát (quit) trong sed](#34-ngừng-xử-lý-và-thoát-quit-trong-sed)
+- [4. Tham khảo](#4-tham-khảo)
+
+# 1. Giới thiệu
 
 Lệnh **sed** là công cụ xử lý văn bản mạnh mẽ và là một tiện ích UNIX lâu đời nhất và phổ biến nhất. Nó được sử dụng để sửa đổi nội dung của một tệp, thường đặt nội dung vào một tệp mới.
 
@@ -11,7 +32,7 @@ Dữ liệu từ một nguồn/tệp đầu vào được lấy và di chuyển 
 
 ![sed](../../images/programming/shellscript/shellscript-sed-1.png)
 
-# Cách sử dụng cơ bản
+# 2. Cách sử dụng cơ bản
 
 - Thông thường lệnh **sed** hoạt động trên một luồng dữ liệu được đọc từ đầu vào chuẩn hoặc một file văn bản. 
 - Lệnh **sed** sẽ hiển thị kết quả ra màn hình, trừ khi có sự chuyển hướng kết quả này. 
@@ -41,15 +62,15 @@ sed [tùy chọn] commands [file]
 
 Lệnh trên sẽ thay thế tất cả các lần xuất hiện của **pattern** bằng **replace_string** trong *file1* và di chuyển nội dung sang *file2*. Nội dung của *file2* có thể được xem với lệnh cat *file2*. Nếu kết quả *file2* chính sác, chúng ta có thể ghi đè lên tệp gốc bằng lệnh `mv file2 file1`
 
-# Ví dụ
+# 3. Ví dụ
 
-## Tùy chọn lọc dòng
+## 3.1. Tùy chọn lọc dòng và in
 
 Theo mặc định, sẽ thực hiện trên toàn bộ tập tin. Thông thường, chúng ta chỉ cần trích xuất hoặc thay đổi các dòng cụ thể dựa trên tìm kiếm văn bản, số dòng,...
 
 Lọc này là giống như sử dụng lệnh **grep**, **head** và **tail**. Sử dụng lệnh **sed** để chỉnh sửa tại chỗ, các dòng được lọc sẽ được chuyển đổi...
 
-### Lệnh in
+### 3.1.1. Lệnh in
 
 Được sử dụng với tùy chọn `-n`
 
@@ -57,7 +78,7 @@ Theo mặc định, lệnh **sed** sẽ in mọi dòng đầu vào, bao gồm m�
 
 Sử dụng tùy chọn `-n` và lệnh `p`,lọc các dòng cụ thể
 
-### Ví dụ 1: Lệnh in(print)
+### 3.1.2. Lệnh in(print)
 
 ```shell
 xuananh@K53SD:~$ cat temp1.log
@@ -79,7 +100,7 @@ xuananh@K53SD:~$ sed -n '/Firefox/p' temp1.log
 1 2 3 4 5 6 7 8 9 Firefox2
 ```
 
-### Ví dụ 2: Sử dụng in và thay thế
+### 3.1.3. Sử dụng in và thay thế
 
 ```shell
 xuananh@K53SD:~$ cat temp1.log
@@ -99,7 +120,7 @@ xuananh@K53SD:~$ sed -n 's/Firefox/fIREFOX/p' temp1.log
 1 2 3 4 5 6 7 8 9 fIREFOX2
 ```
 
-### Ví dụ 3: Sao chép mọi dòng đầu vào
+### 3.1.4. Sao chép mọi dòng đầu vào
 
 Đầu vào từ lệnh  **seq** sẽ được lệnh **sed** sao chép và in ra phía dưới:
 
@@ -119,7 +140,7 @@ xuananh@K53SD:~$ seq 3 | sed 'p'
 xuananh@K53SD:~$ 
 ```
 
-### Ví dụ 4: Lọc theo số dòng
+### 3.1.5. Lọc theo số dòng
 
 Sử dụng tùy chọn -n để lọc số dòng
 
@@ -156,7 +177,7 @@ xuananh@K53SD:~$ sed '3 s/line/LINE/' temp.log
 1 2 3 4 5 6 7 8 9 line 4
 ```
 
-## Tìm kiếm và thay thế
+## 3.2. Tìm kiếm và thay thế
 
 Cú pháp:
 
@@ -164,7 +185,7 @@ Cú pháp:
 
 **Lưu ý**: Kí tự / được sử dụng như là một ký tự phân cách.
 
-### Chỉnh sửa string
+### 3.2.1. Chỉnh sửa string
 
 ```shell
 # lệnh tạo dữ liệu đầu ra
@@ -180,7 +201,7 @@ xuananh@K53SD:~$ seq 15 | paste -sd, | sed 's/,/ : /g'
 1 : 2 : 3 : 4 : 5 : 6 : 7 : 8 : 9 : 10 : 11 : 12 : 13 : 14 : 15
 ```
 
-### Chỉnh sửa đầu vào tập tin
+### 3.2.2. Chỉnh sửa đầu vào tập tin
 
 ```shell
 xuananh@K53SD:~$ cat file.txt
@@ -204,7 +225,7 @@ HEllo
 HavE a nicE day
 ```
 
-### Chỉnh sửa đặt tên bản sao với hậu tố
+### 3.2.3. Chỉnh sửa đặt tên bản sao với hậu tố
 
 ```shell
 xuananh@K53SD:~$ cat file.txt
@@ -222,7 +243,7 @@ xuananh@K53SD:~$ cat file.txt.bkp
 Hello
 ```
 
-### Chỉnh sửa đặt tên bản sao với tiền tố
+### 3.2.4. Chỉnh sửa đặt tên bản sao với tiền tố
 
 ```shell
 xuananh@K53SD:~$ cat > fileprefix.txt
@@ -240,7 +261,7 @@ bar
 baz
 ```
 
-### Chỉnh sửa và đặt bản sao lưu trong thư mục
+### 3.2.5. Chỉnh sửa và đặt bản sao lưu trong thư mục
 
 ```shell
 xuananh@K53SD:~$ mkdir bkp_dir
@@ -259,7 +280,7 @@ baz
 ```
 
 
-### Chỉnh sửa không có bản sao lưu
+### 3.2.6. Chỉnh sửa không có bản sao lưu
 
 ```shell
 xuananh@K53SD:~$ cat file.txt
@@ -273,7 +294,7 @@ xuananh@K53SD:~$ cat file.txt
 Have a safe journey
 ```
 
-### Chỉnh sửa nhiều tập tin
+### 3.2.7. Chỉnh sửa nhiều tập tin
 
 ```shell
 xuananh@K53SD:~$ cat file1
@@ -287,7 +308,7 @@ xuananh@K53SD:~$ cat file2
 I bought tow bananas and three mangoes
 ```
 
-## Xóa lệnh trong **sed**
+## 3.3. Xóa lệnh trong **sed**
 
 Theo mặc định, lệnh **sed** in mọi dòng, bao gồm mọi thay đổi.
 
@@ -324,7 +345,7 @@ Sugar is sweet,
 And so are you.
 ```
 
-## Ngừng xử lý và thoát (quit) trong sed
+## 3.4. Ngừng xử lý và thoát (quit) trong sed
 
 Thoát lệnh sed và không xử lý thêm
 
@@ -371,3 +392,7 @@ xuananh@K53SD:~$ seq 50 | tac | sed '/6/Q' | tac
 49
 50
 ```
+
+# 4. Tham khảo
+
+https://blogd.net/linux/su-dung-lenh-sed/
