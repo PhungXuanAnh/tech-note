@@ -43,4 +43,5 @@ Thu Sep 05 04:56:39 UTC 2019 : Unauthorized
 
 **Step 2**: 
 
-Nếu đã check ổn thỏa rồi thì, kiểm tra lại authorizer lambda, check log của nó, có thể là logic code bị sai
+- Nếu đã check ổn thỏa rồi thì, kiểm tra lại authorizer lambda, check log của nó, có thể là logic code bị sai
+- Call api mà check log của authorizer lambda mà không thấy gì thì khả năng là thiếu header Authorizer
