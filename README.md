@@ -38,6 +38,8 @@ devops
 
 [rsync.md](devops/rsync/rsync.md)
 
+[new-ubuntu.md](devops/ubuntu/new-ubuntu.md)
+
 [deploy-haproxy-nginx-using-docker.md](devops/docker/deploy-haproxy-nginx-using-docker.md)
 
 [docker-supervisor.md](devops/docker/docker-supervisor.md)
@@ -102,6 +104,8 @@ programming
 [interface-vs-abstract-class.md](programming/oop/interface-vs-abstract-class.md)
 
 [rest-api-best-practice.md](programming/rest-api/rest-api-best-practice.md)
+
+[pyenv-guide.md](programming/pyenv/pyenv-guide.md)
 
 [django-nginx-gunicorn-postgres.md](programming/django/django-nginx-gunicorn-postgres.md)
 
