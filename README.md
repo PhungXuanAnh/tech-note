@@ -72,6 +72,8 @@ devops
 
 [nginx-configuration-snippets.md](devops/nginx/nginx-configuration-snippets.md)
 
+[git-command.md](devops/git/git-command.md)
+
 [git-merge-vs-git-rebase.md](devops/git/git-merge-vs-git-rebase.md)
 
 [git-undo-commit-or-remove-commit.md](devops/git/git-undo-commit-or-remove-commit.md)
