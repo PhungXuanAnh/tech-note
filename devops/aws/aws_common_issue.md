@@ -1,9 +1,10 @@
-Tập hợp những kinh nghiệm gỡ rối khi triển khai trên aws
+Summary debug experience in aws
 ---
 
 - [1. Api gateway](#1-api-gateway)
   - [1.1. Custome authorizer](#11-custome-authorizer)
     - [1.1.1. AuthorizerConfigurationException](#111-authorizerconfigurationexception)
+  - [403 Forbidden](#403-forbidden)
 
 # 1. Api gateway
 
@@ -45,3 +46,38 @@ Thu Sep 05 04:56:39 UTC 2019 : Unauthorized
 
 - Nếu đã check ổn thỏa rồi thì, kiểm tra lại authorizer lambda, check log của nó, có thể là logic code bị sai
 - Call api mà check log của authorizer lambda mà không thấy gì thì khả năng là thiếu header Authorizer
+
+## 403 Forbidden
+
+- Check if **API Key Required** is set to True, 
+  - add **x-api-key** to header
+  - **API Key** had to be created
+  - Check **Usage Plan** for **API Key**
+- Pass data in request body on a GET operation
+- User **Custom Domain Names** but forget to set **Base Path Mappings**, or set wrong path, wrong api, wrong stage.
+- Forget to deploy API
+- If use **Custom Authorizer**, check return **Resource** is valid in region, account id, api id, stage, method, resour, 
+  - for example of return policy is below:
+
+```json
+{
+    "context": {
+        "bool": true,
+        "key": "value",
+        "number": 1
+    },
+    "policyDocument": {
+        "Statement": [
+            {
+                "Action": "execute-api:Invoke",
+                "Effect": "Allow",
+                "Resource": [
+                    "arn:aws:execute-api:ap-southeast-1:6542728881795:ork26mq0q3/dev/GET/v1"
+                ]
+            }
+        ],
+        "Version": "2012-10-17"
+    },
+    "principalId": null
+}
+```
