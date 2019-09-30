@@ -4,7 +4,7 @@ Summary debug experience in aws
 - [1. Api gateway](#1-api-gateway)
   - [1.1. Custome authorizer](#11-custome-authorizer)
     - [1.1.1. AuthorizerConfigurationException](#111-authorizerconfigurationexception)
-  - [403 Forbidden](#403-forbidden)
+  - [1.2. 403 Forbidden](#12-403-forbidden)
 
 # 1. Api gateway
 
@@ -47,7 +47,7 @@ Thu Sep 05 04:56:39 UTC 2019 : Unauthorized
 - Nếu đã check ổn thỏa rồi thì, kiểm tra lại authorizer lambda, check log của nó, có thể là logic code bị sai
 - Call api mà check log của authorizer lambda mà không thấy gì thì khả năng là thiếu header Authorizer
 
-## 403 Forbidden
+## 1.2. 403 Forbidden
 
 - Check if **API Key Required** is set to True, 
   - add **x-api-key** to header
