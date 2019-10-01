@@ -80,6 +80,8 @@ devops
 
 [git-fork.md](devops/git/git-fork.md)
 
+[ngrok-command.md](devops/ngrok/ngrok-command.md)
+
 [vagrant-multiple-vm.md](devops/vagrant/vagrant-multiple-vm.md)
 
 [vagrant-and-virtual-box.md](devops/vagrant/vagrant-and-virtual-box.md)
