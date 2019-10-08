@@ -81,3 +81,15 @@ Thu Sep 05 04:56:39 UTC 2019 : Unauthorized
     "principalId": null
 }
 ```
+- If use **Custom Authorizer**, and recieved message:
+
+```json
+{
+  "message": "User is not authorized to access this resource"
+}
+```
+There are 2 ways to fix it:
+  
+  1. Set TTL for customer authorizer to 0
+  2. Set custom authorizer policy resource as "*"
+  3. Reference here: https://stackoverflow.com/questions/50331588/aws-api-gateway-custom-authorizer-strange-showing-error
