@@ -38,6 +38,8 @@ devops
 
 [rsync.md](devops/rsync/rsync.md)
 
+[gcloud.md](devops/gcloud/gcloud.md)
+
 [new-ubuntu.md](devops/ubuntu/new-ubuntu.md)
 
 [deploy-haproxy-nginx-using-docker.md](devops/docker/deploy-haproxy-nginx-using-docker.md)
@@ -81,6 +83,8 @@ devops
 [git-fork.md](devops/git/git-fork.md)
 
 [ngrok-command.md](devops/ngrok/ngrok-command.md)
+
+[elasticsearch-note.md](devops/elasticsearch/elasticsearch-note.md)
 
 [vagrant-multiple-vm.md](devops/vagrant/vagrant-multiple-vm.md)
 
