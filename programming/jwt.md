@@ -1,15 +1,17 @@
 - [1. Token-based authentication là gì?](#1-token-based-authentication-là-gì)
 - [2. JWT - JSON Web Token là gì?](#2-jwt---json-web-token-là-gì)
 - [3. Cấu trúc của một JWT](#3-cấu-trúc-của-một-jwt)
-  - [Header](#header)
-  - [Payload](#payload)
-  - [Signature](#signature)
+  - [3.1. Header](#31-header)
+  - [3.2. Payload](#32-payload)
+  - [3.3. Signature](#33-signature)
 - [4. Luồng xử lý của 1 hệ thống sử dụng bảo mật JWT](#4-luồng-xử-lý-của-1-hệ-thống-sử-dụng-bảo-mật-jwt)
-  - [Sơ lược về luồng xử lý](#sơ-lược-về-luồng-xử-lý)
-  - [Hệ thống Verify chuỗi JWT thế nào?](#hệ-thống-verify-chuỗi-jwt-thế-nào)
+  - [4.1. Sơ lược về luồng xử lý](#41-sơ-lược-về-luồng-xử-lý)
+  - [4.2. Hệ thống Verify chuỗi JWT thế nào?](#42-hệ-thống-verify-chuỗi-jwt-thế-nào)
 - [5. JWT vs Session](#5-jwt-vs-session)
+  - [5.1. Authen bằng Cookie](#51-authen-bằng-cookie)
+  - [5.2. Authen bằng JWT token](#52-authen-bằng-jwt-token)
 - [6. Trả lời câu hỏi về JWT](#6-trả-lời-câu-hỏi-về-jwt)
-- [References](#references)
+- [7. References](#7-references)
 
 # 1. Token-based authentication là gì?
 
@@ -47,7 +49,7 @@ hay
 
 ![jwt1](../images/programming/jwt/jwt-1.jpeg)
 
-## Header
+## 3.1. Header
 
 Header bao gồm hai phần chính:
 
@@ -61,7 +63,7 @@ Header bao gồm hai phần chính:
 }
 ```
 
-## Payload
+## 3.2. Payload
 
 Payload, nơi chứa các nội dung của thông tin (claim). Thông tin truyền đi có thể là mô tả của 1 thực thể (ví dụ như người dùng) hoặc cũng có thể là các thông tin bổ sung thêm cho phần Header. Chúng thuộc một trong 3 loại: **reserved**, **public** và **private**. [Xem tại đây]( https://tools.ietf.org/html/draft-ietf-oauth-json-web-token-32#section-4.1)
 
@@ -95,7 +97,7 @@ ví dụ cho phần Payload như sau
 }
 ```
 
-## Signature
+## 3.3. Signature
 
 Phần chữ ký được tạo bằng cách kết hợp 2 phần Header + Payload, rồi mã hóa nó lại bằng 1 giải thuật encode nào đó, càng phức tạp thì càng tốt, ví dụ như HMAC SHA-256
 
@@ -107,7 +109,7 @@ Ta có thể xem lại công thức mà mình vừa nhắc ở đầu bài viế
 
 # 4. Luồng xử lý của 1 hệ thống sử dụng bảo mật JWT
 
-## Sơ lược về luồng xử lý
+## 4.1. Sơ lược về luồng xử lý
 
 ![jwt2](../images/programming/jwt/jwt-2.png)
 
@@ -118,7 +120,7 @@ Nhìn vào sơ đồ, ta có thể thấy luồng đi như sau
     3. Người dùng nhận được JWT do Authentication Server vừa mới trả về làm "chìa khóa" để thực hiện các "lệnh" tiếp theo đối với Application Server.
     4. Application Server trước khi thực hiện yêu cầu được gọi từ phía User, sẽ verify JWT gửi lên. Nếu OK, tiếp tục thực hiện yêu cầu được gọi.
 
-## Hệ thống Verify chuỗi JWT thế nào?
+## 4.2. Hệ thống Verify chuỗi JWT thế nào?
 
 Câu hỏi đặt ra ở đây là hệ thống Verify JWT thế nào:
 
@@ -131,10 +133,39 @@ Câu hỏi đặt ra ở đây là hệ thống Verify JWT thế nào:
 
 # 5. JWT vs Session
 
+Trước khi chúng ta đi sâu hơn nữa, lại một lần nữa lướt lại flow làm việc của 2 hệ thống này. Sơ đồ dưới đây sẽ cho thấy sự khác biệt của 2 mô hình
+
+![jwt3](../images/programming/jwt/jwt-3.png)
+
+## 5.1. Authen bằng Cookie
+
+**Authen** dựa trên **Cookie** dựa trên các phương thức default. **tried-and-true** để xử lý việc authen trong một thời dài. Đây là phương thức **stateful**. Có nghĩa là một record authen ( có thể hiểu là **session**) sẽ phải được giữ cả 2 phía **client** và **server**. **Server** cần theo dõi **active session** trong DB, trong khi đó cookie được tạo ở phía front-end và giữ 1 session định danh. Hãy xem qua flow xử lý truyền thống của phương pháp này :
+
+![jwt4](../images/programming/jwt/jwt-4.png)
+
+  1. **User** nhập thông tin đăng nhập
+  2. **Server** xác minh các thông tin đó là chính xác và tạo 1 **session** lưu trong DB
+  3. **Cookie** với **session** ID sẽ được lưu ở **browser**
+  4. Các **request** tiếp theo, **session** ID sẽ được xác minh tại DB và nếu nó hợp lí, **request** sẽ được xư lý để truy cập các tài nguyên sâu hơn đc bảo vệ
+  5. Khi **User** log out khỏi ứng dụng, **session** sẽ bị **destroy** ở cả 2 phía **client** và **server**.
+
+## 5.2. Authen bằng JWT token
+
+ Phương thức này là **stateless**. **Server** ko cần phải giữ bất kì **record** nào thê hiện **user** đã **log in** hay chưa ? Thay vì thế mọi **request** đều được tới **server** đều được đính kèm một **token** - cái này sẽ được **server** sử dụng để xác thực **authen** của **request** đó.
+
+![jwt5](../images/programming/jwt/jwt-5.png)
+
+  1. **User** nhập thông tin đăng nhập
+  2. **Server** xác minh thông tin đăng nhập chuẩn ko ? trả về **token** trong **response**
+  3. **Token** lưu ở **client** - thương sẽ lưu ở storage local nhưng có thể lưu trong **sessions** **storage** or **cookie**.
+  4. Các **request** tiếp theo đc gửi lên **server** sẽ chứa **token** , thường sẽ cho vào **header Authorization**
+  5. **Server** decode JWTs và nếu **token** hợp lệ thì **request** đó sẽ đc pass qua authen
+  6. Khi **user log out**, **token** sẽ bị **destroy** ở phía client, ko cần tương tác với bên server.
+
 
 # 6. Trả lời câu hỏi về JWT
 
-# References
+# 7. References
 
 https://viblo.asia/p/jwt-tu-co-ban-den-chi-tiet-LzD5dXwe5jY
 
