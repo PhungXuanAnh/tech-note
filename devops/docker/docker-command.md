@@ -14,6 +14,8 @@
 	- [2.7. build image from Dockerfile](#27-build-image-from-dockerfile)
 	- [2.8. delete an image](#28-delete-an-image)
 - [3. Dockerfile sample](#3-dockerfile-sample)
+- [Docker run commons images](#docker-run-commons-images)
+	- [Redis](#redis)
 
 
 # 1. container
@@ -30,7 +32,7 @@ docker container ls
 docker run -it --name {container_name} \
                --hostname {container_hostname} \
                --net=host \
-               -p {host_port}:}container_port} \
+               -p {host_port}:{container_port} \
                -v {abs_path_host}:}path_contain} \
                {image_name}:{tag}
 # example
@@ -204,3 +206,12 @@ EXPOSE 5000
 CMD ["/bin/bash", "-c", "~/validium-nsb-backend/validium/microservices/onboad/onboard_microservice.sh"]
 ```
 
+# Docker run commons images
+
+## Redis
+
+```shell
+docker run -it --name test-redis \
+               -p 7379:6379  \
+               redis
+```			   
