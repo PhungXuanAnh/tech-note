@@ -9,6 +9,7 @@ MySQL: Replication
 - [4. Resync master-master](#4-resync-master-master)
 - [5. Sample configuration for mysql replication](#5-sample-configuration-for-mysql-replication)
 - [6. Script check status and auto fix Duplicate_entry_Error](#6-script-check-status-and-auto-fix-duplicate_entry_error)
+- [Common issue](#common-issue)
 - [7. Reference](#7-reference)
 
 # 1. Master Master
@@ -191,6 +192,20 @@ The following explain how it work. Choose one server as Good Server(GS) and othe
 # 6. Script check status and auto fix Duplicate_entry_Error
 
 [check_replication_status.sh](../../sample/database/mysql/mysql-replication/check_replication_status.sh)
+
+
+# Common issue
+
+```shell
+$ mysql --login-path=My_Path -Bse "START SLAVE;"
+
+ERROR 1794 (HY000) at line 1: Slave is not configured or failed to initialize properly. You must at least set --server-id to enable either a master or a slave. Additional error messages can be found in the MySQL error log.
+
+# ===> check configuration file inside container in folder /etc/mysql/conf.d, this folder is mounted to
+# ./mysql-conf/mysql-1/mysql-conf (see docker compose), but for some unknow reason, it is not mounted
+```
+
+
 
 
 # 7. Reference
