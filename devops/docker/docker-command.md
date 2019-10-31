@@ -16,6 +16,7 @@
 - [3. Dockerfile sample](#3-dockerfile-sample)
 - [4. Docker run commons images](#4-docker-run-commons-images)
 	- [4.1. Redis](#41-redis)
+	- [RabbitMQ](#rabbitmq)
 
 
 # 1. container
@@ -215,3 +216,12 @@ docker run -it --name test-redis \
                -p 7379:6379  \
                redis
 ```			   
+
+## RabbitMQ
+
+```shell
+docker run -d --name test-rabbitmq \
+               -p 15673:15672  \
+			   -p 5673:5672  \
+               rabbitmq:3.8.0-management
+```
