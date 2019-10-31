@@ -14,8 +14,8 @@
 	- [2.7. build image from Dockerfile](#27-build-image-from-dockerfile)
 	- [2.8. delete an image](#28-delete-an-image)
 - [3. Dockerfile sample](#3-dockerfile-sample)
-- [Docker run commons images](#docker-run-commons-images)
-	- [Redis](#redis)
+- [4. Docker run commons images](#4-docker-run-commons-images)
+	- [4.1. Redis](#41-redis)
 
 
 # 1. container
@@ -206,9 +206,9 @@ EXPOSE 5000
 CMD ["/bin/bash", "-c", "~/validium-nsb-backend/validium/microservices/onboad/onboard_microservice.sh"]
 ```
 
-# Docker run commons images
+# 4. Docker run commons images
 
-## Redis
+## 4.1. Redis
 
 ```shell
 docker run -it --name test-redis \
