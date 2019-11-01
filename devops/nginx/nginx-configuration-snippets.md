@@ -3,8 +3,10 @@ A collection of useful Nginx configuration snippets inspired by
 [.htaccess snippets](https://github.com/phanan/htaccess).
 
 ## Table of Contents
-- [The Nginx Command](#the-nginx-command)
-- [Rewrite and Redirection](#rewrite-and-redirection)
+- [Nginx Configuration Snippets](#nginx-configuration-snippets)
+  - [Table of Contents](#table-of-contents)
+  - [The Nginx Command](#the-nginx-command)
+  - [Rewrite and Redirection](#rewrite-and-redirection)
     - [Force www](#force-www)
     - [Force no-www](#force-no-www)
     - [Force HTTPS](#force-https)
@@ -12,21 +14,21 @@ A collection of useful Nginx configuration snippets inspired by
     - [Redirect a Single Page](#redirect-a-single-page)
     - [Redirect an Entire Site](#redirect-an-entire-site)
     - [Redirect an Entire Sub Path](#redirect-an-entire-sub-path)
-- [Performance](#performance)
+  - [Performance](#performance)
     - [Contents Caching](#contents-caching)
     - [Gzip Compression](#gzip-compression)
     - [Open File Cache](#open-file-cache)
     - [SSL Cache](#ssl-cache)
     - [Upstream Keepalive](#upstream-keepalive)
-- [Monitoring](#monitoring)
-- [Security](#security)
+  - [Monitoring](#monitoring)
+  - [Security](#security)
     - [Enable Basic Authentication](#enable-basic-authentication)
     - [Only Allow Access From Localhost](#only-allow-access-from-localhost)
     - [Secure SSL settings](#secure-ssl-settings)
-- [Miscellaneous](#miscellaneous)
+  - [Miscellaneous](#miscellaneous)
     - [Sub-Request Upon Completion](#sub-request-upon-completion)
     - [Enable Cross Origin Resource Sharing](#enable-cross-origin-resource-sharing)
-- [Links](#links)
+  - [Links](#links)
 
 ## The Nginx Command
 The `nginx` command can be used to perform some useful actions when Nginx is running.
@@ -225,15 +227,47 @@ It provides the following status for the whole Nginx server in plain text(!) for
 ## Security
 
 ### Enable Basic Authentication
-You will need a user password file somewhere first.
-```
-name:{PLAIN}plain-text-password
+
+Cài đặt tools để tạo authenticate file mà nginx có thể đọc được, [tham khảo tại đây](https://www.digitalocean.com/community/tutorials/how-to-set-up-password-authentication-with-nginx-on-ubuntu-14-04)
+
+```shell
+sudo apt-get install apache2-utils -y
 ```
 
-Then add below config to `server`/`location` block that need to be protected.
+Chạy lệnh sau để tạo authenticate file với username là **sammy**, sau đó nó sẽ hỏi password, mình điền vào thôi
+
+```shell
+sudo htpasswd -c /etc/nginx/.htpasswd sammy
+```
+
+Thêm 1 user mới thì bỏ qua **-c**
+
+```shell
+sudo htpasswd /etc/nginx/.htpasswd another_user
+```
+
+Nội dung file sinh ra sẽ như sau:
+
+```makefile
+sammy:$apr1$lzxsIfXG$tmCvCfb49vpPFwKGVsuYz.
+another_user:$apr1$p1E9MeAf$kiAhneUwr.MhAE2kKGYHK.
+```
+
+Bây giờ thêm vào block /`location` mà mình muốn authenticate:
+
 ```nginx
 auth_basic "This is Protected";
 auth_basic_user_file /path/to/password-file;
+
+# Example 
+
+location / {
+        proxy_pass http://wiki;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        auth_basic "Private Property";
+        auth_basic_user_file /etc/nginx/conf.d/.htpasswd;
+    }
 ```
 
 ### Only Allow Access From Localhost
