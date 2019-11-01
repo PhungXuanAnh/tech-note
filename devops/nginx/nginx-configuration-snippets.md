@@ -23,6 +23,7 @@ A collection of useful Nginx configuration snippets inspired by
   - [Monitoring](#monitoring)
   - [Security](#security)
     - [Enable Basic Authentication](#enable-basic-authentication)
+    - [Kết hợp Basic Authentication với IP](#kết-hợp-basic-authentication-với-ip)
     - [Only Allow Access From Localhost](#only-allow-access-from-localhost)
     - [Secure SSL settings](#secure-ssl-settings)
   - [Miscellaneous](#miscellaneous)
@@ -228,7 +229,7 @@ It provides the following status for the whole Nginx server in plain text(!) for
 
 ### Enable Basic Authentication
 
-Cài đặt tools để tạo authenticate file mà nginx có thể đọc được, [tham khảo tại đây](https://www.digitalocean.com/community/tutorials/how-to-set-up-password-authentication-with-nginx-on-ubuntu-14-04)
+Cài đặt tools để tạo authenticate file mà nginx có thể đọc được, [tham khảo tại đây](https://www.digitalocean.com/community/tutorials/how-to-set-up-password-authentication-with-nginx-on-ubuntu-14-04) và [tại đây](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-http-basic-authentication/)
 
 ```shell
 sudo apt-get install apache2-utils -y
@@ -269,6 +270,29 @@ location / {
         auth_basic_user_file /etc/nginx/conf.d/.htpasswd;
     }
 ```
+
+
+### Kết hợp Basic Authentication với IP
+
+Ví dụ disable http basic auth với địa chỉ IP 222.254.34.158
+
+```nginx
+location / {
+        satisfy any;
+
+        allow 222.254.34.158;
+        deny all;
+
+        auth_basic "Private Property";
+        auth_basic_user_file /etc/nginx/conf.d/.htpasswd;
+
+        proxy_pass http://wiki;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+    }
+```
+
+[Tham khảo](https://serverfault.com/questions/242218/how-to-disable-http-basic-auth-in-nginx-for-a-specific-ip-range?answertab=votes#tab-top)
 
 ### Only Allow Access From Localhost
 ```nginx
