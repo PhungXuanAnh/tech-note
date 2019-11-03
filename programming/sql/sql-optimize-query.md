@@ -6,3 +6,6 @@ https://viblo.asia/p/mysql-index-optimize-b-tree-mDYGDPmXGpx
 https://viblo.asia/p/index-duoc-va-mat-gAm5yRXAKdb
 https://viblo.asia/p/query-performance-optimization-mysql-wpVYRPEKM4ng
 https://viblo.asia/p/mot-so-chu-y-tao-index-trong-mysql-djeZ1BYglWz
+https://dzone.com/articles/how-to-optimize-mysql-queries-for-speed-and-perfor
+https://dzone.com/articles/how-to-optimize-mysql-queries-for-speed-and-perfor
+https://mode.com/sql-tutorial/sql-performance-tuning

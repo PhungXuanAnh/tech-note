@@ -233,5 +233,6 @@ docker run -d --name test-rabbitmq \
 docker run -d --name test-postgresql \
 				-p 5433:5432 \
 				-v /tmp/test-postgresql-data:/var/lib/postgresql/data \
+				-e POSTGRES_PASSWORD=123456 \
 				postgres:9.6
 ```

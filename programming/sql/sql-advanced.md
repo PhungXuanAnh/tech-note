@@ -12,4 +12,7 @@ https://support.office.com/vi-vn/article/du%CC%80ng-m%C3%B4%CC%A3t-truy-v%C3%A2%
 http://yagarai.blogspot.com/2013/10/sql-nang-cao-phan-4-cau-lenh-join.html
 
 https://tangduongtrieu.com/mot-so-cau-lenh-co-ban-va-nang-cao-mysql/
+https://bytescout.com/blog/postgresql-advanced-queries.html
+https://sample-videos.com/download-sample-sql.php
+
 
