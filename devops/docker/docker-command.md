@@ -17,6 +17,7 @@
 - [4. Docker run commons images](#4-docker-run-commons-images)
 	- [4.1. Redis](#41-redis)
 	- [RabbitMQ](#rabbitmq)
+	- [PostgreSQL](#postgresql)
 
 
 # 1. container
@@ -224,4 +225,13 @@ docker run -d --name test-rabbitmq \
                -p 15673:15672  \
 			   -p 5673:5672  \
                rabbitmq:3.8.0-management
+```
+
+## PostgreSQL
+
+```shell
+docker run -d --name test-postgresql \
+				-p 5433:5432 \
+				-v /tmp/test-postgresql-data:/var/lib/postgresql/data \
+				postgres:9.6
 ```
