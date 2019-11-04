@@ -18,6 +18,7 @@
 	- [4.1. Redis](#41-redis)
 	- [RabbitMQ](#rabbitmq)
 	- [PostgreSQL](#postgresql)
+	- [MySQL](#mysql)
 
 
 # 1. container
@@ -235,4 +236,14 @@ docker run -d --name test-postgresql \
 				-v /tmp/test-postgresql-data:/var/lib/postgresql/data \
 				-e POSTGRES_PASSWORD=123456 \
 				postgres:9.6
+```
+
+## MySQL
+
+```shell
+docker run -d --name test-mysql \
+				-p 3308:3306 \
+				-v /tmp/test-mysql-data:/var/lib/mysql/ \
+				-e MYSQL_ROOT_PASSWORD=123456 \
+				mysql:5.7
 ```
