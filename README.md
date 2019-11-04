@@ -17,6 +17,8 @@ database
 
 [redis-install-and-cli.md](database/redis/redis-install-and-cli.md)
 
+[postgresql-psql-command.md](database/postgresql/postgresql-psql-command.md)
+
 [rabbitmq-best-pratice-part2.md](database/rabbitmq/rabbitmq-best-pratice-part2.md)
 
 [mysql-backup-restore.md](database/mysql/mysql-backup-restore.md)

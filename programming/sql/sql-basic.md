@@ -1,41 +1,88 @@
-- [1. Database](#1-database)
-  - [1.1. Download sample database](#11-download-sample-database)
-  - [1.2. Create database](#12-create-database)
-  - [List database](#list-database)
-  - [Drop database](#drop-database)
-  - [Use database](#use-database)
-- [2. Import database](#2-import-database)
-- [3. references](#3-references)
-- [4. sample database](#4-sample-database)
+- [1. Prepare](#1-prepare)
+  - [1.1. Install client for interact with database server](#11-install-client-for-interact-with-database-server)
+  - [1.2. Interact with database server from client](#12-interact-with-database-server-from-client)
+  - [1.3. Download sample database](#13-download-sample-database)
+- [2. Database](#2-database)
+  - [2.1. Create database](#21-create-database)
+  - [2.2. List database](#22-list-database)
+  - [2.3. Drop database](#23-drop-database)
+  - [2.4. Use database](#24-use-database)
+  - [2.5. Import dumped database](#25-import-dumped-database)
+- [3. Table](#3-table)
+  - [3.1. List tables](#31-list-tables)
+- [4. Thao tác với dữ liệu](#4-thao-tác-với-dữ-liệu)
+  - [4.1. UPDATE](#41-update)
+- [5. references](#5-references)
+- [6. sample database reference](#6-sample-database-reference)
 
-This practices do with postgresql, to access postgresql console, using command:
+
+# 1. Prepare
+
+## 1.1. Install client for interact with database server
+
+**PostgreSQL**
 
 ```shell
-psql -p 5433 -h 127.0.0.1 -U postgres
+sudo apt install postgresql-client
 ```
 
-# 1. Database
-## 1.1. Download sample database
+**MySQL**
 
-Download sample database from [here](../sample/database/../../../sample/database/postgresql/dvdrental.zip)
+```shell
+sudo apt install mysql-client
+```
 
-## 1.2. Create database
+## 1.2. Interact with database server from client
+
+**PostgreSQL**
+
+[How to use psql with no password prompt?](https://dba.stackexchange.com/a/14741)
+
+```shell
+# enter shell
+export PGPASSWORD=123456
+psql -p 5433 -h 127.0.0.1 -U postgres
+
+# exit
+\q
+```
+
+**MySQL**
+
+```shell
+# enter shell
+ mysql -h127.0.0.1 -P 3389 -uroot -p123456
+
+ # exit
+ exit()
+ ctrl + d
+```
+
+## 1.3. Download sample database
+
+[postgresql](../sample/database/../../../sample/database/postgresql/dvdrental.zip)
+
+# 2. Database
+
+## 2.1. Create database
 
 ```sql
 CREATE DATABASE dvdrental;
 ```
 
-## List database
+## 2.2. List database
 
 ```shell
 # postgresql
 \l
+# or
+select datname FROM pg_database;
 
 # mysql
 SHOW DATABASES;
 ```
 
-## Drop database
+## 2.3. Drop database
 ```sql
 DROP DATABASE dvdrental;
 
@@ -43,7 +90,7 @@ DROP DATABASE dvdrental;
 DROP DATABASE IF EXISTS dvdrental;
 ```
 
-## Use database
+## 2.4. Use database
 
 ```shell
 # postgresql
@@ -53,22 +100,60 @@ DROP DATABASE IF EXISTS dvdrental;
 USE dvdrental;
 ```
 
-# 2. Import database
+## 2.5. Import dumped database
 
-[See here](../database/../../database/postgresql/postgresql-psql-command.md)
 
-# 3. references
+**postgresql**
+
+```shell
+psql -p 5433 -h 127.0.0.1 -U postgres -c "CREATE DATABASE dvdrental;"
+psql -p 5433 -h 127.0.0.1 -U postgres -d dvdrental < dvdrental.tar
+```
+
+**mysql**
+
+```shell
+mysql -h127.0.0.1 -P 3389 -uroot -p123456 dvdrental < dvdrental.sql
+```
+
+# 3. Table
+
+## 3.1. List tables
+
+```shell
+# postgresql
+\dt
+
+# mysql
+SHOW TABLES;
+```
+
+# 4. Thao tác với dữ liệu
+
+## 4.1. UPDATE
+
+```sql
+UPDATE table
+set column1 = value1,
+    column2 = value2, ...
+WHERE
+    condition;
+```
+
+# 5. references
 
 https://vietjack.com/sql/
 https://viettuts.vn/sql
+http://www.postgresqltutorial.com
+
 https://techmaster.vn/posts/34036/huong-dan-sql-cho-nguoi-moi-bat-dau
 
-# 4. sample database
+
+# 6. sample database reference
 
 https://dev.mysql.com/doc/sakila/en/
 https://dataedo.com/kb/databases/postgresql/sample-databases
 http://postgresguide.com/setup/example.html
 https://musicbrainz.org/doc/MusicBrainz_Database/Download
 https://postgrespro.com/education/demodb
-http://www.postgresqltutorial.com/postgresql-sample-database/
 
