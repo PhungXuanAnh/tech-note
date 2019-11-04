@@ -25,12 +25,19 @@
 
 ```shell
 sudo apt install postgresql-client
+
+# or using pgcli
+sudo apt-get install libpq-dev -y
+pip3 install pgcli --user
 ```
 
 **MySQL**
 
 ```shell
 sudo apt install mysql-client
+
+# or using mycli
+pip3 install -U mycli
 ```
 
 ## 1.2. Interact with database server from client
@@ -40,9 +47,14 @@ sudo apt install mysql-client
 [How to use psql with no password prompt?](https://dba.stackexchange.com/a/14741)
 
 ```shell
-# enter shell
+# enter shell using postgres client official
 export PGPASSWORD=123456
 psql -p 5433 -h 127.0.0.1 -U postgres
+
+# enter shell using postgres client with autocomplement
+pgcli local_database
+pgcli postgres://amjith:passw0rd@example.com:5432/app_db
+pgcli -h localhost -p 5433 -U postgres app_db
 
 # exit
 \q
