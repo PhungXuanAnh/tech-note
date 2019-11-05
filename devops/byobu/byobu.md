@@ -68,8 +68,8 @@ Press Ctrl + F8
   F1                             * Used by X11 *
     Shift-F1                     Display this help
   F2                             Create a new window
-    Shift-F2                     Create a horizontal split
-    Ctrl-F2                      Create a vertical split
+    Shift-F2                     Create a horizontal ( - ) split
+    Ctrl-F2                      Create a vertical ( | ) split
     Ctrl-Shift-F2                Create a new session
   F3/F4                          Move focus among windows
     Alt-Left/Right               Move focus among windows
