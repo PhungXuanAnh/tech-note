@@ -16,10 +16,11 @@
 - [3. Dockerfile sample](#3-dockerfile-sample)
 - [4. Docker run commons images](#4-docker-run-commons-images)
 	- [4.1. Redis](#41-redis)
-	- [RabbitMQ](#rabbitmq)
-	- [PostgreSQL](#postgresql)
-	- [MySQL](#mysql)
-- [MongoDB](#mongodb)
+	- [4.2. RabbitMQ](#42-rabbitmq)
+	- [4.3. PostgreSQL](#43-postgresql)
+	- [4.4. MySQL](#44-mysql)
+	- [4.5. Kafka](#45-kafka)
+	- [4.6. MongoDB](#46-mongodb)
 
 
 # 1. container
@@ -220,7 +221,7 @@ docker run -it --name test-redis \
                redis
 ```			   
 
-## RabbitMQ
+## 4.2. RabbitMQ
 
 ```shell
 docker run -d --name test-rabbitmq \
@@ -231,27 +232,45 @@ docker run -d --name test-rabbitmq \
                rabbitmq:3.8.0-management
 ```
 
-## PostgreSQL
+## 4.3. PostgreSQL
 
 ```shell
 docker run -d --name test-postgresql \
 				-p 5433:5432 \
 				-v /tmp/test-postgresql-data:/var/lib/postgresql/data \
 				-e POSTGRES_PASSWORD=123456 \
+				-e POSTGRES_USER=if_not_set_default_is_postgres \
+		 		-e POSTGRES_DB=database_name_to_create \
 				postgres:9.6
 ```
 
-## MySQL
+## 4.4. MySQL
 
 ```shell
 docker run -d --name test-mysql \
 				-p 3308:3306 \
 				-v /tmp/test-mysql-data:/var/lib/mysql/ \
 				-e MYSQL_ROOT_PASSWORD=123456 \
-				mysql:5.7
+				-e MYSQL_USER=other_user \
+				-e MYSQL_PASSWORD=password_for_other_user \
+				-e MYSQL_DATABASE=database_name_to_create \
+				mysql:5.7 \
+				--character-set-server=utf8 \
+         		--collation-server=utf8_unicode_ci
 ```
 
-# MongoDB
+## 4.5. Kafka
+
+```shell
+docker run -d --name kafka-test \
+            -p 2181:2181 \
+            -p 9092:9092 \
+            --env ADVERTISED_HOST=0.0.0.0\
+            --env ADVERTISED_PORT=9092 \
+            spotify/kafka
+```
+
+## 4.6. MongoDB
 
 
 ```shell
