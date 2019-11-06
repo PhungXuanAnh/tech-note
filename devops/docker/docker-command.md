@@ -226,6 +226,8 @@ docker run -it --name test-redis \
 docker run -d --name test-rabbitmq \
                -p 15673:15672  \
 			   -p 5673:5672  \
+			   -e RABBITMQ_DEFAULT_USER=admin \
+			   -e RABBITMQ_DEFAULT_PASS=admin \
                rabbitmq:3.8.0-management
 ```
 
