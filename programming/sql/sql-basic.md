@@ -1,14 +1,18 @@
+This document for practices with Relational Database Management System (RDBMS): PostgeSQL and MySQL
+---
+
 - [1. Prepare](#1-prepare)
   - [1.1. Install client for interact with database server](#11-install-client-for-interact-with-database-server)
   - [1.2. Interact with database server from client](#12-interact-with-database-server-from-client)
   - [1.3. Download sample database](#13-download-sample-database)
-  - [Create database server using docker](#create-database-server-using-docker)
+  - [1.4. Create database server using docker](#14-create-database-server-using-docker)
 - [2. Database](#2-database)
   - [2.1. Create database](#21-create-database)
   - [2.2. List database](#22-list-database)
   - [2.3. Drop database](#23-drop-database)
   - [2.4. Use database](#24-use-database)
-  - [2.5. Import dumped database](#25-import-dumped-database)
+  - [2.5. Export database](#25-export-database)
+  - [2.6. Import dumped database](#26-import-dumped-database)
 - [3. Table](#3-table)
   - [3.1. List tables](#31-list-tables)
 - [4. Thao tác với dữ liệu](#4-thao-tác-với-dữ-liệu)
@@ -75,7 +79,7 @@ pgcli -h localhost -p 5433 -U postgres app_db
 
 [postgresql](../sample/database/../../../sample/database/postgresql/dvdrental.zip)
 
-## Create database server using docker
+## 1.4. Create database server using docker
 
 [postgresql](../../devops/docker/docker-command.md#postgresql)
 
@@ -119,7 +123,30 @@ DROP DATABASE IF EXISTS dvdrental;
 USE dvdrental;
 ```
 
-## 2.5. Import dumped database
+## 2.5. Export database
+
+**postgres**
+
+```shell
+pg_dump -p 5433 -h 127.0.0.1 -U postgres -d dvdrental >> dvdrental.sql
+```
+
+**mysql**
+
+
+```shell
+mysqldump -u <db_username> -h <db_host> -P <port> -p<pass-word> db_name table_name > table_name.sql
+# or
+mysqldump --login-path=My_Path db_name table_name > table_name.sql
+
+# If you are dumping tables t1, t2, and t3 from mydb
+
+mysqldump -u <db_username> -h <db_host> -P <port> -p<pass-word> mydb t1 t2 t3 > mydb_tables.sql
+# or
+mysqldump --login-path=My_Path mydb t1 t2 t3 > mydb_tables.sql
+```
+
+## 2.6. Import dumped database
 
 
 **postgresql**
