@@ -129,10 +129,13 @@ USE dvdrental;
 
 ```shell
 pg_dump -p 5433 -h 127.0.0.1 -U postgres -d dvdrental >> dvdrental.sql
+
+# in docker container
+docker exec -t test_postgres pg_dumpall -c -U postgres > dump_`date +%d-%m-%Y"_"%H_%M_%S`.sql
+
 ```
 
 **mysql**
-
 
 ```shell
 mysqldump -u <db_username> -h <db_host> -P <port> -p<pass-word> db_name table_name > table_name.sql
@@ -144,6 +147,9 @@ mysqldump --login-path=My_Path db_name table_name > table_name.sql
 mysqldump -u <db_username> -h <db_host> -P <port> -p<pass-word> mydb t1 t2 t3 > mydb_tables.sql
 # or
 mysqldump --login-path=My_Path mydb t1 t2 t3 > mydb_tables.sql
+
+# in docker container
+docker exec CONTAINER /usr/bin/mysqldump -u root --password=root DATABASE > backup.sql
 ```
 
 ## 2.6. Import dumped database
@@ -154,12 +160,19 @@ mysqldump --login-path=My_Path mydb t1 t2 t3 > mydb_tables.sql
 ```shell
 psql -p 5433 -h 127.0.0.1 -U postgres -c "CREATE DATABASE dvdrental;"
 psql -p 5433 -h 127.0.0.1 -U postgres -d dvdrental < dvdrental.tar
+
+# in docker container
+cat dvdrental.sql | docker exec -i test_postges psql -U postgres
 ```
 
 **mysql**
 
 ```shell
 mysql -h127.0.0.1 -P 3389 -uroot -p123456 dvdrental < dvdrental.sql
+
+# in docker container
+docker exec -i test_mysql mysql -uroot -psecret dvdrental < dvdrental.sql
+cat backup.sql | docker exec -i CONTAINER /usr/bin/mysql -u root --password=root DATABASE
 ```
 
 # 3. Table
