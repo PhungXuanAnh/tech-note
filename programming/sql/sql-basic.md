@@ -2,17 +2,17 @@ This document for practices with Relational Database Management System (RDBMS): 
 ---
 
 - [1. Prepare](#1-prepare)
-  - [1.1. Install client for interact with database server](#11-install-client-for-interact-with-database-server)
-  - [1.2. Interact with database server from client](#12-interact-with-database-server-from-client)
-  - [1.3. Download sample database](#13-download-sample-database)
-  - [1.4. Create database server using docker](#14-create-database-server-using-docker)
+  - [1.1. Create database server using docker](#11-create-database-server-using-docker)
+  - [1.2. Install client for interact with database server](#12-install-client-for-interact-with-database-server)
+  - [1.3. Interact with database server from client](#13-interact-with-database-server-from-client)
+  - [1.4. Dowload sample database](#14-dowload-sample-database)
 - [2. Database](#2-database)
   - [2.1. Create database](#21-create-database)
   - [2.2. List database](#22-list-database)
   - [2.3. Drop database](#23-drop-database)
   - [2.4. Use database](#24-use-database)
   - [2.5. Export database](#25-export-database)
-  - [2.6. Import dumped database](#26-import-dumped-database)
+  - [2.6. Import database](#26-import-database)
 - [3. Table](#3-table)
   - [3.1. List tables](#31-list-tables)
 - [4. Thao tác với dữ liệu](#4-thao-tác-với-dữ-liệu)
@@ -23,7 +23,15 @@ This document for practices with Relational Database Management System (RDBMS): 
 
 # 1. Prepare
 
-## 1.1. Install client for interact with database server
+
+## 1.1. Create database server using docker
+
+[postgresql](../../devops/docker/docker-command.md#postgresql)
+
+[mysql](../../devops/docker/docker-command.md#mysql)
+
+
+## 1.2. Install client for interact with database server
 
 **PostgreSQL**
 
@@ -44,7 +52,7 @@ sudo apt install mysql-client
 pip3 install -U mycli
 ```
 
-## 1.2. Interact with database server from client
+## 1.3. Interact with database server from client
 
 **PostgreSQL**
 
@@ -74,22 +82,35 @@ pgcli -h localhost -p 5433 -U postgres dvdrental
 
 ```shell
 # enter shell
- mysql -h127.0.0.1 -P 3389 -uroot -p123456
+ mysql -h127.0.0.1 -P 3308 -uroot -p123456
+# or
+ mycli -h localhost -P 3308 -u root -p 123456
 
  # exit
  exit()
  ctrl + d
 ```
 
-## 1.3. Download sample database
+## 1.4. Dowload sample database
 
-[postgresql](../sample/database/../../../sample/database/postgresql/dvdrental.zip)
+**mysql**
 
-## 1.4. Create database server using docker
+```shell
+wget https://downloads.mysql.com/docs/sakila-db.zip
+unzip sakila-db.zip
+cd sakila-db
 
-[postgresql](../../devops/docker/docker-command.md#postgresql)
+# or
+git clone https://github.com/jOOQ/jOOQ.git
+cd jOOQ/jOOQ-examples/Sakila/mysql-sakila-db/
+```
 
-[mysql](../../devops/docker/docker-command.md#mysql)
+**postgresql**
+
+```shell
+git clone https://github.com/jOOQ/jOOQ.git
+cd jOOQ/jOOQ-examples/Sakila/postgres-sakila-db/
+```
 
 # 2. Database
 
@@ -113,10 +134,20 @@ SHOW DATABASES;
 
 ## 2.3. Drop database
 ```sql
-DROP DATABASE dvdrental;
+DROP DATABASE sakila;
 
 # or with postgresql
-DROP DATABASE IF EXISTS dvdrental;
+DROP DATABASE IF EXISTS sakila;
+
+# if see ERROR:
+# database "sakila" is being accessed by other users
+# DETAIL:  There are 2 other sessions using the database.
+REVOKE CONNECT ON DATABASE sakila FROM public;
+# then
+SELECT pg_terminate_backend(pg_stat_activity.pid)
+FROM pg_stat_activity
+WHERE pg_stat_activity.datname = 'sakila';
+
 ```
 
 ## 2.4. Use database
@@ -134,52 +165,67 @@ USE dvdrental;
 **postgres**
 
 ```shell
-pg_dump -p 5433 -h 127.0.0.1 -U postgres -d dvdrental >> dvdrental.sql
-
-# in docker container
-docker exec -t test_postgres pg_dumpall -c -U postgres > dump_`date +%d-%m-%Y"_"%H_%M_%S`.sql
-
+pg_dump -p 5433 -h 127.0.0.1 -U postgres -d sakila >> sakila.sql
+docker exec -t test-postgresql pg_dumpall -c -U postgres > all_`date +%d-%m-%Y"_"%H_%M_%S`.sql
+docker exec -t test-postgresql pg_dump -c -U postgres -d sakila > sakila_`date +%d-%m-%Y"_"%H_%M_%S`.sql
 ```
 
 **mysql**
 
 ```shell
 mysqldump -u <db_username> -h <db_host> -P <port> -p<pass-word> db_name table_name > table_name.sql
-# or
 mysqldump --login-path=My_Path db_name table_name > table_name.sql
 
 # If you are dumping tables t1, t2, and t3 from mydb
-
 mysqldump -u <db_username> -h <db_host> -P <port> -p<pass-word> mydb t1 t2 t3 > mydb_tables.sql
-# or
-mysqldump --login-path=My_Path mydb t1 t2 t3 > mydb_tables.sql
 
 # in docker container
 docker exec CONTAINER /usr/bin/mysqldump -u root --password=root DATABASE > backup.sql
 ```
 
-## 2.6. Import dumped database
-
+## 2.6. Import database
 
 **postgresql**
 
 ```shell
-psql -p 5433 -h 127.0.0.1 -U postgres -c "CREATE DATABASE dvdrental;"
-psql -p 5433 -h 127.0.0.1 -U postgres -d dvdrental < dvdrental.tar
+cd /home/xuananh/Downloads/jOOQ/jOOQ-examples/Sakila/postgres-sakila-db
+docker exec -i test-postgresql psql -U postgres -c "DROP DATABASE sakila;"
+docker exec -i test-postgresql psql -U postgres -c "CREATE DATABASE sakila;"
+docker exec -i test-postgresql psql -U postgres -d sakila < postgres-sakila-delete-data.sql
+docker exec -i test-postgresql psql -U postgres -d sakila < postgres-sakila-drop-objects.sql
+docker exec -i test-postgresql psql -U postgres -d sakila < postgres-sakila-schema.sql
+docker exec -i test-postgresql psql -U postgres -d sakila < postgres-sakila-insert-data.sql
 
-# in docker container
-unzip dvdrental.zip
-cat dvdrental.tar | docker exec -i test-postgresql psql -U postgres
+# check result
+docker exec -i test-postgresql psql -U postgres -d sakila -c "SELECT COUNT(*) FROM film;"
+# output
+ count 
+-------
+  1000
+(1 row)
 ```
 
 **mysql**
 
 ```shell
-mysql -h127.0.0.1 -P 3389 -uroot -p123456 dvdrental < dvdrental.sql
+docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 -e 'DROP DATABASE sakila; CREATE DATABASE sakila;'
 
-# in docker container
-docker exec -i test_mysql mysql -uroot -psecret dvdrental < dvdrental.sql
-cat backup.sql | docker exec -i CONTAINER /usr/bin/mysql -u root --password=root DATABASE
+# import jOOQ sakila database
+cd /home/xuananh/Downloads/jOOQ/jOOQ-examples/Sakila/mysql-sakila-db
+docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 sakila < mysql-sakila-delete-data.sql
+docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 sakila < mysql-sakila-drop-objects.sql
+docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 sakila < mysql-sakila-schema.sql
+docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 sakila < mysql-sakila-insert-data.sql
+
+# import offical sakila
+docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 sakila < sakila-schema.sql
+docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 sakila < sakila-data.sql
+
+# check result
+docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 sakila -e 'SELECT COUNT(*) FROM film;'
+# output
+COUNT(*)
+1000
 ```
 
 # 3. Table
@@ -209,7 +255,7 @@ WHERE
 # 5. references
 
 https://vietjack.com/sql/
-https://viettuts.vn/sql
+https://www.tutorialspoint.com/sql/index.htm
 http://www.postgresqltutorial.com
 
 https://techmaster.vn/posts/34036/huong-dan-sql-cho-nguoi-moi-bat-dau
@@ -217,9 +263,9 @@ https://techmaster.vn/posts/34036/huong-dan-sql-cho-nguoi-moi-bat-dau
 
 # 6. sample database reference
 
+![sakila](../../image/../images/programming/sql/sakila.png)
+
 https://dev.mysql.com/doc/sakila/en/
-https://dataedo.com/kb/databases/postgresql/sample-databases
-http://postgresguide.com/setup/example.html
+https://www.jooq.org/sakila
 https://musicbrainz.org/doc/MusicBrainz_Database/Download
-https://postgrespro.com/education/demodb
 
