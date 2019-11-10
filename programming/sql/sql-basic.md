@@ -57,8 +57,14 @@ psql -p 5433 -h 127.0.0.1 -U postgres
 
 # enter shell using postgres client with autocomplement
 pgcli local_database
-pgcli postgres://amjith:passw0rd@example.com:5432/app_db
-pgcli -h localhost -p 5433 -U postgres app_db
+# or
+export POSTGRES_USER=postgres
+export POSTGRES_PASS=123456
+export POSTGRES_DB=dvdrental
+pgcli postgres://{POSTGRES_USER}:{POSTGRES_PASS}@example.com:5432/{POSTGRES_DB}
+# or
+export PGPASSWORD=123456
+pgcli -h localhost -p 5433 -U postgres dvdrental
 
 # exit
 \q
@@ -162,7 +168,8 @@ psql -p 5433 -h 127.0.0.1 -U postgres -c "CREATE DATABASE dvdrental;"
 psql -p 5433 -h 127.0.0.1 -U postgres -d dvdrental < dvdrental.tar
 
 # in docker container
-cat dvdrental.sql | docker exec -i test_postges psql -U postgres
+unzip dvdrental.zip
+cat dvdrental.tar | docker exec -i test-postgresql psql -U postgres
 ```
 
 **mysql**
