@@ -20,6 +20,7 @@
 	- [4.3. PostgreSQL](#43-postgresql)
 	- [4.4. MySQL](#44-mysql)
 	- [4.5. Kafka](#45-kafka)
+	- [Kafdrop](#kafdrop)
 	- [4.6. MongoDB](#46-mongodb)
 
 
@@ -262,12 +263,21 @@ docker run -d --name test-mysql \
 ## 4.5. Kafka
 
 ```shell
-docker run -d --name kafka-test \
+docker run -d --name test-kafka \
             -p 2181:2181 \
             -p 9092:9092 \
             --env ADVERTISED_HOST=0.0.0.0\
             --env ADVERTISED_PORT=9092 \
             spotify/kafka
+```
+
+## Kafdrop
+
+```shell
+docker run -d --name test-kafdrop \
+            -p 9009:9000 \
+            --env ZOOKEEPER_CONNECT=zookeeper:2181 \
+            xuananh/kafdrop:2.0.6
 ```
 
 ## 4.6. MongoDB

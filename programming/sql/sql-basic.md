@@ -26,9 +26,10 @@ This document for practices with Relational Database Management System (RDBMS): 
 
 ## 1.1. Create database server using docker
 
-[postgresql](../../devops/docker/docker-command.md#postgresql)
+[postgresql](../../devops/docker/docker-command.md#43-postgresql)
 
-[mysql](../../devops/docker/docker-command.md#mysql)
+[mysql](../../devops/docker/docker-command.md#44-mysql)
+
 
 
 ## 1.2. Install client for interact with database server
