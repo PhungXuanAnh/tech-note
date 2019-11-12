@@ -17,8 +17,6 @@ database
 
 [redis-install-and-cli.md](database/redis/redis-install-and-cli.md)
 
-[postgresql-psql-command.md](database/postgresql/postgresql-psql-command.md)
-
 [rabbitmq-best-pratice-part2.md](database/rabbitmq/rabbitmq-best-pratice-part2.md)
 
 [mysql-backup-restore.md](database/mysql/mysql-backup-restore.md)
@@ -38,6 +36,8 @@ devops
 
 [jenkins-configure-notification.md](devops/jenkins/jenkins-configure-notification.md)
 
+[VPN-hamachi.md](devops/VPN-hamachi/VPN-hamachi.md)
+
 [rsync.md](devops/rsync/rsync.md)
 
 [gcloud.md](devops/gcloud/gcloud.md)
@@ -53,8 +53,6 @@ devops
 [docker-swarm.md](devops/docker/docker-swarm.md)
 
 [docker-command.md](devops/docker/docker-command.md)
-
-[hamachi.md](devops/hamachi/hamachi.md)
 
 [kubernetes-architecture-concepts.md](devops/kubernetes/kubernetes-architecture-concepts.md)
 
@@ -116,6 +114,8 @@ programming
 [rest-api-best-practice.md](programming/rest-api/rest-api-best-practice.md)
 
 [pyenv-guide.md](programming/pyenv/pyenv-guide.md)
+
+[markdown.md](programming/markdown/markdown.md)
 
 [jwt.md](programming/jwt/jwt.md)
 
