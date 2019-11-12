@@ -15,7 +15,7 @@ Tool này giúp tạo mạng riêng ảo VPN, free cho 5 máy kết nối vào m
 Đăng ký tại địa chỉ [https://www.logmein.com/](https://www.logmein.com/)
 
 Tạo mạng:
-- Vào Network -> My Networks, click Add Network
+- Vào Network -> My Networks, click **Create Network**
 - Điền thông tin mạng, click Continue
 ![](../../images/devops/hamachi/2019-02-22-hamachi-1.png)
 - Điền các setup khác như bên dưới, click Continue
@@ -33,7 +33,11 @@ Tạo mạng:
 ## 3.1. Trực tiếp
 Tải bộ cài đặt tại [https://www.vpn.net/linux](https://www.vpn.net/linux)
 
-Chạy lệnh `sudo dpkg -i logmein-hamachi_*_amd64.deb`
+Chạy lệnh cài đặt:
+
+```shell
+sudo dpkg -i logmein-hamachi_*_amd64.deb
+```
 
 ## 3.2. Dùng Docker
 
@@ -53,16 +57,30 @@ Join vào network, sử dụng ID của network đã tạo ở trên
 
 ```shell
 
-➜  ~ hahamachi join 398-582-210
+➜  ~ hamachi join 398-582-210
 
 Password: 
 Joining 398-582-210 .. ok
 ```
 
+Hoặc nếu network cần phải được approval thì chạy lệnh:
+
+```shell
+hamachi do-join 411-253-322
+
+Password: 
+Joining 411-253-322 .. ok, request sent, waiting for approval
+```
+
+Sau đó vào web để  **Accept**:
+
+![](../../images/devops/hamachi/hamachi-40.png)
+
+
 Để kiểm tra kết nối:
 
 ```shell
-➜  ~ hahamachi  
+➜  ~ hamachi  
 
   version    : 2.1.0.198
   pid        : 25585
@@ -99,3 +117,11 @@ sudo add-apt-repository -y ppa:webupd8team/haguichi
 sudo apt update
 sudo apt install -y haguichi
 ```
+
+Thông tin của client:
+
+![](../../images/devops/hamachi/hamachi-51.png)
+
+Thông tin của network:
+
+![](../../images/devops/hamachi/hamachi-50.png)
