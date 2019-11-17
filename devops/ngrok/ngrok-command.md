@@ -6,6 +6,8 @@
 
 # 1. Add token
 
+Get token from [here](https://dashboard.ngrok.com/auth)
+
 `ngrok authtoken <token>`
 
 # 2. Forward a port
