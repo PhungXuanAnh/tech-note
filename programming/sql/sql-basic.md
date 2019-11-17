@@ -26,9 +26,10 @@ This document for practices with Relational Database Management System (RDBMS): 
 
 ## 1.1. Create database server using docker
 
-[postgresql](../../devops/docker/docker-command.md#postgresql)
+[postgresql](../../devops/docker/docker-command.md#43-postgresql)
 
-[mysql](../../devops/docker/docker-command.md#mysql)
+[mysql](../../devops/docker/docker-command.md#44-mysql)
+
 
 
 ## 1.2. Install client for interact with database server
@@ -208,7 +209,8 @@ docker exec -i test-postgresql psql -U postgres -d sakila -c "SELECT COUNT(*) FR
 **mysql**
 
 ```shell
-docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 -e 'DROP DATABASE sakila; CREATE DATABASE sakila;'
+docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 -e 'DROP DATABASE sakila;'
+docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 -e 'CREATE DATABASE sakila;'
 
 # import jOOQ sakila database
 cd /home/xuananh/Downloads/jOOQ/jOOQ-examples/Sakila/mysql-sakila-db
