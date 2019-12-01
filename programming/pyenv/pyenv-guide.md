@@ -1,11 +1,19 @@
 Hướng dẫn sử dụng pyevn
 
+# Install pyenv
+
+```shell
+curl https://pyenv.run | bash
+```
+
+Reference: https://github.com/pyenv/pyenv-installer
+
 # Cài đặt một version python
 
 ```shell
-pyenv install 2.7.10
-pyenv install 3.6.8
-pyenv install 3.7.0
+pyenv install -v 2.7.10
+pyenv install -v 3.6.8
+pyenv install -v 3.7.0
 ```
 
 # Danh sách các command:
@@ -17,7 +25,7 @@ Usage: pyenv <command> [<args>]
 Some useful pyenv commands are:
    commands    List all available pyenv commands
    local       Set or show the local application-specific Python version
-   global      Set or show the global Python version
+   global      Set or show the global Python version  <=== NOTE: phải reset shell thì mới thấy thay đổi
    shell       Set or show the shell-specific Python version
    install     Cài đặt 1 version python
    uninstall   Gỡ bỏ một version python

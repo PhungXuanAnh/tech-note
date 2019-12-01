@@ -3,9 +3,10 @@ This document for practices with Relational Database Management System (RDBMS): 
 
 - [1. Prepare](#1-prepare)
   - [1.1. Create database server using docker](#11-create-database-server-using-docker)
-  - [1.2. Install client for interact with database server](#12-install-client-for-interact-with-database-server)
-  - [1.3. Interact with database server from client](#13-interact-with-database-server-from-client)
-  - [1.4. Dowload sample database](#14-dowload-sample-database)
+  - [1.2. Install client](#12-install-client)
+    - [1.2.1. GUI client - DBeaver](#121-gui-client---dbeaver)
+    - [1.2.2. Command line client](#122-command-line-client)
+  - [1.3. Connect to database server from client command line](#13-connect-to-database-server-from-client-command-line)
 - [2. Database](#2-database)
   - [2.1. Create database](#21-create-database)
   - [2.2. List database](#22-list-database)
@@ -14,6 +15,8 @@ This document for practices with Relational Database Management System (RDBMS): 
   - [2.5. Export database](#25-export-database)
   - [2.6. Import database](#26-import-database)
 - [3. Table](#3-table)
+  - [Create table](#create-table)
+  - [Drop table](#drop-table)
   - [3.1. List tables](#31-list-tables)
 - [4. Thao tác với dữ liệu](#4-thao-tác-với-dữ-liệu)
   - [4.1. UPDATE](#41-update)
@@ -32,8 +35,13 @@ This document for practices with Relational Database Management System (RDBMS): 
 
 
 
-## 1.2. Install client for interact with database server
+## 1.2. Install client
 
+### 1.2.1. GUI client - DBeaver
+
+Using **DBeaver** from [this link](https://gist.github.com/PhungXuanAnh/0a86ed25a70000d1dd6d52ce622fdb36)
+
+### 1.2.2. Command line client
 **PostgreSQL**
 
 ```shell
@@ -47,13 +55,13 @@ pip3 install pgcli --user
 **MySQL**
 
 ```shell
-sudo apt install mysql-client
+sudo apt install mysql-client -y
 
 # or using mycli
 pip3 install -U mycli
 ```
 
-## 1.3. Interact with database server from client
+## 1.3. Connect to database server from client command line
 
 **PostgreSQL**
 
@@ -92,33 +100,12 @@ pgcli -h localhost -p 5433 -U postgres dvdrental
  ctrl + d
 ```
 
-## 1.4. Dowload sample database
-
-**mysql**
-
-```shell
-wget https://downloads.mysql.com/docs/sakila-db.zip
-unzip sakila-db.zip
-cd sakila-db
-
-# or
-git clone https://github.com/jOOQ/jOOQ.git
-cd jOOQ/jOOQ-examples/Sakila/mysql-sakila-db/
-```
-
-**postgresql**
-
-```shell
-git clone https://github.com/jOOQ/jOOQ.git
-cd jOOQ/jOOQ-examples/Sakila/postgres-sakila-db/
-```
-
 # 2. Database
 
 ## 2.1. Create database
 
 ```sql
-CREATE DATABASE dvdrental;
+CREATE DATABASE test_db;
 ```
 
 ## 2.2. List database
@@ -134,21 +121,21 @@ SHOW DATABASES;
 ```
 
 ## 2.3. Drop database
+
 ```sql
-DROP DATABASE sakila;
+DROP DATABASE test_db;
 
 # or with postgresql
-DROP DATABASE IF EXISTS sakila;
+DROP DATABASE IF EXISTS test_db;
 
 # if see ERROR:
-# database "sakila" is being accessed by other users
+# database "test_db" is being accessed by other users
 # DETAIL:  There are 2 other sessions using the database.
-REVOKE CONNECT ON DATABASE sakila FROM public;
+REVOKE CONNECT ON DATABASE test_db FROM public;
 # then
 SELECT pg_terminate_backend(pg_stat_activity.pid)
 FROM pg_stat_activity
-WHERE pg_stat_activity.datname = 'sakila';
-
+WHERE pg_stat_activity.datname = 'test_db';
 ```
 
 ## 2.4. Use database
@@ -189,7 +176,8 @@ docker exec CONTAINER /usr/bin/mysqldump -u root --password=root DATABASE > back
 **postgresql**
 
 ```shell
-cd /home/xuananh/Downloads/jOOQ/jOOQ-examples/Sakila/postgres-sakila-db
+git clone https://github.com/jOOQ/jOOQ.git
+cd jOOQ/jOOQ-examples/Sakila/postgres-sakila-db/
 docker exec -i test-postgresql psql -U postgres -c "DROP DATABASE sakila;"
 docker exec -i test-postgresql psql -U postgres -c "CREATE DATABASE sakila;"
 docker exec -i test-postgresql psql -U postgres -d sakila < postgres-sakila-delete-data.sql
@@ -213,13 +201,17 @@ docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 -e 'DROP DATA
 docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 -e 'CREATE DATABASE sakila;'
 
 # import jOOQ sakila database
-cd /home/xuananh/Downloads/jOOQ/jOOQ-examples/Sakila/mysql-sakila-db
+git clone https://github.com/jOOQ/jOOQ.git
+cd jOOQ/jOOQ-examples/Sakila/mysql-sakila-db/
 docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 sakila < mysql-sakila-delete-data.sql
 docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 sakila < mysql-sakila-drop-objects.sql
 docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 sakila < mysql-sakila-schema.sql
 docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 sakila < mysql-sakila-insert-data.sql
 
 # import offical sakila
+wget https://downloads.mysql.com/docs/sakila-db.zip
+unzip sakila-db.zip
+cd sakila-db
 docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 sakila < sakila-schema.sql
 docker exec -i test-mysql /usr/bin/mysql -u root --password=123456 sakila < sakila-data.sql
 
@@ -231,6 +223,29 @@ COUNT(*)
 ```
 
 # 3. Table
+
+## Create table
+
+```sql
+# mysql
+CREATE TABLE test_db.SINHVIEN(
+   ID   INT              NOT NULL,
+   TEN VARCHAR (20)     NOT NULL,
+   TUOI  INT              NOT NULL,
+   KHOAHOC  CHAR (25) ,
+   HOCPHI   DECIMAL (18, 2),       
+   PRIMARY KEY (ID)
+);
+
+DESCRIBE test_db.SINHVIEN;
+```
+
+## Drop table
+
+```sql
+# mysql
+DROP TABLE test_db.SINHVIEN;
+```
 
 ## 3.1. List tables
 
