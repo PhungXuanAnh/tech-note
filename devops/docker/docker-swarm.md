@@ -1,18 +1,23 @@
 - [1. swarm](#1-swarm)
   - [1.1. init swarm](#11-init-swarm)
   - [1.2. show token](#12-show-token)
+  - [1.3. node label](#13-node-label)
+  - [1.4. node list](#14-node-list)
 - [2. stack](#2-stack)
   - [2.1. deploy using docker-compose file](#21-deploy-using-docker-compose-file)
   - [2.2. list the tasks in the stack](#22-list-the-tasks-in-the-stack)
   - [2.3. list the services in the stack](#23-list-the-services-in-the-stack)
 - [3. service](#3-service)
-  - [3.1. remove all service in warm](#31-remove-all-service-in-warm)
-  - [3.2. list the tasks of one or more services](#32-list-the-tasks-of-one-or-more-services)
-  - [3.3. Fetch the logs of a service or task](#33-fetch-the-logs-of-a-service-or-task)
-  - [3.4. restart / force update](#34-restart--force-update)
-  - [3.5. update](#35-update)
-  - [3.6. scale](#36-scale)
+  - [3.1. Run command](#31-run-command)
+  - [3.2. remove all service in warm](#32-remove-all-service-in-warm)
+  - [3.3. list the tasks of one or more services](#33-list-the-tasks-of-one-or-more-services)
+  - [3.4. Fetch the logs of a service or task](#34-fetch-the-logs-of-a-service-or-task)
+  - [3.5. restart / force update](#35-restart--force-update)
+  - [3.6. update](#36-update)
+  - [3.7. scale](#37-scale)
 - [4. Create service monitor swarm](#4-create-service-monitor-swarm)
+- [5. Deploy directive](#5-deploy-directive)
+  - [5.1. Placement](#51-placement)
 
 # 1. swarm
 
@@ -33,6 +38,28 @@ it will show
 # To add a worker to this swarm, run the following command:
 
 docker swarm join --token SWMTKN-1-05mr233vlh8k3f1j688de8scf53sejunk43ymwyh9i76r097uz-2z79uque2ujwinas0xicg7pbk 192.168.1.201:2377
+```
+
+## 1.3. node label
+
+```shell
+docker node update --label-add node_name=kidssy_gateway [hostname/id]
+# ex:
+docker node ls             
+ID                            HOSTNAME                   STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+r739x77y80bp2p1lqblsu8yr2     sender1      Ready               Active                                  19.03.5
+1dnm8jpbdwldjbx09aplctild *   sender2   Ready               Active              Leader              19.03.5
+im4xtpncpulz4tf3o4p72dro8     sender3 
+
+docker node update --label-add node_name=kidssy_gateway sender3
+```
+
+## 1.4. node list
+
+```shell
+docker node ls
+# list by label and hostname
+docker node ls -q | xargs docker node inspect -f "{{ .ID }} {{ .Description.Hostname }}      {{ .Spec.Labels }}"
 ```
 
 # 2. stack
@@ -80,38 +107,46 @@ ID                  NAME                    MODE                REPLICAS        
 
 # 3. service
 
-## 3.1. remove all service in warm
+## 3.1. Run command
+
+```shell
+docker exec $(docker ps -q -f name=[regex to filter container]) command
+# ex
+docker exec $(docker ps -q -f name=kidssy_kong.1) kong health
+```
+
+## 3.2. remove all service in warm
 
 ```shell
 docker service rm $(docker service ls -q)
 ```
 
-## 3.2. list the tasks of one or more services
+## 3.3. list the tasks of one or more services
 
 ```shell
 docker service ps sender_sender --no-trunc --format "table {{.Error}}\t{{.Node}}\t{{.Name}}"
 ```
 
-## 3.3. Fetch the logs of a service or task
+## 3.4. Fetch the logs of a service or task
 
 ```shell
 docker service logs [sevice|tasks]
 # service id or task id get from comment `docker stack services [stack-name]`
 ```
 
-## 3.4. restart / force update
+## 3.5. restart / force update
 
 ```shell
 docker service update --force [service-id]
 ```
 
-## 3.5. update
+## 3.6. update
 
 ```shell
 docker service update [service-id]
 ```
 
-## 3.6. scale
+## 3.7. scale
 
 ```shell
 docker service scale SERVICE=REPLICAS
@@ -132,4 +167,24 @@ docker service create \
   dockersamples/visualizer
 ```
 
+# 5. Deploy directive
 
+## 5.1. Placement
+
+```yaml
+deploy:
+  placement:
+      constraints:
+        - node.labels.label_name == label_value
+
+deploy:
+  placement:
+      constraints:
+        - node.role == manager/worker
+
+deploy:
+  placement:
+      constraints:
+        - node.hostname == sender
+
+```
