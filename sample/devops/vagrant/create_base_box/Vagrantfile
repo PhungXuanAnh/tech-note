@@ -1,0 +1,40 @@
+# vi: set ft=ruby :
+
+configs = JSON.parse(File.read("nodes_config.json"))
+nodes_config = configs['nodes']
+common_config = configs['common']
+
+Vagrant.configure(common_config['vagrant_api_version']) do |config|
+  config.vm.box = common_config['box']
+
+  nodes_config.each do |node|
+    node_name   = node[0] # name of node
+    node_values = node[1] # content of node
+
+    config.vm.define node_name do |config|    
+      # configures all forwarding ports in JSON array
+      ports = node_values['ports']
+      ports.each do |port|
+        config.vm.network :forwarded_port,
+          host:  port[':host'],
+          guest: port[':guest'],
+          id:    port[':id']
+      end
+
+      config.vm.hostname = node_name
+      config.vm.network :private_network, ip: node_values['private_ip']
+      config.vm.network :public_network, ip: node_values['publish_ip'], bridge: common_config['bridge']
+
+      config.vm.provider :virtualbox do |vb|
+        vb.memory = node_values['memory']
+        vb.cpus = node_values['cpus']
+        vb.name = node_name
+      end
+    #   config.vm.provision :shell, :path => node_values['provision']                     # run provision with sudo
+      config.vm.provision :shell, privileged: false, path: node_values['provision']     # run provision without sudo but with vagrant user
+    #   config.vm.provision :file, source: '/home/sigma/Dropbox/Work/Other/conf.d/byobu', destination: "/home/vagrant/Dropbox/Work/Other/conf.d/byobu"
+    #   config.vm.provision :file, source: '/home/sigma/Dropbox/Work/Other/conf.d/zsh', destination: "/home/vagrant/Dropbox/Work/Other/conf.d/zsh"
+      #   config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
+    end
+  end
+end

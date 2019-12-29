@@ -1,0 +1,18 @@
+{
+  "common": {
+    "box": "ubuntu/bionic64",
+    "vagrant_api_version": "2",
+    "bridge": "wlp3s0"
+  },
+  "nodes": {
+    "node-base-box": {
+      "private_ip": "192.168.34.10",
+      "publish_ip": "192.168.1.214",
+      "ports": [],
+      "memory": 2048,
+      "cpus": 2,
+      "provision": "provision.sh",
+      "hostname": "my-vagrant-base-box"
+    }
+  }
+}
