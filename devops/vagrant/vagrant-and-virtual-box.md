@@ -24,6 +24,7 @@
 Download latest version of vagrant and virtualbox to prevent ERROR while instal vagrant plugin or when ERROR happen while using vagrant and virtualbox
 
 [https://www.vagrantup.com/downloads.html](https://www.vagrantup.com/downloads.html)
+
 [https://www.virtualbox.org/wiki/Linux_Downloads](https://www.virtualbox.org/wiki/Linux_Downloads)
 
 verify

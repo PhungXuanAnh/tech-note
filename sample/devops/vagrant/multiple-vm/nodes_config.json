@@ -1,25 +1,36 @@
 {
   "common": {
-    "box": "ubuntu/trusty64",
+    "box": "ubuntu/bionic64",
     "vagrant_api_version": "2",
-    "bridge": "enp2s0"
+    "bridge": "wlp3s0"
   },
   "nodes": {
-    "node01": {
-      "private_ip": "192.168.32.10",
-      "publish_ip": "192.168.1.201",
+    "kidssy01": {
+      "private_ip": "192.168.33.10",
+      "publish_ip": "192.168.1.210",
       "ports": [],
       "memory": 1024,
-      "cpus": 2,
-      "provision": "provision.sh"
+      "cpus": 1,
+      "provision": "provision.sh",
+      "hostname": "kidssy-gateway"
     },
-    "node02": {
-      "private_ip": "192.168.32.11",
-      "publish_ip": "192.168.1.202",
+    "kidssy02": {
+      "private_ip": "192.168.33.11",
+      "publish_ip": "192.168.1.200",
       "ports": [],
       "memory": 1024,
-      "cpus": 2,
-      "provision": "provision.sh"
+      "cpus": 1,
+      "provision": "provision.sh",
+      "hostname": "kidssy-api"
+    },
+    "kidssy03": {
+      "private_ip": "192.168.33.12",
+      "publish_ip": "192.168.1.200",
+      "ports": [],
+      "memory": 1024,
+      "cpus": 1,
+      "provision": "provision.sh",
+      "hostname": "kidssy-db"
     }
   }
 }
