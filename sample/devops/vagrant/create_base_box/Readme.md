@@ -23,7 +23,10 @@ vagrant up
 vagrant ssh
 ```
 
-Install neccessary packages
+
+Change ssh publish key at last line in file [install_package.sh](install_package.sh)
+
+Add more package to this file, then run it:
 
 ```shell
 bash install_packages.sh
@@ -43,7 +46,7 @@ cat /dev/null > ~/.bash_history && history -c && exit
 # 5. Repackage the VM into a New Vagrant Box
 
 ```shell
-vagrant package --output mynew.box
+vagrant package --output my-new.box
 ```
 
 or package base on a vm
@@ -55,13 +58,15 @@ vagrant package --base my-virtual-machine
 # 6. Add the Box into Your Vagrant Install
 
 ```shell
-vagrant box add my-new-box mynew.box
+vagrant box add sigma/my-new-box my-new.box
+vagrant box add sigma/ubuntu18.04 my-new.box
+vagrant box list
 ```
 
 # 7. Testing the box
 
 ```shell
-vagrant init my-new-box
+vagrant init sigma/my-new-box
 vagrant up
 vagrant ssh
 ```

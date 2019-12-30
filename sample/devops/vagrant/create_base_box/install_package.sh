@@ -53,3 +53,11 @@ ln -sf ~/Dropbox/Work/Other/conf.d/zsh/zshrc.sh ~/.zshrc
 # Create Dropbox folder
 mkdir -p ~/Dropbox/Work/Other/conf.d
 cp -R /home/vagrant/shared/* /home/vagrant/Dropbox/Work/Other/conf.d/
+
+#-------------------------------------------------------------------------
+# setup ssh key
+chmod 600 /home/vagrant/.ssh/id_rsa
+chmod 600 /home/vagrant/.ssh/id_rsa.pub
+
+echo ""  >> /home/xuananh/.ssh/authorized_keys
+echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC5pgb/kvf0JI3P9owS95JMUQ84jZ9Q4w33U3jWEg7zHO2PiFa8K9H10Y9NhyHMZ8pPzvMDn3pAsYZLAleATzRLpea8Mz653wOgZAzc12P2w7Nweu9c+BA6LYPUiD0j7BTK8od4qoR+Bh7obOK+TDxeiWZ6qs1TizTWGt4ue9FeTKNtULYaK59kGM2jGLJmPJ4ATTPS3QzaKICqx9S7fwuFdfXEvrbE10QHQ9SBAQGEkm0wpt0pAQrpHp4nB0acIX1IdVGGc2RDaGMYhjoANtnDvyiURtZMI5GTdflo2coH4f2P70OqvN/Xm4g8kPi0cbl/IKp4CumAct0vQArcrQN7 xuananh" >> /home/vagrant/.ssh/authorized_keys
