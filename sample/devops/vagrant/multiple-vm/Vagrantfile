@@ -30,8 +30,13 @@ Vagrant.configure(common_config['vagrant_api_version']) do |config|
         vb.cpus = node_values['cpus']
         vb.name = node_name
       end
+      # config.vm.synced_folder "/home/sigma/Dropbox/Work/Other/conf.d/", "/home/vagrant/shared"
+      # config.vm.synced_folder "/home/sigma/Dropbox/Work/Other/conf.d/", "/home/vagrant/Dropbox/Work/Other/conf.d/", type: "rsync", rsync__auto: true, rsync__exclude: ['.ssh-agent']
 
-      config.vm.provision :shell, :path => node_values['provision']
+      # config.vm.provision :shell, :path => node_values['provision']                     # run privision with sudo
+      config.vm.provision :shell, privileged: false, path: node_values['provision']     # run provision without sudo but with vagrant user
+      # config.vm.provision :file, source: '/home/sigma/Dropbox/Work/Other/conf.d/zsh', destination: "/home/vagrant/Dropbox/Work/Other/conf.d/zsh"
+
     end
   end
 end
