@@ -1,32 +1,35 @@
-# Change node config
+- [1. Change node config](#1-change-node-config)
+- [2. Start base vm](#2-start-base-vm)
+- [3. SSH into the Box and Customize It if need](#3-ssh-into-the-box-and-customize-it-if-need)
+- [4. Make the Box as Small as possible](#4-make-the-box-as-small-as-possible)
+- [5. Repackage the VM into a New Vagrant Box](#5-repackage-the-vm-into-a-new-vagrant-box)
+- [6. Add the Box into Your Vagrant Install](#6-add-the-box-into-your-vagrant-install)
+- [7. Testing the box](#7-testing-the-box)
+
+# 1. Change node config
 
 Modify [nodes_config.json](nodes_config.json)
 
-# Change provision
-
-Add or remove package to install into this box in file [provision.sh](provision.sh)
-
-# Start base vm
+# 2. Start base vm
 
 ```shell
 cd create_base_box
 vagrant up
 ```
 
-# SSH into the Box and Customize It if need
+# 3. SSH into the Box and Customize It if need
 
 ```shell
 vagrant ssh
 ```
 
-For example install more packages
+Install neccessary packages
 
 ```shell
-sudo apt-get update
-sudo apt-get upgrade
+bash install_packages.sh
 ```
 
-# Make the Box as Small as possible
+# 4. Make the Box as Small as possible
 
 ```shell
 sudo apt-get clean
@@ -37,4 +40,28 @@ sudo rm -f /EMPTY
 cat /dev/null > ~/.bash_history && history -c && exit
 ```
 
-# Repackage the VM into a New Vagrant Box
+# 5. Repackage the VM into a New Vagrant Box
+
+```shell
+vagrant package --output mynew.box
+```
+
+or package base on a vm
+
+```shell
+vagrant package --base my-virtual-machine
+```
+
+# 6. Add the Box into Your Vagrant Install
+
+```shell
+vagrant box add my-new-box mynew.box
+```
+
+# 7. Testing the box
+
+```shell
+vagrant init my-new-box
+vagrant up
+vagrant ssh
+```
