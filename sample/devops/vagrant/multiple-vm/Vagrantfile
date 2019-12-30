@@ -6,6 +6,7 @@ common_config = configs['common']
 
 Vagrant.configure(common_config['vagrant_api_version']) do |config|
   config.vm.box = common_config['box']
+  # config.vm.box_url = "file:///home/sigma/vagrant_server/my-box.box"
 
   nodes_config.each do |node|
     node_name   = node[0] # name of node
