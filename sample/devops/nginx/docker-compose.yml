@@ -1,0 +1,31 @@
+#
+# syntax: https://docs.docker.com/compose/yml/
+#
+
+version: "3"
+
+services:
+    nginx:
+        image: nginx:1.11.6
+        networks:
+            - internal-network
+        ports:
+            - 80:80
+        volumes:
+            - ./configs:/etc/nginx/conf.d:ro
+            - ./log:/var/log/nginx/
+            - ./web:/usr/share/nginx/html:ro
+        command: /bin/bash -c "nginx -g 'daemon off;'"
+        restart: always
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "100M"
+                max-file: "3"
+        deploy:
+            resources:
+                limits:
+                    memory: 10M
+
+networks:
+    internal-network:
