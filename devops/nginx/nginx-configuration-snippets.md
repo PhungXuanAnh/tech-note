@@ -30,6 +30,7 @@ A collection of useful Nginx configuration snippets inspired by
     - [Sub-Request Upon Completion](#sub-request-upon-completion)
     - [Enable Cross Origin Resource Sharing](#enable-cross-origin-resource-sharing)
   - [Links](#links)
+  - [Sample](#sample)
 
 ## The Nginx Command
 The `nginx` command can be used to perform some useful actions when Nginx is running.
@@ -348,3 +349,8 @@ Some other awesome resources for configuring Nginx:
 - [Nginx Official Guide](http://nginx.com/resources/admin-guide/)
 - [HTML 5 Boilerplate's Sample Nginx Configuration](https://github.com/h5bp/server-configs-nginx)
 - [Nginx Pitfalls](http://wiki.nginx.org/Pitfalls)
+
+
+## Sample
+
+[simple nginx](../../sample/devops/nginx)
