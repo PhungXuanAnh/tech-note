@@ -16,8 +16,9 @@
   - [3.6. update](#36-update)
   - [3.7. scale](#37-scale)
 - [4. Create service monitor swarm](#4-create-service-monitor-swarm)
-- [5. Deploy directive](#5-deploy-directive)
+- [5. Docker compose file](#5-docker-compose-file)
   - [5.1. Placement](#51-placement)
+  - [5.2. Pass node information to service through environment variable](#52-pass-node-information-to-service-through-environment-variable)
 
 # 1. swarm
 
@@ -167,7 +168,7 @@ docker service create \
   dockersamples/visualizer
 ```
 
-# 5. Deploy directive
+# 5. Docker compose file
 
 ## 5.1. Placement
 
@@ -188,3 +189,10 @@ deploy:
         - node.hostname == sender
 
 ```
+
+## 5.2. Pass node information to service through environment variable
+
+```yaml
+        environment:
+            HOST_NAME: "node-{{.Node.Hostname}}"
+```            
