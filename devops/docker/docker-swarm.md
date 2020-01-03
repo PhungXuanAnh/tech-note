@@ -17,7 +17,8 @@
   - [3.7. scale](#37-scale)
 - [4. Create service monitor swarm](#4-create-service-monitor-swarm)
 - [5. Docker compose file](#5-docker-compose-file)
-  - [5.1. Placement](#51-placement)
+  - [5.1. deploy - placement - constraints](#51-deploy---placement---constraints)
+  - [deploy - mode](#deploy---mode)
   - [5.2. Pass node information to service through environment variable](#52-pass-node-information-to-service-through-environment-variable)
 
 # 1. swarm
@@ -59,8 +60,15 @@ docker node update --label-add node_name=kidssy_gateway sender3
 
 ```shell
 docker node ls
+
+# reference: https://stackoverflow.com/a/42419060/7639845
 # list by label and hostname
-docker node ls -q | xargs docker node inspect -f "{{ .ID }} {{ .Description.Hostname }}      {{ .Spec.Labels }}"
+docker node ls -q | xargs docker node inspect \
+  -f '{{ .ID }}	[{{ .Description.Hostname }}]:	{{ .Spec.Labels }}'
+
+# You can adjust that to use a range for prettier formatting instead of printing the default map:
+docker node ls -q | xargs docker node inspect \
+  -f '{{ .ID }}	[{{ .Description.Hostname }}]:				{{ range $k, $v := .Spec.Labels }}{{ $k }}={{ $v }} {{end}}'
 ```
 
 # 2. stack
@@ -170,24 +178,25 @@ docker service create \
 
 # 5. Docker compose file
 
-## 5.1. Placement
+## 5.1. deploy - placement - constraints
 
 ```yaml
 deploy:
   placement:
       constraints:
         - node.labels.label_name == label_value
-
-deploy:
-  placement:
-      constraints:
         - node.role == manager/worker
+        - node.hostname == server-1
+        - node.hostname != server-2
+        - engine.labels.lable_name == label_value  # start docker engine with labels, e.g. dockerd --label lable_name=label_value
+```
 
+## deploy - mode
+
+```yaml
 deploy:
-  placement:
-      constraints:
-        - node.hostname == sender
-
+  mode: global
+  mode: replicas    # default mode
 ```
 
 ## 5.2. Pass node information to service through environment variable
