@@ -2,7 +2,10 @@ up:
 	docker-compose up -d
 
 test:
-	curl -i http://localhost
+	curl -i http://localhost/
+
+test-hello:
+	curl -i http://localhost/hello
 
 log-access:
 	tail -f log/access.log
