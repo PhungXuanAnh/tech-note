@@ -1,20 +1,28 @@
 Monitor and statistic kong traffic using prometheus and grafana
 
-# Start up service
+- [1. Start up service](#1-start-up-service)
+- [2. Start up kong](#2-start-up-kong)
+- [3. Start up konga](#3-start-up-konga)
+- [4. Config service in kong](#4-config-service-in-kong)
+- [5. Enable prometheus plugin for above service](#5-enable-prometheus-plugin-for-above-service)
+- [6. Start up prometheus](#6-start-up-prometheus)
+- [7. Start up grafana](#7-start-up-grafana)
+
+# 1. Start up service
 
 ```shell
 docker-compose up -d user-service
 make test-service-directly
 ```
 
-# Start up kong
+# 2. Start up kong
 
 ```shell
 docker-compose up -d kong-database kong-migration kong
 make kong-test-services
 ```
 
-# Start up konga
+# 3. Start up konga
 
 Konga help to manage kong using web ui
 
@@ -32,7 +40,7 @@ Add connection
 
 Thick click **Active**
 
-# Config service in kong
+# 4. Config service in kong
 
 ```shell
 make kong-add-service
@@ -50,7 +58,7 @@ Test new service call through kong
 make kong-test-user-service
 ```
 
-# Enable prometheus plugin for above service
+# 5. Enable prometheus plugin for above service
 
 ```shell
 make kong-prometheus-enable
@@ -72,7 +80,7 @@ Get metrics
 make kong-prometheus-get-metrics
 ```
 
-# Start up prometheus
+# 6. Start up prometheus
 
 Change **targets** address on file [prometheus.yml](prometheus.yml)
 
@@ -88,7 +96,7 @@ To check correct targets on file [prometheus.yml](prometheus.yml) , access http:
 
 ![img7](readme-images/kong-prometheus-7.png)
 
-# Start up grafana
+# 7. Start up grafana
 
 Change url to prometheus datasource on file [datasources.yml](grafana/provisioning/datasources/datasources.yml)
 
