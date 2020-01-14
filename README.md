@@ -98,6 +98,8 @@ devops
 
 [deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md](devops/monitor/deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md)
 
+[makefile.md](devops/makefile/makefile.md)
+
 [tmux.md](devops/tmux/tmux.md)
 
 programming
