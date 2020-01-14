@@ -92,7 +92,7 @@ Web console: http://localhost:9090/graph
 
 ![img6](readme-images/kong-prometheus-6.png)
 
-To check correct targets on file [prometheus.yml](prometheus.yml) , access http://localhost:9090/targets
+To check Prometheus is connected to targets on file [prometheus.yml](prometheus.yml) , access http://localhost:9090/targets
 
 ![img7](readme-images/kong-prometheus-7.png)
 
