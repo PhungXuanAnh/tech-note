@@ -41,6 +41,9 @@ kong-prometheus-get-metrics:
 kong-prometheus-generate-traffic:
 	while true; do curl -XGET --url http://localhost:8000 --header 'Host: ${SERVICE_HOST_KONG}'; sleep 0.1; done
 
+kong-prometheus-generate-traffic1:
+	while true; do curl -XGET --url http://localhost:8000/api/user2 --header 'Host: ${SERVICE_HOST_KONG}'; sleep 0.1; done
+
 # ----------------------------------------------------------------------------------------------------
 kong-create-consumer-and-key:
 	curl -i -X POST --url http://localhost:8001/consumers --data 'username=api-user'
