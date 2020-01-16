@@ -96,6 +96,8 @@ devops
 
 [jenkins-docker-ansible.md](devops/ci-cd/jenkins-docker-ansible.md)
 
+[prometheus.md](devops/monitor/prometheus.md)
+
 [deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md](devops/monitor/deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md)
 
 [makefile.md](devops/makefile/makefile.md)
