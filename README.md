@@ -46,6 +46,8 @@ devops
 
 [new-ubuntu.md](devops/ubuntu/new-ubuntu.md)
 
+[docker-registry.md](devops/docker/docker-registry.md)
+
 [deploy-haproxy-nginx-using-docker.md](devops/docker/deploy-haproxy-nginx-using-docker.md)
 
 [docker-supervisor.md](devops/docker/docker-supervisor.md)

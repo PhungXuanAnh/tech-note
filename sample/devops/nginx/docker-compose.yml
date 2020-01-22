@@ -30,10 +30,25 @@ services:
             options:
                 max-size: "100M"
                 max-file: "3"
-        deploy:
-            resources:
-                limits:
-                    memory: 10M
+
+    nginx-ssl-certbot:
+        image: xuananh/nginx-ssl-certbot:0.1.0
+        build: ./nginx-ssl-certbot.Dockerfile
+        networks:
+            - internal-network
+        ports:
+            - 81:80
+        volumes:
+            - ./configs:/etc/nginx/conf.d
+            - ./log:/var/log/nginx/
+            - ./web:/usr/share/nginx/html:ro
+        command: /bin/bash -c "nginx -g 'daemon off;'"
+        restart: always
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "100M"
+                max-file: "3"
 
 networks:
     internal-network:
