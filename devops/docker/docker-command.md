@@ -22,6 +22,7 @@
 	- [4.5. Kafka](#45-kafka)
 	- [4.6. Kafdrop](#46-kafdrop)
 	- [4.7. MongoDB](#47-mongodb)
+	- [Jenkins](#jenkins)
 
 
 # 1. container
@@ -290,4 +291,15 @@ docker run -d --name test-mongodb \
 				-e MONGO_INITDB_ROOT_USERNAME=mongoadmin \
 				-e MONGO_INITDB_ROOT_PASSWORD=secret \
 				mongo
+```
+
+## Jenkins
+
+```shell
+mkdir -p /tmp/test-jenkins
+docker run -d --name test-jenkins \
+				-p 8080:8080 \
+				-p 50000:50000 \
+				-v /tmp/test-jenkins:/var/jenkins_home \
+				jenkins/jenkins
 ```
