@@ -1,8 +1,8 @@
 Monitor and statistic kong traffic using prometheus and grafana
 
 - [1. Start up service](#1-start-up-service)
-- [2. Start up kong](#2-start-up-kong)
-- [3. Start up konga](#3-start-up-konga)
+- [2. Prepare database for kong and konga](#2-prepare-database-for-kong-and-konga)
+- [3. Start up kong and konga](#3-start-up-kong-and-konga)
 - [4. Config service in kong](#4-config-service-in-kong)
 - [5. Enable prometheus plugin for above service](#5-enable-prometheus-plugin-for-above-service)
 - [6. Start up prometheus](#6-start-up-prometheus)
@@ -11,34 +11,41 @@ Monitor and statistic kong traffic using prometheus and grafana
 # 1. Start up service
 
 ```shell
-docker-compose up -d user-service
-make test-service-directly
+make service-up
 ```
 
-# 2. Start up kong
+# 2. Prepare database for kong and konga
 
 ```shell
-docker-compose up -d kong-database kong-migration kong
-make kong-test-services
+make kong-database
 ```
 
-# 3. Start up konga
+# 3. Start up kong and konga
 
 Konga help to manage kong using web ui
 
 ```shell
-docker-compose up -d konga-prepare konga
+make kong-konga-up
 ```
 
-Access konga url: http://localhost:1337
+Access konga url: http://192.168.1.234:1337
 
-Add connection
-**NOTE**: kong url must be external ip, not using localhost
+**NOTE**: konga url must be external ip, not using http://localhost:1337, if not you will encounter below error:
+
+` Oh snap! Can't connect to http://192.168.80.3:8001`
+
+
+![img1](readme-images/kong-prometheus-0.png)
+
+
+Add kong connection/url, can using external ip, docker's ip, hostname of kong service:
 
 ![img1](readme-images/kong-prometheus-1.png)
-![img2](readme-images/kong-prometheus-2.png)
 
 Thick click **Active**
+
+![img2](readme-images/kong-prometheus-2.png)
+
 
 # 4. Config service in kong
 

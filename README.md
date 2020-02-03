@@ -76,6 +76,8 @@ devops
 
 [aws_common_issue.md](devops/aws/aws_common_issue.md)
 
+[kong.md](devops/nginx/kong.md)
+
 [nginx-configuration-snippets.md](devops/nginx/nginx-configuration-snippets.md)
 
 [git-command.md](devops/git/git-command.md)
