@@ -20,6 +20,7 @@
   - [5.1. deploy - placement - constraints](#51-deploy---placement---constraints)
   - [deploy - mode](#deploy---mode)
   - [5.2. Pass node information to service through environment variable](#52-pass-node-information-to-service-through-environment-variable)
+- [Debug docker swarm](#debug-docker-swarm)
 
 # 1. swarm
 
@@ -205,3 +206,42 @@ deploy:
         environment:
             HOST_NAME: "node-{{.Node.Hostname}}"
 ```            
+
+# Debug docker swarm
+
+When a service fail to start docker swarm will try to re-create a new service continously so we cannot get log of that service, let's using bellow command, change service name by yours:
+
+```shell
+
+# es_master1 is your service name, change it to yours
+while true; do docker logs -f $(docker ps -q -f name=es_master1); sleep 1; done
+
+# or command:
+
+swarm-container-log() {
+    container_name_regex=$1
+    # for example if container name is kidssy_app-sample.1.dyyc32fb8alty3wbhbxmo5k4l
+    # then docker_name_regex is kidssy_app-sample.1
+    # call this command: swarm-container-log kidssy_app-sample.1
+
+    while true; 
+    do 
+        container_id=$(docker ps -q -f name=$container_name_regex);
+        line2=$(echo $container_id | awk 'NR==2');
+
+        if [ -z "$container_id" ]
+        then
+            echo "service is removed"
+        elif ! [ -z "$line2" ]
+        then
+            echo "There are multiple container with regex: '$container_name_regex'"
+        else
+            docker logs -f $container_id; 
+        fi
+        sleep 1; 
+    done
+}
+
+swarm-container-log kidssy_app-sample.1
+
+```
