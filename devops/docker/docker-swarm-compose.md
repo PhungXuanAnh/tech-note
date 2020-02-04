@@ -21,6 +21,8 @@
   - [deploy - mode](#deploy---mode)
   - [5.2. Pass node information to service through environment variable](#52-pass-node-information-to-service-through-environment-variable)
 - [Debug docker swarm](#debug-docker-swarm)
+  - [Get log of service](#get-log-of-service)
+  - [Change command of a service in docker compose](#change-command-of-a-service-in-docker-compose)
 
 # 1. swarm
 
@@ -209,6 +211,8 @@ deploy:
 
 # Debug docker swarm
 
+## Get log of service
+
 When a service fail to start docker swarm will try to re-create a new service continously so we cannot get log of that service, let's using bellow command, change service name by yours:
 
 ```shell
@@ -244,4 +248,12 @@ swarm-container-log() {
 
 swarm-container-log kidssy_app-sample.1
 
+```
+
+## Change command of a service in docker compose
+
+Add command field to docker-compose to replace default command in Dockerfile
+
+```yml
+command: while true; do echo ""; sleep 2; done
 ```

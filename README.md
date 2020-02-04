@@ -32,6 +32,8 @@ devops
 
 [jenkins-SSH-remote-hosts.md](devops/jenkins/jenkins-SSH-remote-hosts.md)
 
+[jenkins-pipeline.md](devops/jenkins/jenkins-pipeline.md)
+
 [jenkins-add-user-and-configure-security.md](devops/jenkins/jenkins-add-user-and-configure-security.md)
 
 [jenkins-project-configuration.md](devops/jenkins/jenkins-project-configuration.md)
@@ -52,9 +54,9 @@ devops
 
 [docker-supervisor.md](devops/docker/docker-supervisor.md)
 
-[docker-swarm.md](devops/docker/docker-swarm.md)
-
 [docker-command.md](devops/docker/docker-command.md)
+
+[docker-swarm-compose.md](devops/docker/docker-swarm-compose.md)
 
 [docker-swarm-vagrant-sample.md](devops/docker/docker-swarm-vagrant-sample.md)
 
