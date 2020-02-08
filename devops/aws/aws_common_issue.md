@@ -5,6 +5,12 @@ Summary debug experience in aws
   - [1.1. Custome authorizer](#11-custome-authorizer)
     - [1.1.1. AuthorizerConfigurationException](#111-authorizerconfigurationexception)
   - [1.2. 403 Forbidden](#12-403-forbidden)
+    - [1.2.1. If API Key Required is set to True](#121-if-api-key-required-is-set-to-true)
+    - [1.2.2. User Custom Domain Names but forget to set Base Path Mappings, or set wrong path, wrong api, wrong stage.](#122-user-custom-domain-names-but-forget-to-set-base-path-mappings-or-set-wrong-path-wrong-api-wrong-stage)
+    - [1.2.3. Check if you are passing data in request body on a GET operation](#123-check-if-you-are-passing-data-in-request-body-on-a-get-operation)
+    - [1.2.4. Forget to deploy API](#124-forget-to-deploy-api)
+    - [1.2.5. If use Custom Authorizer, check return **Resource** is valid in region, account id, api id, stage, method, resour, - for example of return policy is below:](#125-if-use-custom-authorizer-check-return-resource-is-valid-in-region-account-id-api-id-stage-method-resour---for-example-of-return-policy-is-below)
+    - [1.2.6. If use **Custom Authorizer**, and recieved message:](#126-if-use-custom-authorizer-and-recieved-message)
 
 # 1. Api gateway
 
@@ -49,15 +55,32 @@ Thu Sep 05 04:56:39 UTC 2019 : Unauthorized
 
 ## 1.2. 403 Forbidden
 
-- Check if **API Key Required** is set to True, 
-  - add **x-api-key** to header
-  - **API Key** had to be created
+Check below points:
+
+### 1.2.1. If API Key Required is set to True 
+  
+![img3](../../images/devops/aws/aws-common-issue-3.png)
+
   - Check **Usage Plan** for **API Key**
-- Pass data in request body on a GET operation
-- User **Custom Domain Names** but forget to set **Base Path Mappings**, or set wrong path, wrong api, wrong stage.
-- Forget to deploy API
-- If use **Custom Authorizer**, check return **Resource** is valid in region, account id, api id, stage, method, resour, 
-  - for example of return policy is below:
+
+![img4](../../images/devops/aws/aws-common-issue-4.png)
+
+  
+  - **API Key** had to be created
+
+![img5](../../images/devops/aws/aws-common-issue-5.png)
+
+
+  - add **x-api-key** to header of request
+  
+
+### 1.2.2. User Custom Domain Names but forget to set Base Path Mappings, or set wrong path, wrong api, wrong stage.
+
+### 1.2.3. Check if you are passing data in request body on a GET operation
+
+### 1.2.4. Forget to deploy API
+
+### 1.2.5. If use Custom Authorizer, check return **Resource** is valid in region, account id, api id, stage, method, resour, - for example of return policy is below:
 
 ```json
 {
@@ -81,7 +104,8 @@ Thu Sep 05 04:56:39 UTC 2019 : Unauthorized
     "principalId": null
 }
 ```
-- If use **Custom Authorizer**, and recieved message:
+
+### 1.2.6. If use **Custom Authorizer**, and recieved message:
 
 ```json
 {

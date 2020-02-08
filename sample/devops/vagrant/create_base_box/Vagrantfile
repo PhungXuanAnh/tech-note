@@ -5,6 +5,7 @@ nodes_config = configs['nodes']
 common_config = configs['common']
 
 Vagrant.configure(common_config['vagrant_api_version']) do |config|
+  config.disksize.size = '30GB'
   config.vm.box = common_config['box']
 
   nodes_config.each do |node|
@@ -30,11 +31,12 @@ Vagrant.configure(common_config['vagrant_api_version']) do |config|
         vb.cpus = node_values['cpus']
         vb.name = node_name
       end
-    #   config.vm.provision :shell, :path => node_values['provision']                     # run provision with sudo
-      config.vm.provision :shell, privileged: false, path: node_values['provision']     # run provision without sudo but with vagrant user
-    #   config.vm.provision :file, source: '/home/sigma/Dropbox/Work/Other/conf.d/byobu', destination: "/home/vagrant/Dropbox/Work/Other/conf.d/byobu"
-    #   config.vm.provision :file, source: '/home/sigma/Dropbox/Work/Other/conf.d/zsh', destination: "/home/vagrant/Dropbox/Work/Other/conf.d/zsh"
-      #   config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
+      
+      config.vm.synced_folder "/home/sigma/Dropbox/Work/Other/conf.d/", "/home/vagrant/shared"
+      config.vm.synced_folder "/home/sigma/.ssh", "/home/vagrant/ssh-key"
+      config.vm.provision "file", source: "install_packages.sh", destination: "/home/vagrant/install_packages.sh"
+      config.vm.provision "file", source: "/home/xuananh/Dropbox/Work/Other/ssh-key/id_rsa_vagrant_vm", destination: "/home/vagrant/.ssh/id_rsa"
+      config.vm.provision "file", source: "/home/xuananh/Dropbox/Work/Other/ssh-key/id_rsa_vagrant_vm.pub", destination: "/home/vagrant/.ssh/id_rsa.pub"
     end
   end
 end

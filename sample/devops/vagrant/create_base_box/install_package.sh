@@ -21,27 +21,21 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo sh -c "curl -L https://raw.githubusercontent.com/docker/compose/${version}/contrib/completion/bash/docker-compose > /etc/bash_completion.d/docker-compose"
 # install byobu
 sudo apt-get install -y byobu
-su vagrant -c 'rm -rf ~/.byobu'
-su vagrant -c 'ln -sf ~/Dropbox/Work/Other/conf.d/byobu ~/.byobu'
+rm -rf ~/.byobu
+ln -sf ~/Dropbox/Work/Other/conf.d/byobu ~/.byobu
 #-------------------------------------------------------------------------
 # git
 sudo apt-get install -y git
 #-------------------------------------------------------------------------
-su - vagrant
 # install zsh
 sudo apt-get install -y zsh
-su vagrant 'rm -rf ~/.zshrc'
-su vagrant -c 'ln -sf ~/Dropbox/Work/Other/conf.d/zsh/zshrc.sh ~/.zshrc'
-# set zsh as default shell for root user
-sudo chsh -s $(which zsh)
 # set zsh as default shell for vagrant user
-# echo vagrant | chsh -s $(which zsh)
-su vagrant -c 'chsh -s $(which zsh)'
+echo vagrant | chsh -s $(which zsh)
 # install_oh_my_zsh
-su vagrant -c 'sudo curl -L http://install.ohmyz.sh | sh'
-su vagrant -c 'git clone git://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions'
-su vagrant -c 'git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting'
-su vagrant -c 'git clone https://github.com/zsh-users/zsh-completions ~/.oh-my-zsh/custom/plugins/zsh-completions'
+sudo curl -L http://install.ohmyz.sh | sh
+git clone git://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+git clone https://github.com/zsh-users/zsh-completions ~/.oh-my-zsh/custom/plugins/zsh-completions
 # choose one history tool bellow in .zshrc
 # install_shell_history_interaction
 # zsh history interactive selection using percol, note: only support python 2.7
@@ -52,5 +46,27 @@ sudo -H pip install percol
 sudo add-apt-repository -y ppa:ultradvorka/ppa
 sudo apt-get update
 sudo apt-get install -y hstr
+
+rm -rf ~/.zshrc
+ln -sf ~/Dropbox/Work/Other/conf.d/zsh/zshrc.sh ~/.zshrc
+#-------------------------------------------------------------------------
 # Create Dropbox folder
-su vagrant -c 'mkdir -p ~/Dropbox/Work/Other/conf.d'
+mkdir -p ~/Dropbox/Work/Other/conf.d
+cp -R /home/vagrant/shared/* /home/vagrant/Dropbox/Work/Other/conf.d/
+
+#-------------------------------------------------------------------------
+# setup ssh key
+cp ssh-key/* /home/vagrant/.ssh/
+chmod 600 /home/vagrant/.ssh/id_rsa
+chmod 600 /home/vagrant/.ssh/id_rsa.pub
+
+echo ""  >> /home/xuananh/.ssh/authorized_keys
+echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC5pgb/kvf0JI3P9owS95JMUQ84jZ9Q4w33U3jWEg7zHO2PiFa8K9H10Y9NhyHMZ8pPzvMDn3pAsYZLAleATzRLpea8Mz653wOgZAzc12P2w7Nweu9c+BA6LYPUiD0j7BTK8od4qoR+Bh7obOK+TDxeiWZ6qs1TizTWGt4ue9FeTKNtULYaK59kGM2jGLJmPJ4ATTPS3QzaKICqx9S7fwuFdfXEvrbE10QHQ9SBAQGEkm0wpt0pAQrpHp4nB0acIX1IdVGGc2RDaGMYhjoANtnDvyiURtZMI5GTdflo2coH4f2P70OqvN/Xm4g8kPi0cbl/IKp4CumAct0vQArcrQN7 xuananh" >> /home/vagrant/.ssh/authorized_keys
+# add github key to known host
+ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+
+# pull image
+docker pull python:3.6.9
+
+
+

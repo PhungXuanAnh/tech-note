@@ -16,8 +16,13 @@
   - [3.6. update](#36-update)
   - [3.7. scale](#37-scale)
 - [4. Create service monitor swarm](#4-create-service-monitor-swarm)
-- [5. Deploy directive](#5-deploy-directive)
-  - [5.1. Placement](#51-placement)
+- [5. Docker compose file](#5-docker-compose-file)
+  - [5.1. deploy - placement - constraints](#51-deploy---placement---constraints)
+  - [deploy - mode](#deploy---mode)
+  - [5.2. Pass node information to service through environment variable](#52-pass-node-information-to-service-through-environment-variable)
+- [Debug docker swarm](#debug-docker-swarm)
+  - [Get log of service](#get-log-of-service)
+  - [Change command of a service in docker compose](#change-command-of-a-service-in-docker-compose)
 
 # 1. swarm
 
@@ -58,8 +63,15 @@ docker node update --label-add node_name=kidssy_gateway sender3
 
 ```shell
 docker node ls
+
+# reference: https://stackoverflow.com/a/42419060/7639845
 # list by label and hostname
-docker node ls -q | xargs docker node inspect -f "{{ .ID }} {{ .Description.Hostname }}      {{ .Spec.Labels }}"
+docker node ls -q | xargs docker node inspect \
+  -f '{{ .ID }}	[{{ .Description.Hostname }}]:	{{ .Spec.Labels }}'
+
+# You can adjust that to use a range for prettier formatting instead of printing the default map:
+docker node ls -q | xargs docker node inspect \
+  -f '{{ .ID }}	[{{ .Description.Hostname }}]:				{{ range $k, $v := .Spec.Labels }}{{ $k }}={{ $v }} {{end}}'
 ```
 
 # 2. stack
@@ -167,24 +179,81 @@ docker service create \
   dockersamples/visualizer
 ```
 
-# 5. Deploy directive
+# 5. Docker compose file
 
-## 5.1. Placement
+## 5.1. deploy - placement - constraints
 
 ```yaml
 deploy:
   placement:
       constraints:
         - node.labels.label_name == label_value
-
-deploy:
-  placement:
-      constraints:
         - node.role == manager/worker
+        - node.hostname == server-1
+        - node.hostname != server-2
+        - engine.labels.lable_name == label_value  # start docker engine with labels, e.g. dockerd --label lable_name=label_value
+```
 
+## deploy - mode
+
+```yaml
 deploy:
-  placement:
-      constraints:
-        - node.hostname == sender
+  mode: global
+  mode: replicas    # default mode
+```
 
+## 5.2. Pass node information to service through environment variable
+
+```yaml
+        environment:
+            HOST_NAME: "node-{{.Node.Hostname}}"
+```            
+
+# Debug docker swarm
+
+## Get log of service
+
+When a service fail to start docker swarm will try to re-create a new service continously so we cannot get log of that service, let's using bellow command, change service name by yours:
+
+```shell
+
+# es_master1 is your service name, change it to yours
+while true; do docker logs -f $(docker ps -q -f name=es_master1); sleep 1; done
+
+# or command:
+
+swarm-container-log() {
+    container_name_regex=$1
+    # for example if container name is kidssy_app-sample.1.dyyc32fb8alty3wbhbxmo5k4l
+    # then docker_name_regex is kidssy_app-sample.1
+    # call this command: swarm-container-log kidssy_app-sample.1
+
+    while true; 
+    do 
+        container_id=$(docker ps -q -f name=$container_name_regex);
+        line2=$(echo $container_id | awk 'NR==2');
+
+        if [ -z "$container_id" ]
+        then
+            echo "service is removed"
+        elif ! [ -z "$line2" ]
+        then
+            echo "There are multiple container with regex: '$container_name_regex'"
+        else
+            docker logs -f $container_id; 
+        fi
+        sleep 1; 
+    done
+}
+
+swarm-container-log kidssy_app-sample.1
+
+```
+
+## Change command of a service in docker compose
+
+Add command field to docker-compose to replace default command in Dockerfile
+
+```yml
+command: while true; do echo ""; sleep 2; done
 ```

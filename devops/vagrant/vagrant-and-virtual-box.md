@@ -23,14 +23,24 @@
 
 Download latest version of vagrant and virtualbox to prevent ERROR while instal vagrant plugin or when ERROR happen while using vagrant and virtualbox
 
-[https://www.vagrantup.com/downloads.html](https://www.vagrantup.com/downloads.html)
+[Download and Install latest vagrant](https://www.vagrantup.com/downloads.html)
 
-[https://www.virtualbox.org/wiki/Linux_Downloads](https://www.virtualbox.org/wiki/Linux_Downloads)
+[Download and Install latest virtualbox and VirtualBox Extension Pack](https://www.virtualbox.org/wiki/Downloads)
 
-verify
+Install Virtualbox Extension Pack
 
 ```shell
-vagrant
+sudo dpkg -i vagrant_*_x86_64.deb
+vagrant plugin update
+vagrant version
+
+sudo dpkg -i virtualbox-*_amd64.deb
+sudo VBoxManage extpack install --replace Oracle_VM_VirtualBox_Extension_Pack-*.vbox-extpack
+vboxmanage --version
+# list installed package
+VBoxManage list extpacks
+# uninstall package
+# sudo VBoxManage extpack uninstall "Oracle VM VirtualBox Extension Pack"
 ```
 
 Nó sẽ liệt kê ra tất cả các command của vagrant, đọc cũng dễ hiểu :D

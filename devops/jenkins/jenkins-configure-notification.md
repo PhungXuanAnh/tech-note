@@ -2,9 +2,9 @@ Jenkins: Configuration jenkins notification
 --------------------------------------------------
 - [1. Slack Notification](#1-slack-notification)
   - [1.1. Lây slack token](#11-lây-slack-token)
-  - [1.2. Thêm cấu hình slack global](#12-thêm-cấu-hình-slack-global)
-  - [1.3. Thêm cấu hình cho riêng từng project](#13-thêm-cấu-hình-cho-riêng-từng-project)
-  - [1.4. Bật notification](#14-bật-notification)
+  - [1.2. Thêm slack credentials vào Jenkins global](#12-thêm-slack-credentials-vào-jenkins-global)
+  - [1.4. Thêm cấu hình cho riêng từng project](#14-thêm-cấu-hình-cho-riêng-từng-project)
+  - [1.5. Bật notification](#15-bật-notification)
 - [2. Email Notification](#2-email-notification)
   - [2.1. Cài đặt plugin Email Extension Plugin](#21-cài-đặt-plugin-email-extension-plugin)
   - [2.2. Cấu hình mail server](#22-cấu-hình-mail-server)
@@ -34,28 +34,34 @@ Click **Add Jenkins CI integration**
 
 ![](../../images/devops/jenkins/2018-07-11-jenkins-configuration-jenkin-notification-03.png)
 
-Làm theo hướng dẫn trong trang này hoặc làm theo hướng dẫn bên dưới để thêm slack vào jenkins
+Trang tiếp theo hiện ra, làm theo hướng dẫn trong trang này, tham khảo phần thực hành thực tế bên dưới []:
 
 ![](../../images/devops/jenkins/2018-07-11-jenkins-configuration-jenkin-notification-04.png)
 
 
-## 1.2. Thêm cấu hình slack global
+## 1.2. Thêm slack credentials vào Jenkins global 
 
-Cài đặt plugin Slack Notification Plugin
+Trước tiên phải Cài đặt plugin Slack Notification Plugin
 
-Truy cập Manage Jenkins > Configure System > Global Slack Notifier Settings, config các giá trị:
+Sau đó, Vào **Manager Jenkins** -> **Configure System**, tìm phần **Slack**, làm theo hình dưới:
 
-• Base URL: https://sigma-solutions.slack.com/services/hooks/jenkins-ci/
-• Integration Token: <get in slack>
-• Channel: #some-chanel
+![](../../images/devops/jenkins/2018-07-11-jenkins-configuration-jenkin-notification-04.1.png)
+![](../../images/devops/jenkins/2018-07-11-jenkins-configuration-jenkin-notification-04.2.png)
+![](../../images/devops/jenkins/2018-07-11-jenkins-configuration-jenkin-notification-04.3.png)
+![](../../images/devops/jenkins/2018-07-11-jenkins-configuration-jenkin-notification-04.4.png)
+![](../../images/devops/jenkins/2018-07-11-jenkins-configuration-jenkin-notification-04.5.png)
 
 Bấm **Test connection**, nó sẽ gửi message đến channel tương ứng trên slack
 
-![](../../images/devops/jenkins/2018-07-11-jenkins-configuration-jenkin-notification-05.png)
-
 Các giá trị trên cấu hình cho toàn bộ project ở jenkins, nếu muốn custom riêng cho từng project làm theo bên dưới, các cấu hình này sẽ khi đè cấu hình global
 
-## 1.3. Thêm cấu hình cho riêng từng project
+Tham khảo:
+
+https://plugins.jenkins.io/slack
+
+https://jenkins.io/doc/pipeline/steps/slack/
+
+## 1.4. Thêm cấu hình cho riêng từng project
 
 Truy cập vào Configure của project:
 
@@ -70,7 +76,7 @@ Bấm **Test connection**, nó sẽ gửi message đến channel tương ứng t
 
 Save lại.
 
-## 1.4. Bật notification
+## 1.5. Bật notification
 
 Tại mục **Post-build Actions**, click **Add post-build action**, rồi chọn **Slack Notification**
 

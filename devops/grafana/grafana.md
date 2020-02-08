@@ -14,6 +14,7 @@
     - [2.4.3. Alert mysql](#243-alert-mysql)
       - [2.4.3.1. Command để check influxdb](#2431-command-để-check-influxdb)
   - [2.5. References](#25-references)
+  - [2.6. Sample](#26-sample)
 
 
 # 1. Add dashboard
@@ -266,6 +267,8 @@ influx -execute 'select * from /.*/ limit 1' -database="telegraf" -format=json -
 [http://docs.grafana.org/alerting/notifications/](http://docs.grafana.org/alerting/notifications/)
 [http://docs.grafana.org/alerting/rules/](http://docs.grafana.org/alerting/rules/)
 
+## 2.6. Sample
 
+Sample using grafana
 
-
+[monitor kong using prometheus and grafana](../../sample/devops/monitor/kong-prometheus/Readme.md)

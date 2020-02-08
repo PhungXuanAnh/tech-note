@@ -38,6 +38,8 @@ devops
 
 [VPN-hamachi.md](devops/VPN-hamachi/VPN-hamachi.md)
 
+[makefile.md](devops/makefile/makefile.md)
+
 [git-fork.md](devops/git/git-fork.md)
 
 [git-command.md](devops/git/git-command.md)
@@ -54,11 +56,15 @@ devops
 
 [jenkins-configure-notification.md](devops/jenkins/jenkins-configure-notification.md)
 
+[jenkins-pipeline.md](devops/jenkins/jenkins-pipeline.md)
+
 [gcloud.md](devops/gcloud/gcloud.md)
 
 [ngrok.md](devops/ngrok/ngrok.md)
 
 [nginx-configuration-snippets.md](devops/nginx/nginx-configuration-snippets.md)
+
+[kong.md](devops/nginx/kong.md)
 
 [elasticsearch-note.md](devops/elasticsearch/elasticsearch-note.md)
 
@@ -68,9 +74,11 @@ devops
 
 [deploy-haproxy-nginx-using-docker.md](devops/docker/deploy-haproxy-nginx-using-docker.md)
 
-[docker-swarm.md](devops/docker/docker-swarm.md)
+[docker-registry.md](devops/docker/docker-registry.md)
 
 [docker-command.md](devops/docker/docker-command.md)
+
+[docker-swarm-compose.md](devops/docker/docker-swarm-compose.md)
 
 [docker-swarm-vagrant-sample.md](devops/docker/docker-swarm-vagrant-sample.md)
 
@@ -99,6 +107,8 @@ devops
 [tmux.md](devops/tmux/tmux.md)
 
 [deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md](devops/monitor/deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md)
+
+[prometheus.md](devops/monitor/prometheus.md)
 
 programming
 ---
