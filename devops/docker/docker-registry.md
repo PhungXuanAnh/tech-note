@@ -31,7 +31,7 @@ This error occure when pull/push from our registry server without https
 ```shell
 vim /etc/docker/daemon.json
 # then, add content:
-{ "insecure-registries":["157.230.250.21:5000"] }
+{ "insecure-registries":["157.234.256.23:5000"] }
 ```
 
 ## 1.3. Test
