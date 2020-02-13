@@ -44,6 +44,16 @@ docker images | grep myfirstimage
 
 ```shell
 docker container stop registry && docker container rm -v registry
+
+# or
+
+docker run -d --name sigma-docker-registry \
+    -p 5000:5000 \
+    --restart=always \
+    -e REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/data \
+    -v docker-registry-data:/data \
+    registry:2
+
 ```
 
 https://docs.docker.com/registry/
