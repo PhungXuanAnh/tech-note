@@ -1,5 +1,5 @@
 - [1. container](#1-container)
-	- [1.1. list all](#11-list-all)
+	- [1.1. list](#11-list)
 	- [1.2. create a container from an image](#12-create-a-container-from-an-image)
 	- [1.3. attach a container](#13-attach-a-container)
 	- [1.4. deattach a container and keep it still running](#14-deattach-a-container-and-keep-it-still-running)
@@ -27,11 +27,23 @@
 
 # 1. container
 
-## 1.1. list all
+## 1.1. list
 
+list all
+
+```shell
 docker ps
 docker ps -a
 docker container ls
+```
+
+list by name with regex pattern
+
+```shell
+docker ps -q -f name=<regex>
+# ex:
+docker ps -q -f name=es_master1.1
+```
 
 ## 1.2. create a container from an image
 
