@@ -4,6 +4,7 @@
 	- [1.3. attach a container](#13-attach-a-container)
 	- [1.4. deattach a container and keep it still running](#14-deattach-a-container-and-keep-it-still-running)
 	- [1.5. delete all stopped containers](#15-delete-all-stopped-containers)
+	- [1.6. Statistic resource using by container](#16-statistic-resource-using-by-container)
 - [2. images](#2-images)
 	- [2.1. list all image](#21-list-all-image)
 	- [2.2. pull image](#22-pull-image)
@@ -22,7 +23,7 @@
 	- [4.5. Kafka](#45-kafka)
 	- [4.6. Kafdrop](#46-kafdrop)
 	- [4.7. MongoDB](#47-mongodb)
-	- [Jenkins](#jenkins)
+	- [4.8. Jenkins](#48-jenkins)
 
 
 # 1. container
@@ -77,6 +78,13 @@ ctrl + P and ctrl + Q
 docker rm `docker ps --no-trunc -aq`
 ```
 
+## 1.6. Statistic resource using by container
+
+```shell
+docker stats --all --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"
+# or
+docker stats --all --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" container_name1 container_name2
+```
 ----------------------------------------------------------------
 
 # 2. images
@@ -305,7 +313,7 @@ docker run -d --name test-mongodb \
 				mongo
 ```
 
-## Jenkins
+## 4.8. Jenkins
 
 ```shell
 mkdir -p /tmp/test-jenkins
