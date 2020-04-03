@@ -15,15 +15,16 @@
 	- [2.7. build image from Dockerfile](#27-build-image-from-dockerfile)
 	- [2.8. delete an image](#28-delete-an-image)
 - [3. Dockerfile sample](#3-dockerfile-sample)
-- [4. Docker run commons images](#4-docker-run-commons-images)
-	- [4.1. Redis](#41-redis)
-	- [4.2. RabbitMQ](#42-rabbitmq)
-	- [4.3. PostgreSQL](#43-postgresql)
-	- [4.4. MySQL](#44-mysql)
-	- [4.5. Kafka](#45-kafka)
-	- [4.6. Kafdrop](#46-kafdrop)
-	- [4.7. MongoDB](#47-mongodb)
-	- [4.8. Jenkins](#48-jenkins)
+- [4. Move docker's default /var/lib/docker to another directory on Ubuntu/Debian Linux](#4-move-dockers-default-varlibdocker-to-another-directory-on-ubuntudebian-linux)
+- [5. Docker run commons images](#5-docker-run-commons-images)
+	- [5.1. Redis](#51-redis)
+	- [5.2. RabbitMQ](#52-rabbitmq)
+	- [5.3. PostgreSQL](#53-postgresql)
+	- [5.4. MySQL](#54-mysql)
+	- [5.5. Kafka](#55-kafka)
+	- [5.6. Kafdrop](#56-kafdrop)
+	- [5.7. MongoDB](#57-mongodb)
+	- [5.8. Jenkins](#58-jenkins)
 
 
 # 1. container
@@ -233,9 +234,77 @@ EXPOSE 5000
 CMD ["/bin/bash", "-c", "~/validium-nsb-backend/validium/microservices/onboad/onboard_microservice.sh"]
 ```
 
-# 4. Docker run commons images
+# 4. Move docker's default /var/lib/docker to another directory on Ubuntu/Debian Linux
 
-## 4.1. Redis
+Reference [here](https://linuxconfig.org/how-to-move-docker-s-default-var-lib-docker-to-another-directory-on-ubuntu-debian-linux)
+
+```shell
+sudo gedit /lib/systemd/system/docker.service
+```
+
+Then add **-g /new/path/docker** to **ExecStart**
+
+Example 1:
+
+```ini
+FROM:
+ExecStart=/usr/bin/docker daemon -H fd://
+TO:
+ExecStart=/usr/bin/docker daemon -g /new/path/docker -H fd://
+```
+
+Example 2:
+
+```ini
+FROM:
+ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+TO:
+ExecStart=/usr/bin/dockerd -g /home/xuananh/data/.docker -H fd:// --containerd=/run/containerd/containerd.sock
+```
+
+Then stop docker service:
+
+```shell
+sudo systemctl stop docker
+```
+
+Ensure docker is stopped, check by command:
+
+```shell
+ps aux | grep -i docker | grep -v grep
+```
+
+Then reload system daemon
+
+```shell
+sudo systemctl daemon-reload
+```
+
+If new directory is not exist, create one and sync data to it
+
+```shell
+mkdir /new/path/docker
+rsync -aqxP /var/lib/docker/ /new/path/docker
+```
+
+Start docker daemon
+
+```shell
+sudo systemctl start docker
+```
+
+Confirm that docker runs within a new data directory:
+
+```shell
+ps aux | grep -i docker | grep -v grep
+# output
+root      2095  0.2  0.4 664472 36176 ?        Ssl  18:14   0:00 /usr/bin/docker daemon -g  /new/path/docker -H fd://
+root      2100  0.0  0.1 360300 10444 ?        Ssl  18:14   0:00 docker-containerd -l /var/run/docker/libcontainerd/docker-containerd.sock --runtime docker-runc
+```
+
+# 5. Docker run commons images
+
+## 5.1. Redis
 
 ```shell
 docker run -it --name test-redis \
@@ -243,7 +312,7 @@ docker run -it --name test-redis \
                redis
 ```			   
 
-## 4.2. RabbitMQ
+## 5.2. RabbitMQ
 
 ```shell
 docker run -d --name test-rabbitmq \
@@ -254,7 +323,7 @@ docker run -d --name test-rabbitmq \
                rabbitmq:3.8.0-management
 ```
 
-## 4.3. PostgreSQL
+## 5.3. PostgreSQL
 
 ```shell
 docker run -d --name test-postgresql \
@@ -266,7 +335,7 @@ docker run -d --name test-postgresql \
 				postgres:9.6
 ```
 
-## 4.4. MySQL
+## 5.4. MySQL
 
 ```shell
 docker run -d --name test-mysql \
@@ -281,7 +350,7 @@ docker run -d --name test-mysql \
          		--collation-server=utf8_unicode_ci
 ```
 
-## 4.5. Kafka
+## 5.5. Kafka
 
 ```shell
 docker run -d --name test-kafka \
@@ -292,7 +361,7 @@ docker run -d --name test-kafka \
             spotify/kafka
 ```
 
-## 4.6. Kafdrop
+## 5.6. Kafdrop
 
 ```shell
 docker run -d --name test-kafdrop \
@@ -301,7 +370,7 @@ docker run -d --name test-kafdrop \
             xuananh/kafdrop:2.0.6
 ```
 
-## 4.7. MongoDB
+## 5.7. MongoDB
 
 
 ```shell
@@ -313,7 +382,7 @@ docker run -d --name test-mongodb \
 				mongo
 ```
 
-## 4.8. Jenkins
+## 5.8. Jenkins
 
 ```shell
 mkdir -p /tmp/test-jenkins
@@ -323,3 +392,4 @@ docker run -d --name test-jenkins \
 				-v /tmp/test-jenkins:/var/jenkins_home \
 				jenkins/jenkins
 ```
+
