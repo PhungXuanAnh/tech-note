@@ -7,6 +7,12 @@
     - [2.3.1. Create database](#231-create-database)
     - [2.3.2. List database](#232-list-database)
     - [2.3.3. Delete database](#233-delete-database)
+    - [Export and import by command line](#export-and-import-by-command-line)
+      - [Install command line tools](#install-command-line-tools)
+      - [Backup single database](#backup-single-database)
+      - [Restore single database](#restore-single-database)
+      - [Backup all databases](#backup-all-databases)
+      - [Restore all databases](#restore-all-databases)
   - [2.4. Collection](#24-collection)
     - [2.4.1. Create collection](#241-create-collection)
     - [2.4.2. List collection](#242-list-collection)
@@ -91,6 +97,61 @@ db.dropDatabase()
 ```
 
 Lệnh này sẽ xóa cơ sở dữ liệu đã chọn. Nếu bạn không chọn bất kỳ cơ sở dữ liệu nào, thì nó sẽ xóa cơ sở dữ liệu mặc định test.
+
+### Export and import by command line
+
+#### Install command line tools
+
+Install mongo comamnd line on ubuntu 18.04, reference: https://askubuntu.com/a/1127143
+
+Add source:
+
+```shell
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
+echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+```
+
+The source contains few packages. According to the MongoDB Manual it's like this:
+
+- **mongodb-org** - A metapackage that will automatically install the four component packages listed below.
+- **mongodb-org-server** - Contains the mongod daemon and associated configuration and init scripts.
+- **mongodb-org-mongos** - Contains the mongos daemon.
+- **mongodb-org-shell** - Contains the mongo shell.
+- **mongodb-org-tools** - Contains the following MongoDB tools: mongoimport bsondump, mongodump, - mongoexport, mongofiles, mongooplog, mongoperf, mongorestore, mongostat, and mongotop.
+
+Setup needed tools:
+
+```shell
+sudo apt-get update
+sudo apt-get install -y mongodb-org-tools
+```
+
+#### Backup single database
+
+```shell
+mongodump --host localhost --port 27017 --username=admin --password=123 --db=db_name --out=/home/user/ --verbose=4
+mongodump -d <database_name> -o <directory_backup>
+```
+
+#### Restore single database
+
+```shell
+mongorestore -d <database_name> <directory_backup>
+mongorestore --host localhost --port 27017 --db **** dump/db_name
+# (In this case, **** represents any name for the database)
+```
+
+#### Backup all databases
+
+```shell
+mongodump --host localhost --port 27017
+```
+
+#### Restore all databases
+
+```shell
+mongorestore --host localhost --port 27017  dump
+```
 
 ## 2.4. Collection
 
