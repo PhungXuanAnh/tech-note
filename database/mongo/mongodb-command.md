@@ -1,40 +1,38 @@
-- [1. Install](#1-install)
-  - [1.1. Docker](#11-docker)
-- [2. Command](#2-command)
-  - [2.1. Access mongo command](#21-access-mongo-command)
-  - [2.2. Help command](#22-help-command)
-  - [2.3. Database](#23-database)
-    - [2.3.1. Create database](#231-create-database)
-    - [2.3.2. List database](#232-list-database)
-    - [2.3.3. Delete database](#233-delete-database)
-    - [Export and import by command line](#export-and-import-by-command-line)
-      - [Install command line tools](#install-command-line-tools)
-      - [Backup single database](#backup-single-database)
-      - [Restore single database](#restore-single-database)
-      - [Backup all databases](#backup-all-databases)
-      - [Restore all databases](#restore-all-databases)
-  - [2.4. Collection](#24-collection)
-    - [2.4.1. Create collection](#241-create-collection)
-    - [2.4.2. List collection](#242-list-collection)
-    - [2.4.3. Delete collection](#243-delete-collection)
-  - [2.5. Document](#25-document)
-    - [2.5.1. Insert document](#251-insert-document)
-    - [2.5.1. Insert or Update document](#251-insert-or-update-document)
-    - [2.5.2. Query document](#252-query-document)
-      - [2.5.2.1. find() method](#2521-find-method)
-      - [2.5.2.2. pretty() method](#2522-pretty-method)
-      - [2.5.2.3. condition in query](#2523-condition-in-query)
-      - [2.5.2.4. AND statement](#2524-and-statement)
-      - [2.5.2.5. OR statement](#2525-or-statement)
-      - [2.5.2.6. AND OR combined](#2526-and-or-combined)
-    - [2.5.3. Update document](#253-update-document)
-      - [2.5.3.1. update() method](#2531-update-method)
-      - [2.5.3.2. save() method](#2532-save-method)
-    - [2.5.4. Delete document](#254-delete-document)
-- [3. Reference](#3-reference)
+- [1. Install mongo](#1-install-mongo)
+  - [1.1. Using Docker](#11-using-docker)
+  - [1.2. Install directly](#12-install-directly)
+- [2. Install mongo command line](#2-install-mongo-command-line)
+- [3. Command](#3-command)
+  - [3.1. Access mongo command](#31-access-mongo-command)
+  - [3.2. Help command](#32-help-command)
+  - [3.3. Database](#33-database)
+    - [3.3.1. Create database](#331-create-database)
+    - [3.3.2. List database](#332-list-database)
+    - [3.3.3. Delete database](#333-delete-database)
+    - [3.3.4. Export and import](#334-export-and-import)
+  - [3.4. Collection](#34-collection)
+    - [3.4.1. Create collection](#341-create-collection)
+    - [3.4.2. List collection](#342-list-collection)
+    - [3.4.3. Delete collection](#343-delete-collection)
+  - [3.5. Document](#35-document)
+    - [3.5.1. Insert document](#351-insert-document)
+    - [3.5.2. Insert or Update document](#352-insert-or-update-document)
+    - [3.5.3. Query document](#353-query-document)
+      - [3.5.3.1. find() method](#3531-find-method)
+      - [3.5.3.2. pretty() method](#3532-pretty-method)
+      - [3.5.3.3. condition in query](#3533-condition-in-query)
+      - [3.5.3.4. AND statement](#3534-and-statement)
+      - [3.5.3.5. OR statement](#3535-or-statement)
+      - [3.5.3.6. AND OR combined](#3536-and-or-combined)
+    - [3.5.4. Update document](#354-update-document)
+      - [3.5.4.1. update() method](#3541-update-method)
+      - [3.5.4.2. save() method](#3542-save-method)
+    - [3.5.5. Delete document](#355-delete-document)
+- [4. Reference](#4-reference)
 
-# 1. Install
-## 1.1. Docker
+# 1. Install mongo
+
+## 1.1. Using Docker
 
 ```shell
 docker run -d \
@@ -43,64 +41,11 @@ docker run -d \
   -v /home/xuananh/Downloads/mongo-data:/data/db \
   mongo
 ```
+## 1.2. Install directly
 
-# 2. Command
+# 2. Install mongo command line
 
-## 2.1. Access mongo command
-
-```shell
-mongo
-```
-
-## 2.2. Help command
-
-```shell
->help
-```
-
-## 2.3. Database
-
-### 2.3.1. Create database
-
-Tạo mới database nếu không tồn tại:
-
-```shell
-use DATABASE_NAME
-```
-
-Để kiểm tra cơ sở dữ liệu đã chọn hiện tại, bạn sử dụng lệnh db.
-```shell
-db
-show dbs
-```
-
-Cơ sở dữ liệu mydb đã được tạo của bạn không có trong danh sách này. Để hiển thị nó, bạn cần chèn ít nhất một Collection vào trong đó.
-
-```shell
-db.movie.insert({"name":"tutorials point"})
-show dbs
-```
-
-### 2.3.2. List database
-
-```shell
-show dbs
-```
-
-### 2.3.3. Delete database
-
-```shell
-show dbs
-use mydb
-
-db.dropDatabase()
-```
-
-Lệnh này sẽ xóa cơ sở dữ liệu đã chọn. Nếu bạn không chọn bất kỳ cơ sở dữ liệu nào, thì nó sẽ xóa cơ sở dữ liệu mặc định test.
-
-### Export and import by command line
-
-#### Install command line tools
+If install mongo directly, it will come with mongo commanline else we can install it
 
 Install mongo comamnd line on ubuntu 18.04, reference: https://askubuntu.com/a/1127143
 
@@ -123,17 +68,152 @@ Setup needed tools:
 
 ```shell
 sudo apt-get update
+sudo apt-get install -y mongodb-org-shell
 sudo apt-get install -y mongodb-org-tools
 ```
 
-#### Backup single database
+Test:
+
+```shell
+export MONGO_HOST=
+export MONGO_PORT=
+export MONGO_USER=
+export MONGO_PASS=
+mongo --host=$MONGO_HOST --port=$MONGO_PORT \
+  --username=$MONGO_USER --password=$MONGO_PASS \
+  --verbose
+```
+
+or using uri:
+
+```shell
+export MONGO_HOST=
+export MONGO_PORT=
+export MONGO_USER=
+export MONGO_PASS=
+export MONGO_DB_NAME=
+# if using this uri:
+"mongodb+srv://$MONGO_USER:$MONGO_PASS@$MONGO_HOST/$MONGO_DB_NAME?authSource=staging&retryWrites=true&w=majority"
+# we can connect to mongodb using this command
+mongo --host="mongodb+srv://$MONGO_HOST:$MONGO_PORT/staging?username=$MONGO_USER" \
+  --username=$MONGO_USER \
+  --password=$MONGO_PASS \
+  --verbose
+```
+
+# 3. Command
+
+## 3.1. Access mongo command
+
+```shell
+mongo
+```
+
+## 3.2. Help command
+
+```shell
+>help
+```
+
+## 3.3. Database
+
+### 3.3.1. Create database
+
+Tạo mới database nếu không tồn tại:
+
+```shell
+use DATABASE_NAME
+```
+
+Để kiểm tra cơ sở dữ liệu đã chọn hiện tại, bạn sử dụng lệnh db.
+```shell
+db
+show dbs
+```
+
+Cơ sở dữ liệu mydb đã được tạo của bạn không có trong danh sách này. Để hiển thị nó, bạn cần chèn ít nhất một Collection vào trong đó.
+
+```shell
+db.movie.insert({"name":"tutorials point"})
+show dbs
+```
+
+### 3.3.2. List database
+
+```shell
+show dbs
+```
+
+### 3.3.3. Delete database
+
+```shell
+show dbs
+use mydb
+
+db.dropDatabase()
+```
+
+Lệnh này sẽ xóa cơ sở dữ liệu đã chọn. Nếu bạn không chọn bất kỳ cơ sở dữ liệu nào, thì nó sẽ xóa cơ sở dữ liệu mặc định test.
+
+### 3.3.4. Export and import
+
+**Backup single database**
 
 ```shell
 mongodump --host localhost --port 27017 --username=admin --password=123 --db=db_name --out=/home/user/ --verbose=4
 mongodump -d <database_name> -o <directory_backup>
 ```
 
-#### Restore single database
+Using uri to connect to a sharding server:
+
+```shell
+export MONGO_HOST=
+export MONGO_PORT=
+export MONGO_USER=
+export MONGO_PASS=
+export MONGO_DB_NAME=
+# if using this uri:
+"mongodb+srv://$MONGO_USER:$MONGO_PASS@$MONGO_HOST/$MONGO_DB_NAME?authSource=staging&retryWrites=true&w=majority"
+```
+
+Get sharding uri using *mongo* command:
+
+https://docs.mongodb.com/manual/reference/connection-string/
+
+https://docs.mongodb.com/manual/reference/program/mongodump/#mongodump-examples
+
+https://docs.mongodb.com/manual/reference/program/mongorestore/#bin.mongorestore
+
+```shell
+mongo --host="mongodb+srv://$MONGO_HOST:$MONGO_PORT/staging?username=$MONGO_USER" \
+  --username=$MONGO_USER \
+  --password=$MONGO_PASS \
+  --verbose
+```
+
+And get log message:
+
+```shell
+MongoDB shell version v4.0.17
+connecting to: mongodb://mongodb-domain-00-00-d1oi2.mongodb.net.:27017,mongodb-domain-00-01-d1oi2.mongodb.net.:27017,mongodb-domain-00-02-d1oi2.mongodb.net.:27017/?authSource=admin&gssapiServiceName=mongodb&replicaSet=mongodb-domain-0&ssl=true
+...
+```
+
+replace *.:27017* by *:27017* remove *&gssapiServiceName=mongodb*, add database_name, we get needed uri:
+
+```shell
+export MONGO_URI="mongodb://mongodb-domain-00-00-d1oi2.mongodb.net:27017,mongodb-domain-00-01-d1oi2.mongodb.net:27017,mongodb-domain-00-02-d1oi2.mongodb.net:27017/$MONGO_DB_NAME?authSource=admin&gssapiServiceName=mongodb&replicaSet=mongodb-domain-0&ssl=true"
+```
+
+then export:
+
+```shell
+mongodump --uri=$MONGO_DB_NAME --verbose
+```
+
+the above command with genarate a folder *dump/$MONGO_DB_NAME* contain all exported collection
+
+**Restore single database**
 
 ```shell
 mongorestore -d <database_name> <directory_backup>
@@ -141,21 +221,21 @@ mongorestore --host localhost --port 27017 --db **** dump/db_name
 # (In this case, **** represents any name for the database)
 ```
 
-#### Backup all databases
+**Backup all databases**
 
 ```shell
 mongodump --host localhost --port 27017
 ```
 
-#### Restore all databases
+**Restore all databases**
 
 ```shell
 mongorestore --host localhost --port 27017  dump
 ```
 
-## 2.4. Collection
+## 3.4. Collection
 
-### 2.4.1. Create collection
+### 3.4.1. Create collection
 
 ```shell
 db.createCollection(name, options)
@@ -175,13 +255,13 @@ Tham số options là tùy ý, vì thế bạn chỉ cần xác định tên c�
 | size        | số      | Xác định kích cỡ tối đa (giá trị byte) cho một Capped Collection. **Nếu tham số capped là true, thì bạn cũng cần xác định trường này**                                                                                       |
 | max         | số      | Xác định số Document tối đa được cho phép trong một Capped Colleciton                                                                                                                                                        |
 
-### 2.4.2. List collection
+### 3.4.2. List collection
 
 ```shell
 show collections
 ```
 
-### 2.4.3. Delete collection
+### 3.4.3. Delete collection
 
 ```shell
 db.collection.drop()
@@ -189,9 +269,9 @@ db.collection.drop()
 db.post.save(document)
 ```
 
-## 2.5. Document
+## 3.5. Document
 
-### 2.5.1. Insert document
+### 3.5.1. Insert document
 
 ```python
 db.COLLECTION_NAME.insert(document)
@@ -243,7 +323,7 @@ db.post.insert([
   * Nếu bạn xác định _id, thì nó sẽ thay thế toàn bộ dữ liệu của Document chứa _id khi được xác định trong phương thức **save()**.
 
 
-### 2.5.1. Insert or Update document
+### 3.5.2. Insert or Update document
 
 ```python
 db.collection.updateOne(
@@ -259,16 +339,16 @@ db.collection.updateOne(
 ```
 
 
-### 2.5.2. Query document
+### 3.5.3. Query document
 
-#### 2.5.2.1. find() method
+#### 3.5.3.1. find() method
 Phương thức **find()** sẽ hiển thị tất cả Document ở dạng không có cấu trúc (hiển thị không theo cấu trúc nào).
 
 ```shell
 db.COLLECTION_NAME.find()
 ```
 
-#### 2.5.2.2. pretty() method
+#### 3.5.3.2. pretty() method
 
 ```shell
 db.mycol.find().pretty()
@@ -287,7 +367,7 @@ db.mycol.find().pretty()
 * Để hiển thị các kết quả theo một cách đã được định dạng, bạn có thể sử dụng phương thức pretty().
 * Ngoài phương thức find(), trong MongoDB còn có phương thức findOne() sẽ chỉ trả về một Document.
 
-#### 2.5.2.3. condition in query
+#### 3.5.3.3. condition in query
 
 * Truy vấn trong MongoDB mà tương đương mệnh đề WHERE trong RDBMS
 * Để truy vấn Document dựa trên một số điều kiện nào đó, bạn có thể sử dụng các phép toán sau:
@@ -301,7 +381,7 @@ db.mycol.find().pretty()
 | Greater Than Equals | {<key>:{$gte:<value>}} | db.mycol.find({"likes":{$gte:50}}).pretty()      | where likes >= 50            |
 | Not Equals          | {<key>:{$ne:<value>}}  | db.mycol.find({"likes":{$ne:50}}).pretty()       | where likes != 50            |
 
-#### 2.5.2.4. AND statement
+#### 3.5.3.4. AND statement
 
 ```shell
 db.mycol.find({key1:value1, key2:value2}).pretty()
@@ -325,7 +405,7 @@ db.mycol.find({"by":"tutorials point","title": "MongoDB Overview"}).pretty()
 }
 ```
 
-#### 2.5.2.5. OR statement
+#### 3.5.3.5. OR statement
 
 ```shell
 db.mycol.find(
@@ -350,7 +430,7 @@ db.mycol.find({$or:[{"by":"tutorials point"},{"title": "MongoDB Overview"}]}).pr
 }
 ```
 
-#### 2.5.2.6. AND OR combined
+#### 3.5.3.6. AND OR combined
 
 * Ví dụ sau hiển thị các Document mà có các like lớn hơn 100 và có title là hoặc 'MongoDB Overview' hoặc bởi là 'tutorials point'. 
 * Mệnh đề WHERE trong truy vấn SQL tương đương là 'where likes>10 AND (by = 'tutorials point' OR title = 'MongoDB Overview')'
@@ -368,13 +448,13 @@ db.mycol.find({"likes": {$gt:10}, $or: [{"by": "tutorials point"},{"title": "Mon
 }
 ```
 
-### 2.5.3. Update document
+### 3.5.4. Update document
 
 * Phương thức **update()** hoặc **save()** trong MongoDB được sử dụng để cập nhật Document vào trong một Collection. 
 * Phương thức **update()** cập nhật các giá trị trong Document đang tồn tại 
 * Phương thức **save()** thay thế Document đang tồn tại với Document đã truyền trong phương thức **save()** đó.
 
-#### 2.5.3.1. update() method
+#### 3.5.4.1. update() method
 
 Phương thức update() cập nhật các giá trị trong Document đang tồn tại.
 
@@ -406,7 +486,7 @@ Theo mặc định, MongoDB sẽ chỉ cập nhật một Document đơn, để 
 >db.mycol.update({'title':'MongoDB Overview'},{$set:{'title':'New MongoDB Tutorial'}},{multi:true})
 ```
 
-#### 2.5.3.2. save() method
+#### 3.5.4.2. save() method
 
 Phương thức save() thay thế Document đang tồn tại với Document mới đã được truyền trong phương thức save() này.
 
@@ -429,7 +509,7 @@ Ví dụ sau sẽ thay thế Document với _id là '5983548781331adf45ec7'.
 >
 ```
 
-### 2.5.4. Delete document
+### 3.5.5. Delete document
 
 ```shell
 db.COLLECTION_NAME.remove(DELLETION_CRITTERIA)
@@ -457,5 +537,5 @@ db.mycol.remove()
 ```
 
 
-# 3. Reference
+# 4. Reference
 [https://vietjack.com/mongodb/](https://vietjack.com/mongodb/)
