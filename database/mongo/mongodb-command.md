@@ -2,6 +2,7 @@
   - [1.1. Using Docker](#11-using-docker)
   - [1.2. Install directly](#12-install-directly)
 - [2. Install mongo command line](#2-install-mongo-command-line)
+  - [2.1. Get URI of sharding server](#21-get-uri-of-sharding-server)
 - [3. Command](#3-command)
   - [3.1. Access mongo command](#31-access-mongo-command)
   - [3.2. Help command](#32-help-command)
@@ -101,6 +102,51 @@ mongo --host="mongodb+srv://$MONGO_HOST:$MONGO_PORT/staging?username=$MONGO_USER
   --verbose
 ```
 
+
+## 2.1. Get URI of sharding server
+
+```shell
+export MONGO_HOST=
+export MONGO_PORT=
+export MONGO_USER=
+export MONGO_PASS=
+export MONGO_DB_NAME=
+# if using this uri:
+"mongodb+srv://$MONGO_USER:$MONGO_PASS@$MONGO_HOST/$MONGO_DB_NAME?authSource=staging&retryWrites=true&w=majority"
+```
+
+Get sharding uri using *mongo* command:
+
+https://docs.mongodb.com/manual/reference/connection-string/
+
+https://docs.mongodb.com/manual/reference/program/mongodump/#mongodump-examples
+
+https://docs.mongodb.com/manual/reference/program/mongorestore/#bin.mongorestore
+
+```shell
+mongo --host="mongodb+srv://$MONGO_HOST:$MONGO_PORT/staging?username=$MONGO_USER" \
+  --username=$MONGO_USER \
+  --password=$MONGO_PASS \
+  --verbose
+```
+
+And get log message:
+
+```shell
+MongoDB shell version v4.0.17
+connecting to: mongodb://mongodb-domain-00-00-d1oi2.mongodb.net.:27017,mongodb-domain-00-01-d1oi2.mongodb.net.:27017,mongodb-domain-00-02-d1oi2.mongodb.net.:27017/?authSource=admin&gssapiServiceName=mongodb&replicaSet=mongodb-domain-0&ssl=true
+...
+```
+
+replace *.:27017* by *:27017* remove *&gssapiServiceName=mongodb*, add database_name, we get needed uri:
+
+**NOTE**: don't using `mongdb+srv` with any UI software or commmand `mongodump` and `mongostore`. Just using it with `mongo` command
+
+```shell
+mongodb://mongodb-domain-00-00-d1oi2.mongodb.net:27017,mongodb-domain-00-01-d1oi2.mongodb.net:27017,mongodb-domain-00-02-d1oi2.mongodb.net:27017/$MONGO_DB_NAME?authSource=admin&gssapiServiceName=mongodb&replicaSet=mongodb-domain-0&ssl=true
+```
+
+
 # 3. Command
 
 ## 3.1. Access mongo command
@@ -162,56 +208,11 @@ Lệnh này sẽ xóa cơ sở dữ liệu đã chọn. Nếu bạn không chọ
 ```shell
 mongodump --host localhost --port 27017 --username=admin --password=123 --db=db_name --out=/home/user/ --verbose=4
 mongodump -d <database_name> -o <directory_backup>
+# or
+mongodump --uri=$MONGO_URI --verbose
 ```
 
-Using uri to connect to a sharding server:
-
-```shell
-export MONGO_HOST=
-export MONGO_PORT=
-export MONGO_USER=
-export MONGO_PASS=
-export MONGO_DB_NAME=
-# if using this uri:
-"mongodb+srv://$MONGO_USER:$MONGO_PASS@$MONGO_HOST/$MONGO_DB_NAME?authSource=staging&retryWrites=true&w=majority"
-```
-
-Get sharding uri using *mongo* command:
-
-https://docs.mongodb.com/manual/reference/connection-string/
-
-https://docs.mongodb.com/manual/reference/program/mongodump/#mongodump-examples
-
-https://docs.mongodb.com/manual/reference/program/mongorestore/#bin.mongorestore
-
-```shell
-mongo --host="mongodb+srv://$MONGO_HOST:$MONGO_PORT/staging?username=$MONGO_USER" \
-  --username=$MONGO_USER \
-  --password=$MONGO_PASS \
-  --verbose
-```
-
-And get log message:
-
-```shell
-MongoDB shell version v4.0.17
-connecting to: mongodb://mongodb-domain-00-00-d1oi2.mongodb.net.:27017,mongodb-domain-00-01-d1oi2.mongodb.net.:27017,mongodb-domain-00-02-d1oi2.mongodb.net.:27017/?authSource=admin&gssapiServiceName=mongodb&replicaSet=mongodb-domain-0&ssl=true
-...
-```
-
-replace *.:27017* by *:27017* remove *&gssapiServiceName=mongodb*, add database_name, we get needed uri:
-
-```shell
-export MONGO_URI="mongodb://mongodb-domain-00-00-d1oi2.mongodb.net:27017,mongodb-domain-00-01-d1oi2.mongodb.net:27017,mongodb-domain-00-02-d1oi2.mongodb.net:27017/$MONGO_DB_NAME?authSource=admin&gssapiServiceName=mongodb&replicaSet=mongodb-domain-0&ssl=true"
-```
-
-then export:
-
-```shell
-mongodump --uri=$MONGO_DB_NAME --verbose
-```
-
-the above command with genarate a folder *dump/$MONGO_DB_NAME* contain all exported collection
+It will export to folder named `dump`
 
 **Restore single database**
 
