@@ -1,0 +1,50 @@
+version: '3.8'
+services:
+  mongo1:
+    hostname: mongo1
+    container_name: localmongo1
+    image: mongo:4.2.6
+    restart: always
+    expose:
+      - 27017
+    ports:
+      - 27017:27017
+    command: '--quiet --bind_ip_all --replSet rs0'
+    volumes:
+      - mongodb-data:/data/db
+
+  mongo2:
+    hostname: mongo2
+    container_name: localmongo2
+    image: mongo:4.2.6
+    restart: always
+    expose:
+      - 27017
+    ports:
+      - 27018:27017
+    command: '--quiet --bind_ip_all --replSet rs0'
+
+  mongo3:
+    hostname: mongo3
+    container_name: localmongo3
+    image: mongo:4.2.6
+    restart: always
+    expose:
+      - 27017
+    ports:
+      - 27019:27017
+    command: '--quiet --bind_ip_all --replSet rs0'
+
+  rsinit:
+    build:
+      context: .
+      dockerfile: rsinit
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+    entrypoint: ["sh", "-c", "rs.sh"]
+
+volumes:
+  mongodb-data:
+    
