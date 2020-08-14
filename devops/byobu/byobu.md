@@ -96,7 +96,7 @@ Press Ctrl + F8
     Shift-F8                     Toggle through split arrangements
     Alt-Shift-F8                 Restore a split-pane layout
     Ctrl-Shift-F8                Save the current split-pane layout
-  F9                             Launch byobu-config window
+  F9                             Launch byobu-config window ================ > Setting -> Toggle status notifications
     Ctrl-F9                      Enter command and run in all windows
     Shift-F9                     Enter command and run in all splits
     Alt-F9                       Toggle sending keyboard input to all splits
