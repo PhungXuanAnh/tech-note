@@ -17,7 +17,15 @@ init_rs() {
   ret=$(mongo --host mongo1 --port 27017 --eval "rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo1:27017' }, { _id: 1, host: 'mongo2:27017' }, { _id: 2, host: 'mongo3:27017' } ] })" > /dev/null 2>&1)
 }
 
-check_db_status > /dev/null 2>&1
+wait_others() {
+  /usr/local/bin/wait-for-it.sh -t 60 -s mongo1:27017 -- \
+  /usr/local/bin/wait-for-it.sh -t 60 -s mongo2:27017 -- \
+  /usr/local/bin/wait-for-it.sh -t 60 -s mongo3:27017 -- \
+  check_db_status > /dev/null 2>&1
+}
+
+# check_db_status > /dev/null 2>&1
+wait_others
 
 echo "rs initiating finished"
 exit 0
