@@ -1,6 +1,9 @@
-Hướng dẫn sử dụng pyevn
+Guide to use pyevn
+---
 
-# Install pyenv
+
+
+# 1. Install pyenv
 
 ```shell
 curl https://pyenv.run | bash
@@ -8,7 +11,7 @@ curl https://pyenv.run | bash
 
 Reference: https://github.com/pyenv/pyenv-installer
 
-# Cài đặt một version python
+# 2. Install a python version
 
 ```shell
 pyenv install -v 2.7.10
@@ -16,7 +19,7 @@ pyenv install -v 3.6.8
 pyenv install -v 3.7.0
 ```
 
-# Danh sách các command:
+# 3. List of command:
 
 ```shell
 ➜  Downloads pyenv --help        
@@ -39,7 +42,7 @@ See `pyenv help <command>' for information on a specific command.
 For full documentation, see: https://github.com/pyenv/pyenv#readme
 ```
 
-# Tạo virtualenv
+# 4. Create virtualenv
 
 **NOTE:**: phiên bản python bên dưới phải được cài trước bằng lệnh **pyenv install** bên trên
 
@@ -53,7 +56,7 @@ pyenv virtualenv 2.7.10 my-virtual-env-2.7.10
 pyenv virtualenv my-virtual-env
 ```
 
-# Liệt kê virtualenv có sẵn
+# 5. List exists virtualenv
 
 ```shell
 pyenv virtualenvs
@@ -64,7 +67,7 @@ pyenv virtualenvs
   my-virtual-env1 (created from /usr)
 ```
 
-# Activate virtualenv
+# 6. Activate virtualenv
 
 ```shell
 pyenv activate <name>
@@ -73,7 +76,7 @@ pyenv activate my-virtual-env-2.7.10
 pyenv deactivate
 ```
 
-# Remove an virtualenv
+# 7. Remove an virtualenv
 
 ```shell
 pyenv uninstall my-virtual-env-2.7.10

@@ -49,18 +49,28 @@ docker ps -q -f name=es_master1.1
 
 ## 1.2. create a container from an image
 
+https://docs.docker.com/engine/reference/run/
+
 ```Dockerfile
 docker run -it --name {container_name} \
                --hostname {container_hostname} \
-               --net=host \
+               --net=bridge \
+			   --mac-address=00:00:00:00:00:11 \
                -p {host_port}:{container_port} \
                -v {abs_path_host}:}path_contain} \
                {image_name}:{tag}
 # example
-docker run -it --name demo-container \
+docker run -it --name demo-container-1 \
                --hostname demo-container \
                --net=host \
                -p 12345:12345  \
+               -v /media/xuananh/data/Downloads/test:/test \
+               ubuntu:16.04
+
+docker run -it --name demo-container-2 \
+               --hostname demo-container \
+			   --mac-address=00:00:00:00:00:11 \
+               -p 12346:12345  \
                -v /media/xuananh/data/Downloads/test:/test \
                ubuntu:16.04
 ```
