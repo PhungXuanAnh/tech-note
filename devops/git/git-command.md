@@ -3,6 +3,7 @@
   - [1.2. Delete](#12-delete)
     - [1.2.1. Delete local branch](#121-delete-local-branch)
     - [1.2.2. Delete remote branch](#122-delete-remote-branch)
+    - [Find branchs contain commit](#find-branchs-contain-commit)
 
 # 1. Branch
 
@@ -28,3 +29,11 @@ git branch -D {the_local_branch}
 git push origin --delete {the_remote_branch}
 ```
 
+### Find branchs contain commit
+
+```shell
+# local
+git branch --contains ab123456
+# branch
+git branch -r --contains ab123456
+```
