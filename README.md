@@ -9,80 +9,36 @@ This repo is my note about technical
 database
 ---
 
-[redis-lua.md](database/redis/redis-lua.md)
+[rabbitmq-best-pratice-part2.md](database/rabbitmq/rabbitmq-best-pratice-part2.md)
 
 [redis-bitmaps-thong-ke-realtime.md](database/redis/redis-bitmaps-thong-ke-realtime.md)
 
-[redis-bits-and-bats.md](database/redis/redis-bits-and-bats.md)
+[redis-lua.md](database/redis/redis-lua.md)
 
 [redis-install-and-cli.md](database/redis/redis-install-and-cli.md)
 
-[cassandra-command.md](database/cassandra/cassandra-command.md)
+[redis-bits-and-bats.md](database/redis/redis-bits-and-bats.md)
 
-[rabbitmq-best-pratice-part2.md](database/rabbitmq/rabbitmq-best-pratice-part2.md)
+[cassandra-command.md](database/cassandra/cassandra-command.md)
 
 [mysql-backup-restore.md](database/mysql/mysql-backup-restore.md)
 
 [mysql-replication.md](database/mysql/mysql-replication.md)
 
-[mongodb-optimization.md](database/mongo/mongodb-optimization.md)
-
 [mongodb-command.md](database/mongo/mongodb-command.md)
+
+[mongodb-optimization.md](database/mongo/mongodb-optimization.md)
 
 devops
 ---
 
-[jenkins-SSH-remote-hosts.md](devops/jenkins/jenkins-SSH-remote-hosts.md)
-
-[jenkins-pipeline.md](devops/jenkins/jenkins-pipeline.md)
-
-[jenkins-add-user-and-configure-security.md](devops/jenkins/jenkins-add-user-and-configure-security.md)
-
-[jenkins-project-configuration.md](devops/jenkins/jenkins-project-configuration.md)
-
-[jenkins-configure-notification.md](devops/jenkins/jenkins-configure-notification.md)
-
-[VPN-hamachi.md](devops/VPN-hamachi/VPN-hamachi.md)
-
-[rsync.md](devops/rsync/rsync.md)
-
-[gcloud.md](devops/gcloud/gcloud.md)
-
-[new-ubuntu.md](devops/ubuntu/new-ubuntu.md)
-
-[docker-registry.md](devops/docker/docker-registry.md)
-
-[deploy-haproxy-nginx-using-docker.md](devops/docker/deploy-haproxy-nginx-using-docker.md)
-
-[docker-supervisor.md](devops/docker/docker-supervisor.md)
-
-[docker-command.md](devops/docker/docker-command.md)
-
-[docker-swarm-compose.md](devops/docker/docker-swarm-compose.md)
-
-[docker-swarm-vagrant-sample.md](devops/docker/docker-swarm-vagrant-sample.md)
-
-[kubernetes-architecture-concepts.md](devops/kubernetes/kubernetes-architecture-concepts.md)
-
-[kubernetes-command.md](devops/kubernetes/kubernetes-command.md)
-
-[kubernetes-setup-using-minikube.md](devops/kubernetes/kubernetes-setup-using-minikube.md)
-
-[kubernetes-volume-and-network.md](devops/kubernetes/kubernetes-volume-and-network.md)
-
-[kubernetes-setup-using-kubeadm.md](devops/kubernetes/kubernetes-setup-using-kubeadm.md)
-
-[kubernetes-yaml-file.md](devops/kubernetes/kubernetes-yaml-file.md)
-
-[grafana.md](devops/grafana/grafana.md)
-
-[byobu.md](devops/byobu/byobu.md)
-
-[aws_common_issue.md](devops/aws/aws_common_issue.md)
+[nginx-configuration-snippets.md](devops/nginx/nginx-configuration-snippets.md)
 
 [kong.md](devops/nginx/kong.md)
 
-[nginx-configuration-snippets.md](devops/nginx/nginx-configuration-snippets.md)
+[jenkins-docker-ansible.md](devops/ci-cd/jenkins-docker-ansible.md)
+
+[rsync.md](devops/rsync/rsync.md)
 
 [git-command.md](devops/git/git-command.md)
 
@@ -92,28 +48,98 @@ devops
 
 [git-fork.md](devops/git/git-fork.md)
 
-[ngrok.md](devops/ngrok/ngrok.md)
+[new-ubuntu.md](devops/ubuntu/new-ubuntu.md)
 
-[elasticsearch-note.md](devops/elasticsearch/elasticsearch-note.md)
+[deploy-haproxy-nginx-using-docker.md](devops/docker/deploy-haproxy-nginx-using-docker.md)
 
-[vagrant-multiple-vm.md](devops/vagrant/vagrant-multiple-vm.md)
+[docker-swarm-compose.md](devops/docker/docker-swarm-compose.md)
 
-[vagrant-and-virtual-box.md](devops/vagrant/vagrant-and-virtual-box.md)
+[docker-supervisor.md](devops/docker/docker-supervisor.md)
 
-[haproxy-load-balancing.md](devops/haproxy/haproxy-load-balancing.md)
+[docker-command.md](devops/docker/docker-command.md)
 
-[jenkins-docker-ansible.md](devops/ci-cd/jenkins-docker-ansible.md)
+[docker-registry.md](devops/docker/docker-registry.md)
 
-[prometheus.md](devops/monitor/prometheus.md)
-
-[deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md](devops/monitor/deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md)
+[docker-swarm-vagrant-sample.md](devops/docker/docker-swarm-vagrant-sample.md)
 
 [makefile.md](devops/makefile/makefile.md)
 
+[stress-test-cpu-memory-network.md](devops/monitor/stress-test-cpu-memory-network.md)
+
+[deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md](devops/monitor/deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md)
+
+[prometheus.md](devops/monitor/prometheus.md)
+
+[kubernetes-setup-using-kubeadm.md](devops/kubernetes/kubernetes-setup-using-kubeadm.md)
+
+[kubernetes-yaml-file.md](devops/kubernetes/kubernetes-yaml-file.md)
+
+[kubernetes-setup-using-minikube.md](devops/kubernetes/kubernetes-setup-using-minikube.md)
+
+[kubernetes-architecture-concepts.md](devops/kubernetes/kubernetes-architecture-concepts.md)
+
+[kubernetes-command.md](devops/kubernetes/kubernetes-command.md)
+
+[kubernetes-volume-and-network.md](devops/kubernetes/kubernetes-volume-and-network.md)
+
+[aws_common_issue.md](devops/aws/aws_common_issue.md)
+
+[jenkins-add-user-and-configure-security.md](devops/jenkins/jenkins-add-user-and-configure-security.md)
+
+[jenkins-pipeline.md](devops/jenkins/jenkins-pipeline.md)
+
+[jenkins-configure-notification.md](devops/jenkins/jenkins-configure-notification.md)
+
+[jenkins-SSH-remote-hosts.md](devops/jenkins/jenkins-SSH-remote-hosts.md)
+
+[jenkins-project-configuration.md](devops/jenkins/jenkins-project-configuration.md)
+
 [tmux.md](devops/tmux/tmux.md)
+
+[gcloud.md](devops/gcloud/gcloud.md)
+
+[vagrant-and-virtual-box.md](devops/vagrant/vagrant-and-virtual-box.md)
+
+[vagrant-multiple-vm.md](devops/vagrant/vagrant-multiple-vm.md)
+
+[byobu.md](devops/byobu/byobu.md)
+
+[haproxy-load-balancing.md](devops/haproxy/haproxy-load-balancing.md)
+
+[VPN-hamachi.md](devops/VPN-hamachi/VPN-hamachi.md)
+
+[ngrok-and-same-tools.md](devops/ngrok/ngrok-and-same-tools.md)
+
+[elasticsearch-note.md](devops/elasticsearch/elasticsearch-note.md)
+
+[grafana.md](devops/grafana/grafana.md)
 
 programming
 ---
+
+[css-basic.md](programming/css/css-basic.md)
+
+[django-nginx-gunicorn-postgres.md](programming/django/django-nginx-gunicorn-postgres.md)
+
+[angular-fundamentals.md](programming/angular/angular-fundamentals.md)
+
+[angular-architecture.md](programming/angular/angular-architecture.md)
+
+[pyenv-guide.md](programming/pyenv/pyenv-guide.md)
+
+[rest-api-best-practice.md](programming/rest-api/rest-api-best-practice.md)
+
+[shellscript-sed.md](programming/shellscript/shellscript-sed.md)
+
+[shellscript-awk.md](programming/shellscript/shellscript-awk.md)
+
+[shellscript-date.md](programming/shellscript/shellscript-date.md)
+
+[jwt.md](programming/jwt/jwt.md)
+
+[interface-vs-abstract-class.md](programming/oop/interface-vs-abstract-class.md)
+
+[selenium-webdriver-4-page-object-model.md](programming/selenium/selenium-webdriver-4-page-object-model.md)
 
 [selenium-webdriver-2-locators.md](programming/selenium/selenium-webdriver-2-locators.md)
 
@@ -121,35 +147,11 @@ programming
 
 [selenium-webdriver-1-intruduce.md](programming/selenium/selenium-webdriver-1-intruduce.md)
 
-[selenium-webdriver-4-page-object-model.md](programming/selenium/selenium-webdriver-4-page-object-model.md)
-
-[interface-vs-abstract-class.md](programming/oop/interface-vs-abstract-class.md)
-
-[rest-api-best-practice.md](programming/rest-api/rest-api-best-practice.md)
-
-[pyenv-guide.md](programming/pyenv/pyenv-guide.md)
-
 [markdown.md](programming/markdown/markdown.md)
-
-[jwt.md](programming/jwt/jwt.md)
-
-[django-nginx-gunicorn-postgres.md](programming/django/django-nginx-gunicorn-postgres.md)
 
 [sql-advanced.md](programming/sql/sql-advanced.md)
 
-[sql-optimize-query.md](programming/sql/sql-optimize-query.md)
-
 [sql-basic.md](programming/sql/sql-basic.md)
 
-[shellscript-awk.md](programming/shellscript/shellscript-awk.md)
-
-[shellscript-sed.md](programming/shellscript/shellscript-sed.md)
-
-[shellscript-date.md](programming/shellscript/shellscript-date.md)
-
-[angular-fundamentals.md](programming/angular/angular-fundamentals.md)
-
-[angular-architecture.md](programming/angular/angular-architecture.md)
-
-[css-basic.md](programming/css/css-basic.md)
+[sql-optimize-query.md](programming/sql/sql-optimize-query.md)
 
