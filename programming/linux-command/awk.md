@@ -305,4 +305,8 @@ xuananh@K53SD:~$ awk '{s+=$1; print $1} END {print "--------"; print s}' file1.t
 ```
 
 # 10. Tham khảo
+
 https://blogd.net/linux/su-dung-lenh-awk/
+
+https://www.geeksforgeeks.org/awk-command-unixlinux-examples/
+

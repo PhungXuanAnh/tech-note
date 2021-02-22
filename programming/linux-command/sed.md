@@ -400,6 +400,10 @@ xuananh@K53SD:~$ seq 50 | tac | sed '/6/Q' | tac
 
 https://blogd.net/linux/su-dung-lenh-sed/
 
+https://www.geeksforgeeks.org/sed-command-in-linux-unix-with-examples/?ref=rp
+
+https://www.geeksforgeeks.org/sed-command-linux-set-2/
+
 # 5. Thực hành
 
 https://vietjack.com/unix/regular_expression_trong_unix_linux.jsp
