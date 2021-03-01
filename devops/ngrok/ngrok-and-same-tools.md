@@ -6,6 +6,9 @@
   - [1.5. Configuration file](#15-configuration-file)
   - [1.6. Document](#16-document)
 - [2. Other services sample ngrok](#2-other-services-sample-ngrok)
+  - [2.1. staqlab-tunnel](#21-staqlab-tunnel)
+  - [2.2. localtunnel](#22-localtunnel)
+  - [2.3. Other](#23-other)
 
 
 # 1. Ngrok and same tools
@@ -46,9 +49,32 @@ https://ngrok.com/docs
 
 # 2. Other services sample ngrok
 
-https://github.com/localtunnel/localtunnel
+## 2.1. staqlab-tunnel
 
 https://tunnel.staqlab.com/
+
+Install
+
+```shell
+wget https://raw.githubusercontent.com/cocoflan/Staqlab-tunnel/master/mac/staqlab-tunnel -P ~/.local/bin
+chmod +x ~/.local/bin/staqlab-tunnel
+```
+
+Using
+
+```shell
+staqlab-tunnel <port> hostname=<desired-domain>
+# ex:
+staqlab-tunnel 8000 hostname=my-domain
+# output domain:
+https://my-domain.staqlab-tunnel.com/
+```
+
+## 2.2. localtunnel
+
+https://github.com/localtunnel/localtunnel
+
+## 2.3. Other
 
 https://www.softwaretestinghelp.com/ngrok-alternatives/
 
