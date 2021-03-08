@@ -313,14 +313,14 @@ root      2100  0.0  0.1 360300 10444 ?        Ssl  18:14   0:00 docker-containe
 ```
 
 # 5. Docker run commons images
-
+		   
 ## 5.1. Redis
 
 ```shell
 docker run -it --name test-redis \
                -p 7379:6379  \
                redis
-```			   
+```
 
 ## 5.2. RabbitMQ
 
@@ -382,7 +382,6 @@ docker run -d --name test-kafdrop \
 
 ## 5.7. MongoDB
 
-
 ```shell
 docker run -d --name test-mongodb \
 				-p 27018:27017 \
@@ -402,4 +401,3 @@ docker run -d --name test-jenkins \
 				-v /tmp/test-jenkins:/var/jenkins_home \
 				jenkins/jenkins
 ```
-
