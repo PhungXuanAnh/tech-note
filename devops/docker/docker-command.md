@@ -58,7 +58,7 @@ docker run -it --name {container_name} \
 			   --mac-address=00:00:00:00:00:11 \
                -p {host_port}:{container_port} \
                -v {abs_path_host}:}path_contain} \
-               {image_name}:{tag}
+               {IMAGE_NAME}:{TAG}
 # example
 docker run -it --name demo-container-1 \
                --hostname demo-container \
@@ -106,30 +106,34 @@ docker images
 
 ## 2.2. pull image
 
-```Dockerfile
-docker pull ubuntu:14.04 (by default, it will download offical ubuntu)
-docker pull {author_name}/{image_name} # ex: docker pull binhcao/docker-whale
+```shell
+docker pull ubuntu:14.04 # by default, it will download offical ubuntu
+docker pull {USER_NAME}/{IMAGE_NAME} # ex: docker pull binhcao/docker-whale
 ```
 
 ## 2.3. save the change in already exist image
 
-`docker commit {container_id} {author}/{image_name}:{tag}`
+`docker commit {container_id} {USER_NAME}/{IMAGE_NAME}:{TAG}`
 
 ## 2.4. push image to Docker hub
 
 Push an exist image to a repo in Docker hub
 
 ```Dockerfile
-docker login <username>
-# change tag of an exist image
-docker tag <image_id> username/image_name:tag
-docker push username/image_name
+# step 1 : login docker hub
+docker login {USER_NAME}
+# step 2 : commit the change from a container into already exist image
+docker commit {container_id} {USER_NAME}/{IMAGE_NAME}:{TAG}
+# step 3: change tag of an exist image for new version
+docker tag <image_id> {USER_NAME}/{IMAGE_NAME}:{TAG}
+# step 4: push new image with new tag to docker hub
+docker push {USER_NAME}/{IMAGE_NAME}
 ```
 
 ## 2.5. save image to archive file
 
 ```Dockerfile
-docker save <image_name/image_id> > name_archive_file.tar
+docker save <IMAGE_NAME/image_id> > name_archive_file.tar
 ```
 
 ## 2.6. load image from archive file
@@ -172,7 +176,7 @@ docker run -it --name test11 test1:0.1 bash
 ## 2.7. build image from Dockerfile
 
 ```Dockerfile
-docker build -t {author}/{image_name}:{tag} .   # chu y dau cham
+docker build -t {author}/{IMAGE_NAME}:{TAG} .   # chu y dau cham
 ```
 
 ## 2.8. delete an image
