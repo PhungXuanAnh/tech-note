@@ -100,8 +100,6 @@ devops
 
 [kubernetes-setup-using-kubeadm.md](devops/kubernetes/kubernetes-setup-using-kubeadm.md)
 
-[new-ubuntu.md](devops/ubuntu/new-ubuntu.md)
-
 [elasticsearch-note.md](devops/elasticsearch/elasticsearch-note.md)
 
 [git-command.md](devops/git/git-command.md)
@@ -129,16 +127,6 @@ programming
 
 [selenium-webdriver-1-intruduce.md](programming/selenium/selenium-webdriver-1-intruduce.md)
 
-[date.md](programming/linux-command/date.md)
-
-[grep.md](programming/linux-command/grep.md)
-
-[awk.md](programming/linux-command/awk.md)
-
-[sed.md](programming/linux-command/sed.md)
-
-[cut.md](programming/linux-command/cut.md)
-
 [css-basic.md](programming/css/css-basic.md)
 
 [markdown.md](programming/markdown/markdown.md)
@@ -148,6 +136,18 @@ programming
 [angular-fundamentals.md](programming/angular/angular-fundamentals.md)
 
 [angular-architecture.md](programming/angular/angular-architecture.md)
+
+[date.md](programming/shell-scripts/date.md)
+
+[grep.md](programming/shell-scripts/grep.md)
+
+[awk.md](programming/shell-scripts/awk.md)
+
+[other-commands-statements.md](programming/shell-scripts/other-commands-statements.md)
+
+[sed.md](programming/shell-scripts/sed.md)
+
+[cut.md](programming/shell-scripts/cut.md)
 
 [django-nginx-gunicorn-postgres.md](programming/django/django-nginx-gunicorn-postgres.md)
 

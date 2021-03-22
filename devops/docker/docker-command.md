@@ -6,7 +6,8 @@
 	- [1.5. delete all stopped containers](#15-delete-all-stopped-containers)
 	- [1.6. Statistic resource using by container](#16-statistic-resource-using-by-container)
 - [2. images](#2-images)
-	- [2.1. list all image](#21-list-all-image)
+	- [2.1. list all image on local](#21-list-all-image-on-local)
+	- [list all images on docker hub](#list-all-images-on-docker-hub)
 	- [2.2. pull image](#22-pull-image)
 	- [2.3. save the change in already exist image](#23-save-the-change-in-already-exist-image)
 	- [2.4. push image to Docker hub](#24-push-image-to-docker-hub)
@@ -14,6 +15,7 @@
 	- [2.6. load image from archive file](#26-load-image-from-archive-file)
 	- [2.7. build image from Dockerfile](#27-build-image-from-dockerfile)
 	- [2.8. delete an image](#28-delete-an-image)
+	- [check image exist on remote docker hub](#check-image-exist-on-remote-docker-hub)
 - [3. Dockerfile sample](#3-dockerfile-sample)
 - [4. Move docker's default /var/lib/docker to another directory on Ubuntu/Debian Linux](#4-move-dockers-default-varlibdocker-to-another-directory-on-ubuntudebian-linux)
 - [5. Docker run commons images](#5-docker-run-commons-images)
@@ -100,9 +102,13 @@ docker stats --all --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" conta
 
 # 2. images
 
-## 2.1. list all image
+## 2.1. list all image on local
 
 docker images
+
+## list all images on docker hub
+
+see command in this file: [../../sample/devops/docker/docker-hub-api-combine-with-shell-script/list-all-images-on-docker-hub.sh](../../sample/devops/docker/docker-hub-api-combine-with-shell-script/list-all-images-on-docker-hub.sh)
 
 ## 2.2. pull image
 
@@ -182,6 +188,11 @@ docker build -t {author}/{IMAGE_NAME}:{TAG} .   # chu y dau cham
 ## 2.8. delete an image
 
 `docker rmi {image-id}`
+
+## check image exist on remote docker hub
+
+check this file: 
+[../../sample/devops/docker/docker-hub-api-combine-with-shell-script/check-image-exist-on-docker-hub.sh](../../sample/devops/docker/docker-hub-api-combine-with-shell-script/check-image-exist-on-docker-hub.sh)
 
 # 3. Dockerfile sample
 

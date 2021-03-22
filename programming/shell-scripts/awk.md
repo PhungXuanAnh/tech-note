@@ -3,18 +3,17 @@ Bài viết này giới thiệu các bạn cách dùng lệnh awk trên hệ 
 
 - [1. Giới thiệu](#1-giới-thiệu)
 - [2. In các dòng trong file](#2-in-các-dòng-trong-file)
-- [3. Xử lý trường/cột](#3-xử-lý-trườngcột)
-  - [3.1. Tách trường/cột](#31-tách-trườngcột)
-  - [3.2. Chỉ định ký tự tách trường cột](#32-chỉ-định-ký-tự-tách-trường-cột)
-- [4. Phép so sánh](#4-phép-so-sánh)
-- [5. Cú pháp điều kiện](#5-cú-pháp-điều-kiện)
-- [6. Lọc ký tự](#6-lọc-ký-tự)
-- [7. Lọc dựa trên số dòng](#7-lọc-dựa-trên-số-dòng)
-- [8. Thay thế](#8-thay-thế)
-- [9. Tính tổng giá trị](#9-tính-tổng-giá-trị)
-  - [9.1. Tính tổng giá trị của một cột](#91-tính-tổng-giá-trị-của-một-cột)
-  - [9.2. Tính tổng giá trị của một cột và in các giá trị của cột đó](#92-tính-tổng-giá-trị-của-một-cột-và-in-các-giá-trị-của-cột-đó)
-- [10. Tham khảo](#10-tham-khảo)
+- [3. In ra hàng (row) thứ n](#3-in-ra-hàng-row-thứ-n)
+- [4. In ra cột (column) thứ n](#4-in-ra-cột-column-thứ-n)
+- [5. Tách 1 chuỗi thành các cột theo 1 ký tự bất kỳ và in ra cột thứ n](#5-tách-1-chuỗi-thành-các-cột-theo-1-ký-tự-bất-kỳ-và-in-ra-cột-thứ-n)
+- [6. Phép so sánh](#6-phép-so-sánh)
+- [7. Cú pháp điều kiện](#7-cú-pháp-điều-kiện)
+- [8. Lọc ký tự](#8-lọc-ký-tự)
+- [9. Thay thế chuỗi](#9-thay-thế-chuỗi)
+- [10. Tính tổng giá trị](#10-tính-tổng-giá-trị)
+  - [10.1. Tính tổng giá trị của một cột](#101-tính-tổng-giá-trị-của-một-cột)
+  - [10.2. Tính tổng giá trị của một cột và in các giá trị của cột đó](#102-tính-tổng-giá-trị-của-một-cột-và-in-các-giá-trị-của-cột-đó)
+- [11. Tham khảo](#11-tham-khảo)
 
 # 1. Giới thiệu
 
@@ -55,154 +54,7 @@ fig     90
 guava   6
 ```
 
-# 3. Xử lý trường/cột
-
-## 3.1. Tách trường/cột
-
-- `$0`: Chứa toàn bộ văn bản
-- `$1`: Chứa văn bản trường đầu tiên
-- `$2`: chứa văn bản trường thứ hai
-- `$(2+3)`: Kết quả của các biểu thức được sử dụng, đưa ra trường thứ năm
-- `NF`: là một biến tích hợp có chứa số lượng các trường trong bản ghi hiện tại. Vì vậy `$NF `đưa ra trường cuối cùng và `$(NF-1)` sẽ đưa ra trường cuối cùng thứ hai.
-
-Ví dụ:
-
-```shell
-# in toàn bộ text
-xuananh@K53SD:~$ cat file.txt
-fruit   qty
-apple   42
-banana  31
-fig     90
-guava   6
-xuananh@K53SD:~$ awk '{print $1}' file.txt
-fruit
-apple
-banana
-fig
-guava
-xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{print $0}'
-1 2 3 4 5 6 7 8 9
-
-# in trường/cột 1 và 3
-xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{print $1 $3}'
-13
-
-# in trường/cột 2 và 4
-xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{print $2 $4}'
-24
-
-# in ra tất cả các trường/cột trừ cột 1 và 2
-xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{$1=$2=""; print $0}'
-  3 4 5 6 7 8 9
-
-# in ra trường cuối cùng
-xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{print $NF}'
-9
-
-# in ra trường đầu tiên và trường cuối cùng 
-xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{print $1, $NF}'
-1 9
-
-# in ra trường thứ 2 tính từ cuối dòng
-xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{print $(NF-1)}'
-8
-
-# in ra tất cả các trường/cột trong khoảng từ 3 đến 7
-xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk -v f=3 -v t=7 '{for(i=f;i<=t;i++) printf("%s%s",$i,(i==t)?"\n":OFS)}'
-3 4 5 6 7
-
-# in ra tất cả các trường/cột ngoài khoảng từ 3 đến 7
-xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk -v f=3 -v t=7 '{for(i=1;i<=NF;i++)if(i>=f&&i<=t)continue;else printf("%s%s",$i,(i!=NF)?OFS:ORS)}'
-1 2 8 9
-```
-
-## 3.2. Chỉ định ký tự tách trường cột
-
-Mặc định là ký tự space, ta có thể chỉ định ký tự khác để tách trường, ví dụ:
-
-```shell
-xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{print $1 $3}'
-13
-xuananh@K53SD:~$ echo "1-2-3-4-5-6-7-8-9" | awk -F- '{print $1 $3}'
-13
-xuananh@K53SD:~$ echo "1:2:3:4:5:6:7:8:9" | awk -F: '{print $1 $3}'
-13
-```
-
-# 4. Phép so sánh
-
-Ví dụ: Sử dụng lệnh **awk** thực hiện như sau `awk '$1 > 200' file1.txt`
-Nếu `$1` lớn hơn 200 thì chương trình sẽ thực hiện in nội dung của file1.txt
-
-```shell
-xuananh@K53SD:~$ cat file1.txt
-500  Sanjay  Sysadmin   Technology  $7,000
-300  Nisha   Manager    Marketing   $9,500
-400  Randy   DBA        Technology  $6,000
-xuananh@K53SD:~$ awk '$1 > 200' file1.txt
-500  Sanjay  Sysadmin   Technology  $7,000
-300  Nisha   Manager    Marketing   $9,500
-400  Randy   DBA        Technology  $6,000
-```
-
-# 5. Cú pháp điều kiện
-
-Mỗi câu lệnh bên trong **{}** có thể được thêm bởi một điều kiện để các câu lệnh sẽ chỉ thực thi nếu điều kiện là đúng. 
-
-Ví dụ:
-
-```shell
-xuananh@K53SD:~$ cat file.txt
-fruit   qty
-apple   42
-banana  31
-fig     90
-guava   6
-xuananh@K53SD:~$ awk '{
-         if($1 == "apple"){
-            print $2
-         }
-       }' file.txt
-42
-xuananh@K53SD:~$ awk '{
-         if(NR==1 || $2<35){
-            print $0
-         }
-       }' file.txt
-fruit   qty
-banana  31
-guava   6
-```
-
-# 6. Lọc ký tự
-
-Để lọc ký tự ta sử dụng regex đặt trong  `'//'`
-
-Ví dụ:
-
-```shell
-xuananh@K53SD:~$ cat temp.log
-1 2 3 4 5 6 7 8 9 Chrome chrome1
-1 2 3 4 5 6 7 8 9 Chrome chrome2
-1 2 3 4 5 6 7 8 9 Firefox
-1 2 3 4 5 6 7 8 9 IE
-1 2 3 4 5 6 7 8 9 Other
-xuananh@K53SD:~$ awk '/Chrome/' temp.log
-1 2 3 4 5 6 7 8 9 Chrome chrome1
-1 2 3 4 5 6 7 8 9 Chrome chrome2
-xuananh@K53SD:~$ awk '!/Chrome/' temp.log
-1 2 3 4 5 6 7 8 9 Firefox
-1 2 3 4 5 6 7 8 9 IE
-1 2 3 4 5 6 7 8 9 Other
-xuananh@K53SD:~$ awk '/Chrome/ && !/chrome2/' temp.log
-1 2 3 4 5 6 7 8 9 Chrome chrome1
-xuananh@K53SD:~$ awk '/Chrome/{print $NF}' temp.log
-chrome1
-chrome2
-```
-
-# 7. Lọc dựa trên số dòng
+# 3. In ra hàng (row) thứ n
 
 ```shell
 xuananh@K53SD:~$ cat temp.log
@@ -231,7 +83,152 @@ xuananh@K53SD:~$ awk 'NR==4{print $3}' temp.log
 3
 ```
 
-# 8. Thay thế
+# 4. In ra cột (column) thứ n
+
+- `$0`: Chứa toàn bộ văn bản
+- `$1`: Chứa văn bản cột đầu tiên
+- `$2`: chứa văn bản cột thứ hai
+- `$(2+3)`: Kết quả của các biểu thức được sử dụng, đưa ra cột thứ năm
+- `NF`: là một biến tích hợp có chứa số lượng các cột trong bản ghi hiện tại. Vì vậy `$NF `đưa ra cột cuối cùng và `$(NF-1)` sẽ đưa ra cột cuối cùng thứ hai.
+
+Ví dụ:
+
+```shell
+# in toàn bộ text
+xuananh@K53SD:~$ cat file.txt
+fruit   qty
+apple   42
+banana  31
+fig     90
+guava   6
+xuananh@K53SD:~$ awk '{print $1}' file.txt
+fruit
+apple
+banana
+fig
+guava
+xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{print $0}'
+1 2 3 4 5 6 7 8 9
+
+# in cột (column) 1 và 3
+xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{print $1 $3}'
+13
+
+# in cột (column) 2 và 4
+xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{print $2 $4}'
+24
+
+# in ra tất cả các cột (column) trừ cột 1 và 2
+xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{$1=$2=""; print $0}'
+  3 4 5 6 7 8 9
+
+# in ra cột cuối cùng
+xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{print $NF}'
+9
+
+# in ra cột đầu tiên và cột cuối cùng 
+xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{print $1, $NF}'
+1 9
+
+# in ra cột thứ 2 tính từ cuối dòng
+xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{print $(NF-1)}'
+8
+
+# in ra tất cả các cột (column) trong khoảng từ 3 đến 7
+xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk -v f=3 -v t=7 '{for(i=f;i<=t;i++) printf("%s%s",$i,(i==t)?"\n":OFS)}'
+3 4 5 6 7
+
+# in ra tất cả các cột (column) ngoài khoảng từ 3 đến 7
+xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk -v f=3 -v t=7 '{for(i=1;i<=NF;i++)if(i>=f&&i<=t)continue;else printf("%s%s",$i,(i!=NF)?OFS:ORS)}'
+1 2 8 9
+```
+
+# 5. Tách 1 chuỗi thành các cột theo 1 ký tự bất kỳ và in ra cột thứ n
+
+Mặc định là ký tự space, ta có thể chỉ định ký tự khác để tách cột, ví dụ:
+
+```shell
+xuananh@K53SD:~$ echo "1 2 3 4 5 6 7 8 9" | awk '{print $1 $3}'
+13
+xuananh@K53SD:~$ echo "1-2-3-4-5-6-7-8-9" | awk -F- '{print $1 $3}'
+13
+xuananh@K53SD:~$ echo "1:2:3:4:5:6:7:8:9" | awk -F: '{print $1 $3}'
+13
+```
+
+# 6. Phép so sánh
+
+Ví dụ: Sử dụng lệnh **awk** thực hiện như sau `awk '$1 > 200' file1.txt`
+Nếu `$1` lớn hơn 200 thì chương trình sẽ thực hiện in nội dung của file1.txt
+
+```shell
+xuananh@K53SD:~$ cat file1.txt
+500  Sanjay  Sysadmin   Technology  $7,000
+300  Nisha   Manager    Marketing   $9,500
+400  Randy   DBA        Technology  $6,000
+xuananh@K53SD:~$ awk '$1 > 200' file1.txt
+500  Sanjay  Sysadmin   Technology  $7,000
+300  Nisha   Manager    Marketing   $9,500
+400  Randy   DBA        Technology  $6,000
+```
+
+# 7. Cú pháp điều kiện
+
+Mỗi câu lệnh bên trong **{}** có thể được thêm bởi một điều kiện để các câu lệnh sẽ chỉ thực thi nếu điều kiện là đúng. 
+
+Ví dụ:
+
+```shell
+xuananh@K53SD:~$ cat file.txt
+fruit   qty
+apple   42
+banana  31
+fig     90
+guava   6
+xuananh@K53SD:~$ awk '{
+         if($1 == "apple"){
+            print $2
+         }
+       }' file.txt
+42
+xuananh@K53SD:~$ awk '{
+         if(NR==1 || $2<35){
+            print $0
+         }
+       }' file.txt
+fruit   qty
+banana  31
+guava   6
+```
+
+# 8. Lọc ký tự
+
+Để lọc ký tự ta sử dụng regex đặt trong  `'//'`
+
+Ví dụ:
+
+```shell
+xuananh@K53SD:~$ cat temp.log
+1 2 3 4 5 6 7 8 9 Chrome chrome1
+1 2 3 4 5 6 7 8 9 Chrome chrome2
+1 2 3 4 5 6 7 8 9 Firefox
+1 2 3 4 5 6 7 8 9 IE
+1 2 3 4 5 6 7 8 9 Other
+xuananh@K53SD:~$ awk '/Chrome/' temp.log
+1 2 3 4 5 6 7 8 9 Chrome chrome1
+1 2 3 4 5 6 7 8 9 Chrome chrome2
+xuananh@K53SD:~$ awk '!/Chrome/' temp.log
+1 2 3 4 5 6 7 8 9 Firefox
+1 2 3 4 5 6 7 8 9 IE
+1 2 3 4 5 6 7 8 9 Other
+xuananh@K53SD:~$ awk '/Chrome/ && !/chrome2/' temp.log
+1 2 3 4 5 6 7 8 9 Chrome chrome1
+xuananh@K53SD:~$ awk '/Chrome/{print $NF}' temp.log
+chrome1
+chrome2
+```
+
+# 9. Thay thế chuỗi
 
 Sử dụng hàm **sub** chuỗi để thay thế lần xuất hiện đầu tiên
 
@@ -262,9 +259,9 @@ xuananh@K53SD:~$ echo 'one;two;three;four' | awk -F';' '{gsub("e", "E", $3)} 1'
 one two thrEE four
 ```
 
-# 9. Tính tổng giá trị
+# 10. Tính tổng giá trị
 
-## 9.1. Tính tổng giá trị của một cột
+## 10.1. Tính tổng giá trị của một cột
 
 Lệnh **awk** thực hiện tính tổng dựa trên cú pháp sau:
 
@@ -281,7 +278,7 @@ xuananh@K53SD:~$ awk '{s+=$1} END {print s}' file1.txt
 1200
 ```
 
-## 9.2. Tính tổng giá trị của một cột và in các giá trị của cột đó
+## 10.2. Tính tổng giá trị của một cột và in các giá trị của cột đó
 
 Cú pháp:
 
@@ -304,7 +301,7 @@ xuananh@K53SD:~$ awk '{s+=$1; print $1} END {print "--------"; print s}' file1.t
 1200
 ```
 
-# 10. Tham khảo
+# 11. Tham khảo
 
 https://blogd.net/linux/su-dung-lenh-awk/
 
