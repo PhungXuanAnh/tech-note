@@ -62,6 +62,8 @@ devops
 
 [vagrant-and-virtual-box.md](devops/vagrant/vagrant-and-virtual-box.md)
 
+[digitalocean_cli.md](devops/digitalocean/digitalocean_cli.md)
+
 [VPN-hamachi.md](devops/VPN-hamachi/VPN-hamachi.md)
 
 [rsync.md](devops/rsync/rsync.md)
@@ -109,6 +111,8 @@ devops
 [git-fork.md](devops/git/git-fork.md)
 
 [git-merge-vs-git-rebase.md](devops/git/git-merge-vs-git-rebase.md)
+
+[spark.md](devops/spark/spark.md)
 
 [haproxy-load-balancing.md](devops/haproxy/haproxy-load-balancing.md)
 
