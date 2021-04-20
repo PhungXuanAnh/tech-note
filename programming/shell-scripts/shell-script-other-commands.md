@@ -15,7 +15,7 @@ Sample here: [../../sample/programming/shell-script/debug-shell-script.sh](../..
 
 # 2. if-else
 
-Sample: [../../sample/programming/shell-script/date-time.sh](../../sample/programming/shell-script/date-time.sh)
+[../../sample/programming/shell-script/if-else.sh](../../sample/programming/shell-script/if-else.sh)
 
 In Bash, the test command takes one of the following syntax forms:
 
@@ -55,4 +55,4 @@ Reference: https://linuxize.com/post/bash-if-else-statement/
 
 sample
 
-[../../sample/programming/shell-script/if-else.sh](../../sample/programming/shell-script/if-else.sh)
+Sample: [../../sample/programming/shell-script/date-time.sh](../../sample/programming/shell-script/date-time.sh)

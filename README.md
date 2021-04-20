@@ -112,6 +112,8 @@ devops
 
 [haproxy-load-balancing.md](devops/haproxy/haproxy-load-balancing.md)
 
+[slash_command.md](devops/slack/slash_command.md)
+
 [VPN-hamachi.md](devops/VPN-hamachi/VPN-hamachi.md)
 
 [ngrok-and-same-tools.md](devops/ngrok/ngrok-and-same-tools.md)
@@ -135,13 +137,13 @@ programming
 
 [awk.md](programming/shell-scripts/awk.md)
 
+[shell-script-other-commands.md](programming/shell-scripts/shell-script-other-commands.md)
+
 [date.md](programming/shell-scripts/date.md)
 
 [grep.md](programming/shell-scripts/grep.md)
 
 [cut.md](programming/shell-scripts/cut.md)
-
-[other-commands-statements.md](programming/shell-scripts/other-commands-statements.md)
 
 [sed.md](programming/shell-scripts/sed.md)
 
