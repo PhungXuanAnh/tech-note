@@ -59,14 +59,18 @@ https://tunnel.staqlab.com/
 
 ```shell
 # ubuntu
-rm -rf ~/.local/bin/staqlab-tunnel
-wget https://raw.githubusercontent.com/cocoflan/Staqlab-tunnel/master/linux/staqlab-tunnel -P ~/.local/bin
+rm -rf ~/.local/bin/staqlab-tunnel*
+wget https://raw.githubusercontent.com/abhishekq61/tunnel-client/master/linux/staqlab-tunnel.zip -P ~/.local/bin
+unzip staqlab-tunnel.zip
 chmod +x ~/.local/bin/staqlab-tunnel
+rm -rf staqlab-tunnel.zip
 
 # mac
 rm -rf ~/.local/bin/staqlab-tunnel
 wget https://raw.githubusercontent.com/cocoflan/Staqlab-tunnel/master/mac/staqlab-tunnel -P ~/.local/bin
+unzip staqlab-tunnel.zip
 chmod +x ~/.local/bin/staqlab-tunnel
+rm -rf staqlab-tunnel.zip
 ```
 
 ### 2.1.2. Using
