@@ -1,6 +1,7 @@
 - [1. Setup slash command](#1-setup-slash-command)
 - [2. How slash command work](#2-how-slash-command-work)
   - [2.1. Outgoing Data explain](#21-outgoing-data-explain)
+- [3. Using slash command with dialog](#3-using-slash-command-with-dialog)
 
 # 1. Setup slash command
 
@@ -46,3 +47,23 @@ example:
 
 
 **NOTE:** your api can hander this message then send back to this channel any data that you want through `response_url`
+
+# 3. Using slash command with dialog
+
+https://api.slack.com/best-practices/blueprints/slash-command-and-dialogs
+
+https://api.slack.com/best-practices/creating-useful-dialogs
+
+https://api.slack.com/methods/dialog.open
+
+https://github.com/slackapi/python-dialog-example
+
+https://api.slack.com/reference/block-kit/block-elements#timepicker
+
+https://api.slack.com/reference/block-kit/block-elements
+
+https://api.slack.com/dialogs#submit__input-validation
+
+https://stackoverflow.com/questions/58618607/is-it-possible-to-create-a-slack-datetime-picker-element
+
+https://app.slack.com/block-kit-builder
