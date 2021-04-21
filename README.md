@@ -112,7 +112,7 @@ devops
 
 [haproxy-load-balancing.md](devops/haproxy/haproxy-load-balancing.md)
 
-[slash_command.md](devops/slack/slash_command.md)
+[slack_slash_command.md](devops/slack/slack_slash_command.md)
 
 [VPN-hamachi.md](devops/VPN-hamachi/VPN-hamachi.md)
 
