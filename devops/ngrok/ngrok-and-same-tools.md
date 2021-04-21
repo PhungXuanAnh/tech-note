@@ -7,6 +7,8 @@
   - [1.6. Document](#16-document)
 - [2. Other services sample ngrok](#2-other-services-sample-ngrok)
   - [2.1. staqlab-tunnel](#21-staqlab-tunnel)
+    - [2.1.1. Install](#211-install)
+    - [2.1.2. Using](#212-using)
   - [2.2. localtunnel](#22-localtunnel)
   - [2.3. Other](#23-other)
 
@@ -53,14 +55,21 @@ https://ngrok.com/docs
 
 https://tunnel.staqlab.com/
 
-Install
+### 2.1.1. Install
 
 ```shell
+# ubuntu
+rm -rf ~/.local/bin/staqlab-tunnel
+wget https://raw.githubusercontent.com/cocoflan/Staqlab-tunnel/master/linux/staqlab-tunnel -P ~/.local/bin
+chmod +x ~/.local/bin/staqlab-tunnel
+
+# mac
+rm -rf ~/.local/bin/staqlab-tunnel
 wget https://raw.githubusercontent.com/cocoflan/Staqlab-tunnel/master/mac/staqlab-tunnel -P ~/.local/bin
 chmod +x ~/.local/bin/staqlab-tunnel
 ```
 
-Using
+### 2.1.2. Using
 
 ```shell
 staqlab-tunnel <port> hostname=<desired-domain>
