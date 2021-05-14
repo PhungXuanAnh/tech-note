@@ -17,7 +17,6 @@ chmod +x burpsuite_community_linux_v*.sh
 
 ## 2.1. Installing Burp's CA certificate
 
-https://portswigger.net/burp/documentation/desktop/getting-started/proxy-setup/certificate
 
 ### 2.1.1. android
 
@@ -27,21 +26,34 @@ how to get certificates here : https://portswigger.net/support/installing-burp-s
 
 #### 2.1.1.1. Facebook app
 
-To intercept request from facebook, first, you have to patch `so` file of facebook as guide here [sample/devops/ssl/FBUnpinner/README.md](sample/devops/ssl/FBUnpinner/README.md) or here : https://github.com/tsarpaul/FBUnpinner (**require ROOTED device**)
+**NOTE: require ROOTED device or you can using device run on Genymotion**
+
+To intercept request from facebook, first, you have to patch `so` file of facebook as guide here [../../sample/devops/ssl/FBUnpinner/README.md](../../sample/devops/ssl/FBUnpinner/README.md) or here : https://github.com/tsarpaul/FBUnpinner
 
 summary command : 
 
 ```shell
+# below command using android vm run on Genymotion
+alias adb=/opt/genymobile/genymotion/tools/adb
+
 # mobile
+adb devices
+adb shell
+ls /data/data/com.facebook.katana/lib-xzs/libcoldstart.so
 cp /data/data/com.facebook.katana/lib-xzs/libcoldstart.so /data/local/tmp/libcoldstart.so
+
 # pc
+cd ~/repo/tech-note/sample/devops/ssl/FBUnpinner/
+pip install pyelftools
+
 adb pull /data/local/tmp/libcoldstart.so .
-python patch.py libliger.so libliger-patched.so
-adb push libliger-patched.so /data/local/tmp/libliger-patched.so
+python patch.py libcoldstart.so libcoldstart-patched.so
+adb push libcoldstart-patched.so /data/local/tmp/libliger-patched.so
+
 # mobile
 rm -rf /data/data/com.facebook.katana/lib-xzs/libcoldstart.so
 cp /data/local/tmp/libliger-patched.so /data/data/com.facebook.katana/lib-xzs/libcoldstart.so
 chmod 777 /data/data/com.facebook.katana/lib-xzs/libcoldstart.so
 ```
 
-restart facebook app
+restart facebook app or restart your virtual device
