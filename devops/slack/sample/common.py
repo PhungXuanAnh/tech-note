@@ -59,11 +59,16 @@ def handle_view_submition(data_interactivity):
         if more than 3s, it will lead to error
     """
     if "actions" in data_interactivity:
-        # NOTE: when change data of any field in slack view, for ex select box or radio button or date_picker
-        # slack also send request to `interactivity` endpoint
+        # NOTE: when change data of some fields in slack model, for ex select box or radio button or date_picker
+        # slack also send request to `interactivity` endpoint, this is call block_action request
         # and there is one more field name `actions: []` in the body of that request
-        # so, we check if this field is exist, then ignore this action, here we only hander quest when click button submit
+        # so, we check if this field is exist, then ignore this action, 
+        # here we only handle quest when click button submit
         # or you can handle action request base yourself here
+        # 
+        # NOTE: If you don't want slack send block_actions payloads, then define element inside input block
+        # see example: "block_id": "radio_buttons_inside_input_block_id_3" at test3 command
+        # and see block_actions payloads detail here: https://api.slack.com/reference/interaction-payloads/block-actions
         print("Ignore action with action: %s" % json.dumps(data_interactivity['actions'], indent=4, sort_keys=True))
         return
 
@@ -88,6 +93,32 @@ def handle_view_submition(data_interactivity):
     print("Send result after handler submition text %s" % response.text)
 
 
+def validate_submited_data(data_interactivity):
+    error_msg = None
+    submited_data = data_interactivity['view']['state']["values"]
+    text_input = submited_data['plain_text_input_block_id_1']["plain_text_input_action_id_1"]["value"]
+    if not text_input:
+        error_msg = "Khong duoc rong."
+    else:
+        try:
+            int(text_input)
+        except Exception:
+            error_msg = "Chi duoc nhap so."
+
+    print("Validate input result: %s" % error_msg)
+
+    if error_msg:
+        return {
+            "response_action": "errors",
+            "errors": {
+                "plain_text_input_block_id_1": error_msg   # NOTE: key phai la block id cua cai truong dang kiem tra
+                                                            # refer: https://api.slack.com/surfaces/modals/using#displaying_errors
+            }
+        }
+    else:
+        return None
+
+
 # @app.route('/interactivity', methods=['POST', "GET"])
 def slack_interactivity_handler():
     """
@@ -106,6 +137,9 @@ def slack_interactivity_handler():
     print("Data interactivity type: %s " % data_interactivity['type'])
 
     if data_interactivity['type'] == 'view_submission':
+        result = validate_submited_data(data_interactivity)
+        if result: return result, 200
+
         handle_view_submition(data_interactivity)
 
     if data_interactivity['type'] == 'dialog_submission':

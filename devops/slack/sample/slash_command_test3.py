@@ -55,18 +55,54 @@ def send_view_to_slack_app___in_background(data):
                         "type": "input",
                         "label": {
                             "type": "plain_text",
-                            "text": "Input label"
+                            "text": "Number input"
                         },
                         "element": {
                             "type": "plain_text_input",
                             "action_id": "plain_text_input_action_id_1",
                             "placeholder": {
+                                "type": "plain_text",
+                                "text": "Bat buoc phai nhap vao, va phai nhap so"
+                            },
+                            "multiline": False
+                        },
+                        "optional": True
+                    },
+                    {
+                        "block_id": "plain_text_input_block_id_3",
+                        "type": "input",
+                        "label": {
                             "type": "plain_text",
-                            "text": "enter anything you want here, ex: xuananh"
+                            "text": "Nhap bat cu cai gi"
+                        },
+                        "element": {
+                            "type": "plain_text_input",
+                            "action_id": "plain_text_input_action_id_3",
+                            "placeholder": {
+                                "type": "plain_text",
+                                "text": "muc nay bat buoc phai nhap, vi tuy chon optional: False"
                             },
                             "multiline": False
                         },
                         "optional": False
+                    },
+                    {
+                        "block_id": "plain_text_input_block_id_2",
+                        "type": "input",
+                        "label": {
+                            "type": "plain_text",
+                            "text": "Multiple line"
+                        },
+                        "element": {
+                            "type": "plain_text_input",
+                            "action_id": "plain_text_input_action_id_2",
+                            "placeholder": {
+                            "type": "plain_text",
+                            "text": "De tao cai nay set: multiline: True ben duoi \n muc nay la tuy chon vi optional: true"
+                            },
+                            "multiline": True # Refer: https://api.slack.com/reference/block-kit/block-elements#input
+                        },
+                        "optional": True
                     },
                     {
                         "block_id": "datepicker_block_id_1",
@@ -87,6 +123,42 @@ def send_view_to_slack_app___in_background(data):
                         }
                     },
                     {
+                        "block_id": "radio_buttons_inside_input_block_id_3",
+                        "type": "input",
+                        "label": {
+                            "type": "plain_text",
+                            "text": "Radio buttons inside Input block for avoid block_action request"
+                        },
+                        "element": {
+                            "type": "radio_buttons",
+                            "action_id": "this_is_an_action_id",
+                            "initial_option": {
+                            "value": "A1",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "Radio 1"
+                            }
+                            },
+                            "options": [
+                            {
+                                "value": "A1",
+                                "text": {
+                                "type": "plain_text",
+                                "text": "Radio 1"
+                                }
+                            },
+                            {
+                                "value": "A2",
+                                "text": {
+                                "type": "plain_text",
+                                "text": "Radio 2"
+                                }
+                            }
+                            ]
+                        },
+                        "optional": False
+                    },
+                    {
                         "block_id": "radio_buttons_block_id_1",
                         "type": "section",
                         "text": {
@@ -95,6 +167,13 @@ def send_view_to_slack_app___in_background(data):
                         },
                         "accessory": {
                             "type": "radio_buttons",
+                            "initial_option": {
+                                "value": "value 1111111111111111111111111111",
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "text 1"
+                                }
+                            },
                             "options": [
                                 {
                                     "text": {
@@ -113,7 +192,7 @@ def send_view_to_slack_app___in_background(data):
                                     "value": "value 222222222222222222222222222222"
                                 }
                             ],
-                            "action_id": "radio_buttons_action_id_1"
+                            "action_id": "radio_buttons_action_id_1",
                         }
                     },
                     {
@@ -182,4 +261,4 @@ def test3():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8002, debug=True)
+    app.run(host='0.0.0.0', port=3333, debug=True)
