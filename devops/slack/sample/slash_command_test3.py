@@ -163,7 +163,7 @@ def send_view_to_slack_app___in_background(data):
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": "Section block with radio buttons"
+                            "text": "Radio buttons inside session block with cause a block_action request when change it"
                         },
                         "accessory": {
                             "type": "radio_buttons",
