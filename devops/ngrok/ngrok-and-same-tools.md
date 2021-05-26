@@ -1,10 +1,11 @@
 - [1. Ngrok and same tools](#1-ngrok-and-same-tools)
   - [1.1. Install](#11-install)
   - [1.2. Add token](#12-add-token)
-  - [1.3. Forward a port](#13-forward-a-port)
-  - [1.4. Forward a port and rewrite header](#14-forward-a-port-and-rewrite-header)
-  - [1.5. Configuration file](#15-configuration-file)
-  - [1.6. Document](#16-document)
+  - [1.3. sample how to run](#13-sample-how-to-run)
+  - [1.4. Configuration file](#14-configuration-file)
+  - [1.5. Ngrok api client](#15-ngrok-api-client)
+  - [1.6. ngrok python](#16-ngrok-python)
+  - [1.7. Document](#17-document)
 - [2. Other services sample ngrok](#2-other-services-sample-ngrok)
   - [2.1. staqlab-tunnel](#21-staqlab-tunnel)
     - [2.1.1. Install](#211-install)
@@ -24,13 +25,14 @@ Get token from [here](https://dashboard.ngrok.com/auth)
 
 `ngrok authtoken <token>`
 
-## 1.3. Forward a port
+Or add to ngrok.yml
 
-`ngrok http 80`
+## 1.3. sample how to run
 
-## 1.4. Forward a port and rewrite header
 
 ```shell
+ngrok http 80
+# or
 ngrok http --region=us --host-header=rewrite 4200
 # or secify a domain
 ngrok http --region=us --host-header=site1.dev 4200
@@ -40,12 +42,23 @@ ngrok http -config=/opt/ngrok/conf/ngrok.yml 8000
 ngrok start -config ~/ngrok.yml -config ~/projects/example/ngrok.yml demo admin
 ```
 
-## 1.5. Configuration file
+## 1.4. Configuration file
 
 https://ngrok.com/docs#config-examples
 
+https://www.dropbox.com/s/l94bvbo7cwu5qrl/ngrok.yml
 
-## 1.6. Document
+## 1.5. Ngrok api client
+
+https://github.com/PhungXuanAnh/python-note/blob/master/ngrok_sample/ngrok_client_api.py
+
+https://ngrok.com/docs#client-api
+
+## 1.6. ngrok python
+
+https://github.com/PhungXuanAnh/python-note/blob/master/ngrok_sample/pyngrok_sample.py
+
+## 1.7. Document
 
 https://ngrok.com/docs
 
