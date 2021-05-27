@@ -153,9 +153,22 @@ USE dvdrental;
 **postgres**
 
 ```shell
+# dump database to SQL FILE, then you must using appropriate command to import this SQL FILE
 pg_dump -p 5433 -h 127.0.0.1 -U postgres -d sakila >> sakila.sql
+# using with docker
 docker exec -t test-postgresql pg_dumpall -c -U postgres > all_`date +%d-%m-%Y"_"%H_%M_%S`.sql
 docker exec -t test-postgresql pg_dump -c -U postgres -d sakila > sakila_`date +%d-%m-%Y"_"%H_%M_%S`.sql
+
+# dump database into a custom-format ARCHIVE FILE (Recommended), 
+# then you must using pg_restore to import ARCHIVE FILE
+# Reference: https://stackoverflow.com/a/40632316/7639845
+PGPASSWORD=password123 pg_dump \
+  --verbose --clean \
+  --no-owner --no-privileges \
+  --format=c \
+  -U postgres -d sakila_ -h 127.0.0.1 \
+  > sakila.dump
+
 ```
 
 **mysql**
@@ -176,6 +189,7 @@ docker exec CONTAINER /usr/bin/mysqldump -u root --password=root DATABASE > back
 **postgresql**
 
 ```shell
+# ------------------- import a SQL FILE to database
 git clone https://github.com/jOOQ/jOOQ.git
 cd jOOQ/jOOQ-examples/Sakila/postgres-sakila-db/
 docker exec -i test-postgresql psql -U postgres -c "DROP DATABASE sakila;"
@@ -192,6 +206,14 @@ docker exec -i test-postgresql psql -U postgres -d sakila -c "SELECT COUNT(*) FR
 -------
   1000
 (1 row)
+
+# ------------------- import a ARCHIVE FILE to database using pg_restore (Recommended)
+# Reference: https://stackoverflow.com/a/40632316/7639845
+pg_restore --no-owner --no-privileges \
+  --verbose --clean --format=c \
+  --username=admin --dbname=nemo_db \
+  < sakila.dump
+
 ```
 
 **mysql**
