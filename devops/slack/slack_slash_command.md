@@ -18,10 +18,11 @@ Step by step to setup slack slash command, and integrate with slack dialog or in
   - [3.2. setup slash command with share app](#32-setup-slash-command-with-share-app)
     - [3.2.1. Setup slack shared app interactivity](#321-setup-slack-shared-app-interactivity)
   - [3.3. reference about dialog](#33-reference-about-dialog)
-- [4. Test3 command - Using slash command with slack view](#4-test3-command---using-slash-command-with-slack-view)
+- [4. Test3 command - Using slash command with slack modals](#4-test3-command---using-slash-command-with-slack-modals)
   - [4.1. setup api server](#41-setup-api-server)
   - [4.2. setup slash command](#42-setup-slash-command)
   - [4.3. list of element types supported by slack view](#43-list-of-element-types-supported-by-slack-view)
+- [5. Slack app scope](#5-slack-app-scope)
 
 
 # 1. Slash working flow
@@ -205,9 +206,9 @@ https://api.slack.com/dialogs#submit__input-validation
 
 
 
-# 4. Test3 command - Using slash command with slack view
+# 4. Test3 command - Using slash command with slack modals
 
-Dialog is restricted than view in slack
+Dialog is restricted than modals in slack
 
 ## 4.1. setup api server
 
@@ -227,3 +228,12 @@ same as `test2` command
 ## 4.3. list of element types supported by slack view
 
 https://app.slack.com/block-kit-builder
+
+
+# 5. Slack app scope
+
+To using slack app token to call slack api or do something else, you have to add capabilities and permission by [the scopes](https://api.slack.com/scopes)
+
+To add scopes, see below image.
+
+![](images/slack-command-add-scope-to-slack-app.png)
