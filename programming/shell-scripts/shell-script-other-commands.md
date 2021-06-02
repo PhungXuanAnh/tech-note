@@ -1,6 +1,10 @@
 - [1. debug shell script](#1-debug-shell-script)
 - [2. if-else](#2-if-else)
 - [3. date](#3-date)
+- [auto answer interactive prompt](#auto-answer-interactive-prompt)
+  - [pass answer directly multiple question with different answer](#pass-answer-directly-multiple-question-with-different-answer)
+  - [using 'yes' commmand to answer question with same answer](#using-yes-commmand-to-answer-question-with-same-answer)
+  - [using `expect` command](#using-expect-command)
 
 # 1. debug shell script
 
@@ -56,3 +60,42 @@ Reference: https://linuxize.com/post/bash-if-else-statement/
 sample
 
 Sample: [../../sample/programming/shell-script/date-time.sh](../../sample/programming/shell-script/date-time.sh)
+
+# auto answer interactive prompt
+
+## pass answer directly multiple question with different answer
+
+```shell
+echo "xuananh\n11\n" | ~/repo/tech-note/programming/shell-scripts/sample/read_user_input.sh
+printf 'xuananh\n11\n' | ~/repo/tech-note/programming/shell-scripts/sample/read_user_input.sh
+printf "%s\n" xuananh 11 | ~/repo/tech-note/programming/shell-scripts/sample/read_user_input.sh 
+```
+
+## using 'yes' commmand to answer question with same answer
+
+```shell
+yes [answer] |./your_script
+yes xuananh | ~/repo/tech-note/programming/shell-scripts/sample/read_user_input.sh
+```
+
+## using `expect` command
+
+```shell
+expect -c '''
+spawn -noecho ~/repo/tech-note/programming/shell-scripts/sample/read_user_input.sh
+expect "Hello, what is your name ?" { send -- "xuananh\r" }
+expect "how old are you ?" { send -- "11\r" }
+interact
+'''
+```
+
+or in shell script file
+
+```shell
+#!/usr/bin/env expect
+#!/usr/bin/expect
+spawn -noecho /tmp/foo.sh
+expect "Hello, what is your name ?" { send -- "xuananh\r" }
+expect "how old are you ?" { send -- "11\r" }
+interact
+```
