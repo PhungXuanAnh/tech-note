@@ -91,8 +91,13 @@ pgcli -h localhost -p 5433 -U postgres dvdrental
 
 ```shell
 # enter shell
- mysql -h127.0.0.1 -P 3308 -uroot -p123456
-# or
+mysql -h[host] -P[port] -u[user] -p[password]
+mysql --host=[host] --port=[port] --user=[user] --password=[password]
+# ex
+mysql -h127.0.0.1 -P3308 -uroot -p123456
+mysql --host=127.0.0.1 --port=3308 --user=root --password=123456
+
+# using mycli command
  mycli -h localhost -P 3308 -u root -p 123456
 
  # exit
