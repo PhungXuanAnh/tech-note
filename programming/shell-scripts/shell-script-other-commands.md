@@ -66,27 +66,29 @@ Sample: [../../sample/programming/shell-script/date-time.sh](../../sample/progra
 ## pass answer directly multiple question with different answer
 
 ```shell
-echo "xuananh\n11\n" | ~/repo/tech-note/programming/shell-scripts/sample/read_user_input.sh
-printf 'xuananh\n11\n' | ~/repo/tech-note/programming/shell-scripts/sample/read_user_input.sh
-printf "%s\n" xuananh 11 | ~/repo/tech-note/programming/shell-scripts/sample/read_user_input.sh 
+echo "Xuan Anh\n11\n" | ~/repo/tech-note/programming/shell-scripts/sample/read_user_input.sh
+printf 'Xuan Anh\n11\n' | ~/repo/tech-note/programming/shell-scripts/sample/read_user_input.sh
+printf "%s\n" "Xuan Anh" 11 | ~/repo/tech-note/programming/shell-scripts/sample/read_user_input.sh 
 ```
 
 ## using 'yes' commmand to answer question with same answer
 
 ```shell
 yes [answer] |./your_script
-yes xuananh | ~/repo/tech-note/programming/shell-scripts/sample/read_user_input.sh
+yes Xuan Anh | ~/repo/tech-note/programming/shell-scripts/sample/read_user_input.sh
 ```
 
 ## using `expect` command
 
 ```shell
+
 expect -c '''
 spawn -noecho ~/repo/tech-note/programming/shell-scripts/sample/read_user_input.sh
-expect "Hello, what is your name ?" { send -- "xuananh\r" }
+expect "Hello, what is your name ?" { send -- "Xuan Anh\r" }
 expect "how old are you ?" { send -- "11\r" }
 interact
 '''
+
 ```
 
 or in shell script file
@@ -95,7 +97,7 @@ or in shell script file
 #!/usr/bin/env expect
 #!/usr/bin/expect
 spawn -noecho /tmp/foo.sh
-expect "Hello, what is your name ?" { send -- "xuananh\r" }
+expect "Hello, what is your name ?" { send -- "Xuan Anh\r" }
 expect "how old are you ?" { send -- "11\r" }
 interact
 ```
