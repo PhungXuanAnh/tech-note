@@ -37,8 +37,9 @@ def test1():
     # if more than 3s, it will lead to error
     do_something___in_background(data_from_slash_command)
 
-    return jsonify({'msg': "hello ! this is repsonse from api server after get your test1 command. I'm doing what you want.."}), 200
-
+    return jsonify(text="hello ! this is repsonse from api server after get your test1 command. I'm doing what you want.."), 200    # this message will be show Only visible to you
+    # return '', 200  # Don't show anything, just acknowledge response to confirm that api have received this command
+    # Reference: https://api.slack.com/interactivity/slash-commands#responding_to_commands
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8002, debug=True)
