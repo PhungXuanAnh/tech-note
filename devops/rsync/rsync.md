@@ -56,12 +56,38 @@ Còn có rất nhiều option khác, các bạn có thể tham khảo thêm [ở
 ```shell
 rsync -azvhP --delete \
         --exclude-from='/home/test/filessh/excluded.txt' \ 
-        -e 'ssh -i /home/test/filessh/server2.pem' \
-        -e 'ssh -p 12345' \
+        -e 'ssh -i /home/test/filessh/server2.pem' \    # chi dinh ssh private key, tot nhat nen cho vao ssh config, tham khao : https://unix.stackexchange.com/a/127355/474544
+        -e 'ssh -p 12345' \     # port
         /var/www/html/web/staging/* test@192.168.0.2:/var/www/html/web/production/
 ```
 
-Nội dung file `excluded.txt` định dạng như sau:
+chuẩn bị data để test
+
+```shell
+# tao thu muc test
+export RSYNC_TEST_SOURCE_DIR=/home/xuananh/Downloads/test-rsync/source-dir
+export RSYNC_TEST_DESTINATION_DIR=/home/xuananh/Downloads/test-rsync/destination-dir
+mkdir -p $RSYNC_TEST_SOURCE_DIR
+mkdir -p $RSYNC_TEST_DESTINATION_DIR
+# tao data test
+echo `date` >> $RSYNC_TEST_SOURCE_DIR/test.txt
+cat $RSYNC_TEST_SOURCE_DIR/test.txt
+touch $RSYNC_TEST_SOURCE_DIR/test-$(date '+%d-%m-%Y__%H:%M:%S').txt
+ls -lha $RSYNC_TEST_SOURCE_DIR/
+```
+
+chạy lệnh test với thư các thư mục vừa tạo
+
+```shell
+rsync --archive --compress \
+        --verbose --human-readable \
+        --progress --partial \
+        $RSYNC_TEST_SOURCE_DIR/* xuananh@localhost:$RSYNC_TEST_DESTINATION_DIR
+ls -lha $RSYNC_TEST_SOURCE_DIR
+ls -lha $RSYNC_TEST_DESTINATION_DIR
+```
+
+Nội dung file `excluded.txt` của rsync định dạng như sau:
 
 ```conf
 application/config/*
