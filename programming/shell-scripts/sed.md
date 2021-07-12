@@ -4,24 +4,24 @@ Bài viết này giới thiệu các bạn cách dùng lệnh **sed** trên h
 - [1. Giới thiệu](#1-giới-thiệu)
 - [2. Cách sử dụng cơ bản](#2-cách-sử-dụng-cơ-bản)
 - [3. Ví dụ](#3-ví-dụ)
-  - [In ra chuỗi từ 1 đến 5 theo hàng dòng (in ra 5 hàng)](#in-ra-chuỗi-từ-1-đến-5-theo-hàng-dòng-in-ra-5-hàng)
-  - [3.1. Tùy chọn lọc hàng (row)](#31-tùy-chọn-lọc-hàng-row)
-    - [3.1.2. Lọc ra các hàng chứa 1 chuỗi cụ thể](#312-lọc-ra-các-hàng-chứa-1-chuỗi-cụ-thể)
-    - [3.1.3. Lọc ra các hàng chứa 1 chuỗi và thay thế chuỗi đó bằng chuỗi chỉ định](#313-lọc-ra-các-hàng-chứa-1-chuỗi-và-thay-thế-chuỗi-đó-bằng-chuỗi-chỉ-định)
-    - [3.1.4. Sao chép mọi dòng đầu vào](#314-sao-chép-mọi-dòng-đầu-vào)
-    - [3.1.5. Lọc ra hàng (row) thứ n](#315-lọc-ra-hàng-row-thứ-n)
-  - [3.2. Tìm kiếm và thay thế chuỗi](#32-tìm-kiếm-và-thay-thế-chuỗi)
-    - [3.2.1. Chỉnh sửa chuỗi bất kỳ](#321-chỉnh-sửa-chuỗi-bất-kỳ)
-    - [3.2.2. Chỉnh sửa chuỗi trong file](#322-chỉnh-sửa-chuỗi-trong-file)
-    - [3.2.3. Chỉnh sửa 1 file, sau đó lưu nội dung vào file gốc, tạo bản sao để backup và đặt tên bản sao với 1 hậu tố bất kỳ](#323-chỉnh-sửa-1-file-sau-đó-lưu-nội-dung-vào-file-gốc-tạo-bản-sao-để-backup-và-đặt-tên-bản-sao-với-1-hậu-tố-bất-kỳ)
-    - [3.2.4. Chỉnh sửa đặt tên bản sao với tiền tố](#324-chỉnh-sửa-đặt-tên-bản-sao-với-tiền-tố)
-    - [3.2.5. Chỉnh sửa và đặt bản sao lưu trong thư mục](#325-chỉnh-sửa-và-đặt-bản-sao-lưu-trong-thư-mục)
-    - [3.2.6. Chỉnh sửa không có bản sao lưu](#326-chỉnh-sửa-không-có-bản-sao-lưu)
-    - [3.2.7. Chỉnh sửa nhiều tập tin](#327-chỉnh-sửa-nhiều-tập-tin)
-  - [3.3. Chỉ định không in ra 1 dòng với 1 điều kiện bất kỳ](#33-chỉ-định-không-in-ra-1-dòng-với-1-điều-kiện-bất-kỳ)
-    - [Không in ra dòng chứa 1 chuỗi chỉ định](#không-in-ra-dòng-chứa-1-chuỗi-chỉ-định)
-    - [Không in ra dòng chứa 1 chuỗi cụ thể không phân biệt chữ hoa chữ thường](#không-in-ra-dòng-chứa-1-chuỗi-cụ-thể-không-phân-biệt-chữ-hoa-chữ-thường)
-  - [3.4. Ngừng xử lý và thoát (quit) trong sed](#34-ngừng-xử-lý-và-thoát-quit-trong-sed)
+  - [3.1. In ra chuỗi từ 1 đến 5 theo hàng dòng (in ra 5 hàng)](#31-in-ra-chuỗi-từ-1-đến-5-theo-hàng-dòng-in-ra-5-hàng)
+  - [3.2. Tùy chọn lọc hàng (row)](#32-tùy-chọn-lọc-hàng-row)
+    - [3.2.1. Lọc ra các hàng chứa 1 chuỗi cụ thể](#321-lọc-ra-các-hàng-chứa-1-chuỗi-cụ-thể)
+    - [3.2.2. Lọc ra các hàng chứa 1 chuỗi và thay thế chuỗi đó bằng chuỗi chỉ định](#322-lọc-ra-các-hàng-chứa-1-chuỗi-và-thay-thế-chuỗi-đó-bằng-chuỗi-chỉ-định)
+    - [3.2.3. Sao chép mọi dòng đầu vào](#323-sao-chép-mọi-dòng-đầu-vào)
+    - [3.2.4. Lọc ra hàng (row) thứ n](#324-lọc-ra-hàng-row-thứ-n)
+  - [3.3. Tìm kiếm và thay thế chuỗi](#33-tìm-kiếm-và-thay-thế-chuỗi)
+    - [3.3.1. Chỉnh sửa chuỗi bất kỳ, thay thế ký tự cuối dòng](#331-chỉnh-sửa-chuỗi-bất-kỳ-thay-thế-ký-tự-cuối-dòng)
+    - [3.3.2. Chỉnh sửa chuỗi trong file](#332-chỉnh-sửa-chuỗi-trong-file)
+    - [3.3.3. Chỉnh sửa 1 file, sau đó lưu nội dung vào file gốc, tạo bản sao để backup và đặt tên bản sao với 1 hậu tố bất kỳ](#333-chỉnh-sửa-1-file-sau-đó-lưu-nội-dung-vào-file-gốc-tạo-bản-sao-để-backup-và-đặt-tên-bản-sao-với-1-hậu-tố-bất-kỳ)
+    - [3.3.4. Chỉnh sửa đặt tên bản sao với tiền tố](#334-chỉnh-sửa-đặt-tên-bản-sao-với-tiền-tố)
+    - [3.3.5. Chỉnh sửa và đặt bản sao lưu trong thư mục](#335-chỉnh-sửa-và-đặt-bản-sao-lưu-trong-thư-mục)
+    - [3.3.6. Chỉnh sửa không có bản sao lưu](#336-chỉnh-sửa-không-có-bản-sao-lưu)
+    - [3.3.7. Chỉnh sửa nhiều tập tin](#337-chỉnh-sửa-nhiều-tập-tin)
+  - [3.4. Chỉ định không in ra 1 dòng với 1 điều kiện bất kỳ](#34-chỉ-định-không-in-ra-1-dòng-với-1-điều-kiện-bất-kỳ)
+    - [3.4.1. Không in ra dòng chứa 1 chuỗi chỉ định](#341-không-in-ra-dòng-chứa-1-chuỗi-chỉ-định)
+    - [3.4.2. Không in ra dòng chứa 1 chuỗi cụ thể không phân biệt chữ hoa chữ thường](#342-không-in-ra-dòng-chứa-1-chuỗi-cụ-thể-không-phân-biệt-chữ-hoa-chữ-thường)
+  - [3.5. Ngừng xử lý và thoát (quit) trong sed](#35-ngừng-xử-lý-và-thoát-quit-trong-sed)
 - [4. Tham khảo](#4-tham-khảo)
 - [5. Thực hành](#5-thực-hành)
 
@@ -67,7 +67,7 @@ Lệnh trên sẽ thay thế tất cả các lần xuất hiện của **pattern
 
 # 3. Ví dụ
 
-## In ra chuỗi từ 1 đến 5 theo hàng dòng (in ra 5 hàng)
+## 3.1. In ra chuỗi từ 1 đến 5 theo hàng dòng (in ra 5 hàng)
 
 ```shell
 $sed 5
@@ -77,12 +77,12 @@ $sed 5
 4
 5
 ```
-## 3.1. Tùy chọn lọc hàng (row)
+## 3.2. Tùy chọn lọc hàng (row)
 
 - Theo mặc định, lệnh **sed** sẽ in mọi dòng đầu vào, bao gồm mọi thay đổi được thực hiện bởi các lệnh.
 - Sử dụng tùy chọn `-n` và lệnh `p`,lọc các dòng cụ thể
 
-### 3.1.2. Lọc ra các hàng chứa 1 chuỗi cụ thể
+### 3.2.1. Lọc ra các hàng chứa 1 chuỗi cụ thể
 
 ```shell
 xuananh@K53SD:~$ cat temp1.log
@@ -104,7 +104,7 @@ xuananh@K53SD:~$ sed -n '/Firefox/p' temp1.log
 1 2 3 4 5 6 7 8 9 Firefox2
 ```
 
-### 3.1.3. Lọc ra các hàng chứa 1 chuỗi và thay thế chuỗi đó bằng chuỗi chỉ định
+### 3.2.2. Lọc ra các hàng chứa 1 chuỗi và thay thế chuỗi đó bằng chuỗi chỉ định
 
 ```shell
 xuananh@K53SD:~$ cat temp1.log
@@ -124,7 +124,7 @@ xuananh@K53SD:~$ sed -n 's/Firefox/fIREFOX/p' temp1.log
 1 2 3 4 5 6 7 8 9 fIREFOX2
 ```
 
-### 3.1.4. Sao chép mọi dòng đầu vào
+### 3.2.3. Sao chép mọi dòng đầu vào
 
 Đầu vào từ lệnh  **seq** sẽ được lệnh **sed** sao chép và in ra phía dưới:
 
@@ -144,7 +144,7 @@ xuananh@K53SD:~$ seq 3 | sed 'p'
 xuananh@K53SD:~$ 
 ```
 
-### 3.1.5. Lọc ra hàng (row) thứ n
+### 3.2.4. Lọc ra hàng (row) thứ n
 
 Sử dụng tùy chọn -n để lọc số dòng
 
@@ -183,7 +183,7 @@ xuananh@K53SD:~$ sed '3 s/line/LINE/' temp.log
 1 2 3 4 5 6 7 8 9 line 4
 ```
 
-## 3.2. Tìm kiếm và thay thế chuỗi
+## 3.3. Tìm kiếm và thay thế chuỗi
 
 Cú pháp:
 
@@ -191,7 +191,7 @@ Cú pháp:
 
 **Lưu ý**: Kí tự / được sử dụng như là một ký tự phân cách.
 
-### 3.2.1. Chỉnh sửa chuỗi bất kỳ
+### 3.3.1. Chỉnh sửa chuỗi bất kỳ, thay thế ký tự cuối dòng
 
 ```shell
 # lệnh tạo dữ liệu đầu ra
@@ -205,9 +205,29 @@ xuananh@K53SD:~$ seq 15 | paste -sd, | sed 's/,/ : /'
 # thay đổi tất cả "," thành dấu ":" bằng cách sử dụng công cụ sữa đổi "r"
 xuananh@K53SD:~$ seq 15 | paste -sd, | sed 's/,/ : /g'
 1 : 2 : 3 : 4 : 5 : 6 : 7 : 8 : 9 : 10 : 11 : 12 : 13 : 14 : 15
+
+#-----------------------------------------------
+# lệnh tạo dữ liệu test
+╭─xuananh@xuananh-PC ~/repo/tech-note  ‹master) ✗› 
+╰─➤  seq 5 | paste -sd\\n
+
+1
+2
+3
+4
+5
+# thêm dấu , vào cuối mỗi dòng
+╭─xuananh@xuananh-PC ~/repo/tech-note  ‹master) ✗› 
+╰─➤  seq 5 | paste -sd\\n | sed 's/$/,/'
+
+1,
+2,
+3,
+4,
+5,
 ```
 
-### 3.2.2. Chỉnh sửa chuỗi trong file
+### 3.3.2. Chỉnh sửa chuỗi trong file
 
 ```shell
 # giả sử có 1 file với nội dung như sau :
@@ -232,7 +252,7 @@ HEllo
 HavE a nicE day
 ```
 
-### 3.2.3. Chỉnh sửa 1 file, sau đó lưu nội dung vào file gốc, tạo bản sao để backup và đặt tên bản sao với 1 hậu tố bất kỳ
+### 3.3.3. Chỉnh sửa 1 file, sau đó lưu nội dung vào file gốc, tạo bản sao để backup và đặt tên bản sao với 1 hậu tố bất kỳ
 
 ```shell
 # ví dụ có 1 file với nội dung
@@ -251,7 +271,7 @@ xuananh@K53SD:~$ cat file.txt.bkp
 Hello
 ```
 
-### 3.2.4. Chỉnh sửa đặt tên bản sao với tiền tố
+### 3.3.4. Chỉnh sửa đặt tên bản sao với tiền tố
 
 ```shell
 xuananh@K53SD:~$ cat > fileprefix.txt
@@ -269,7 +289,7 @@ bar
 baz
 ```
 
-### 3.2.5. Chỉnh sửa và đặt bản sao lưu trong thư mục
+### 3.3.5. Chỉnh sửa và đặt bản sao lưu trong thư mục
 
 ```shell
 xuananh@K53SD:~$ mkdir bkp_dir
@@ -288,7 +308,7 @@ baz
 ```
 
 
-### 3.2.6. Chỉnh sửa không có bản sao lưu
+### 3.3.6. Chỉnh sửa không có bản sao lưu
 
 ```shell
 xuananh@K53SD:~$ cat file.txt
@@ -302,7 +322,7 @@ xuananh@K53SD:~$ cat file.txt
 Have a safe journey
 ```
 
-### 3.2.7. Chỉnh sửa nhiều tập tin
+### 3.3.7. Chỉnh sửa nhiều tập tin
 
 ```shell
 xuananh@K53SD:~$ cat file1
@@ -316,11 +336,11 @@ xuananh@K53SD:~$ cat file2
 I bought tow bananas and three mangoes
 ```
 
-## 3.3. Chỉ định không in ra 1 dòng với 1 điều kiện bất kỳ
+## 3.4. Chỉ định không in ra 1 dòng với 1 điều kiện bất kỳ
 
 Theo mặc định, lệnh **sed** in mọi dòng, bao gồm mọi thay đổi.
 
-### Không in ra dòng chứa 1 chuỗi chỉ định
+### 3.4.1. Không in ra dòng chứa 1 chuỗi chỉ định
 
 Sử dụng tùy chọn `d`, những dòng cụ thể sẽ không được in:
 
@@ -341,7 +361,7 @@ xuananh@K53SD:~$ seq 5 | sed '/3/d'
 5
 ```
 
-### Không in ra dòng chứa 1 chuỗi cụ thể không phân biệt chữ hoa chữ thường
+### 3.4.2. Không in ra dòng chứa 1 chuỗi cụ thể không phân biệt chữ hoa chữ thường
 
 Tùy chọn `I` cho phép lọc các dòng theo cách không phân biệt chữ hoa chữ thường
 
@@ -357,7 +377,7 @@ Sugar is sweet,
 And so are you.
 ```
 
-## 3.4. Ngừng xử lý và thoát (quit) trong sed
+## 3.5. Ngừng xử lý và thoát (quit) trong sed
 
 Thoát lệnh sed và không xử lý thêm
 
