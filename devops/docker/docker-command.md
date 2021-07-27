@@ -7,15 +7,15 @@
 	- [1.6. Statistic resource using by container](#16-statistic-resource-using-by-container)
 - [2. images](#2-images)
 	- [2.1. list all image on local](#21-list-all-image-on-local)
-	- [list all images on docker hub](#list-all-images-on-docker-hub)
-	- [2.2. pull image](#22-pull-image)
-	- [2.3. save the change in already exist image](#23-save-the-change-in-already-exist-image)
-	- [2.4. push image to Docker hub](#24-push-image-to-docker-hub)
-	- [2.5. save image to archive file](#25-save-image-to-archive-file)
-	- [2.6. load image from archive file](#26-load-image-from-archive-file)
-	- [2.7. build image from Dockerfile](#27-build-image-from-dockerfile)
-	- [2.8. delete an image](#28-delete-an-image)
-	- [check image exist on remote docker hub](#check-image-exist-on-remote-docker-hub)
+	- [2.2. list all images on docker hub](#22-list-all-images-on-docker-hub)
+	- [2.3. pull image](#23-pull-image)
+	- [2.4. save the change in already exist image](#24-save-the-change-in-already-exist-image)
+	- [2.5. push image to Docker hub](#25-push-image-to-docker-hub)
+	- [2.6. save image to archive file](#26-save-image-to-archive-file)
+	- [2.7. load image from archive file](#27-load-image-from-archive-file)
+	- [2.8. build image from Dockerfile](#28-build-image-from-dockerfile)
+	- [2.9. delete an image](#29-delete-an-image)
+	- [2.10. check image exist on remote docker hub](#210-check-image-exist-on-remote-docker-hub)
 - [3. Dockerfile sample](#3-dockerfile-sample)
 - [4. Move docker's default /var/lib/docker to another directory on Ubuntu/Debian Linux](#4-move-dockers-default-varlibdocker-to-another-directory-on-ubuntudebian-linux)
 - [5. Docker run commons images](#5-docker-run-commons-images)
@@ -27,7 +27,8 @@
 	- [5.6. Kafdrop](#56-kafdrop)
 	- [5.7. MongoDB](#57-mongodb)
 	- [5.8. Jenkins](#58-jenkins)
-- [Reference](#reference)
+- [6. Debug container](#6-debug-container)
+- [7. Reference](#7-reference)
 
 
 # 1. container
@@ -107,22 +108,22 @@ docker stats --all --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" conta
 
 docker images
 
-## list all images on docker hub
+## 2.2. list all images on docker hub
 
 see command in this file: [../../sample/devops/docker/docker-hub-api-combine-with-shell-script/list-all-images-on-docker-hub.sh](../../sample/devops/docker/docker-hub-api-combine-with-shell-script/list-all-images-on-docker-hub.sh)
 
-## 2.2. pull image
+## 2.3. pull image
 
 ```shell
 docker pull ubuntu:14.04 # by default, it will download offical ubuntu
 docker pull {USER_NAME}/{IMAGE_NAME} # ex: docker pull binhcao/docker-whale
 ```
 
-## 2.3. save the change in already exist image
+## 2.4. save the change in already exist image
 
 `docker commit {container_id} {USER_NAME}/{IMAGE_NAME}:{TAG}`
 
-## 2.4. push image to Docker hub
+## 2.5. push image to Docker hub
 
 Push an exist image to a repo in Docker hub
 
@@ -137,13 +138,13 @@ docker tag <image_id> {USER_NAME}/{IMAGE_NAME}:{TAG}
 docker push {USER_NAME}/{IMAGE_NAME}
 ```
 
-## 2.5. save image to archive file
+## 2.6. save image to archive file
 
 ```Dockerfile
 docker save <IMAGE_NAME/image_id> > name_archive_file.tar
 ```
 
-## 2.6. load image from archive file
+## 2.7. load image from archive file
 
 ```Dockerfile
 docker load < name_archive_file.tar.gz
@@ -180,17 +181,17 @@ then run above image:
 docker run -it --name test11 test1:0.1 bash
 ```
 
-## 2.7. build image from Dockerfile
+## 2.8. build image from Dockerfile
 
 ```Dockerfile
 docker build -t {author}/{IMAGE_NAME}:{TAG} .   # chu y dau cham
 ```
 
-## 2.8. delete an image
+## 2.9. delete an image
 
 `docker rmi {image-id}`
 
-## check image exist on remote docker hub
+## 2.10. check image exist on remote docker hub
 
 check this file: 
 [../../sample/devops/docker/docker-hub-api-combine-with-shell-script/check-image-exist-on-docker-hub.sh](../../sample/devops/docker/docker-hub-api-combine-with-shell-script/check-image-exist-on-docker-hub.sh)
@@ -419,6 +420,45 @@ docker run -d --name test-jenkins \
 ```
 
 
-# Reference
+# 6. Debug container
 
-This is a good website for undertanding all asppect of docker: https://vsupalov.com/articles/
+1. get entrypoint and cmd of container:
+
+```shell
+docker inspect container-name
+# output
+"Path": "/opt/bitnami/scripts/sonarqube/entrypoint.sh",
+"Args": [
+	"/opt/bitnami/scripts/sonarqube/run.sh"
+],
+...
+```
+
+2. from above we have :
+   
+		entrypoint: /opt/bitnami/scripts/sonarqube/entrypoint.sh
+		cmd: /opt/bitnami/scripts/sonarqube/run.sh
+
+3. add to docker-compose file at service that you want to debug:
+
+```yml
+	sonarqube:
+		user: root
+		entrypoint: bash -c # sh -c
+		command:
+		- while true; do echo "this is test command"; sleep 1; done
+```
+
+4. attach to shell of that service, then run entrypoint and cmd that we got above:
+
+```shell
+docker exec -it sonarqube bash
+# then run entrypoint and cmd
+/opt/bitnami/scripts/sonarqube/entrypoint.sh /opt/bitnami/scripts/sonarqube/run.sh
+```
+
+5. now see log output or any log file that you want 
+
+# 7. Reference
+
+This is a good website for undertanding all aspect of docker: https://vsupalov.com/articles/
