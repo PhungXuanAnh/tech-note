@@ -151,6 +151,8 @@ programming
 
 [rest-api-best-practice.md](programming/rest-api/rest-api-best-practice.md)
 
+[get-request-from-browser.md](programming/rest-api/get-request-from-browser.md)
+
 [jwt.md](programming/jwt/jwt.md)
 
 [interface-vs-abstract-class.md](programming/oop/interface-vs-abstract-class.md)
