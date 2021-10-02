@@ -1,24 +1,24 @@
 - [1.1. Session](#11-session)
   - [1.1.1. Create session](#111-create-session)
   - [1.1.2. Escape a session but keep it alive](#112-escape-a-session-but-keep-it-alive)
-  - [1.1.3. Delete session](#113-delete-session)
+  - [1.1.3. Delete sessions](#113-delete-sessions)
   - [1.1.4. Attach session](#114-attach-session)
   - [1.1.5. List session](#115-list-session)
-- [1.2. Window tab](#12-window-tab)
-  - [1.2.1. Create window tab](#121-create-window-tab)
-  - [1.2.2. Delete window tab](#122-delete-window-tab)
-  - [1.2.3. Change window tab name](#123-change-window-tab-name)
-  - [1.2.4. Move between window tab](#124-move-between-window-tab)
-  - [1.2.5. Move to window tab just accessed before](#125-move-to-window-tab-just-accessed-before)
-  - [1.2.6. Move to next window tab](#126-move-to-next-window-tab)
-- [1.3. Pane](#13-pane)
-  - [1.3.1. Create pane](#131-create-pane)
-  - [1.3.2. Delete pane](#132-delete-pane)
-  - [1.3.3. Move between pane](#133-move-between-pane)
+- [1.2. Tab](#12-tab)
+  - [1.2.1. Create Tab](#121-create-tab)
+  - [1.2.2. Delete Tab](#122-delete-tab)
+  - [1.2.3. Change Tab name](#123-change-tab-name)
+  - [1.2.4. Move between Tab](#124-move-between-tab)
+  - [1.2.5. Move to Tab just accessed before](#125-move-to-tab-just-accessed-before)
+  - [1.2.6. Move to next Tab](#126-move-to-next-tab)
+- [1.3. Window](#13-window)
+  - [1.3.1. Create Window](#131-create-window)
+  - [1.3.2. Delete Window](#132-delete-window)
+  - [1.3.3. Move between Window](#133-move-between-window)
   - [1.3.4. Full screen/ un-full screen](#134-full-screen-un-full-screen)
-  - [1.3.5. Change size pane](#135-change-size-pane)
-  - [1.3.6. Change location of pane in a window](#136-change-location-of-pane-in-a-window)
-  - [1.3.7. Change layout pane (change from horizontal to vertical)](#137-change-layout-pane-change-from-horizontal-to-vertical)
+  - [1.3.5. Change size Window](#135-change-size-window)
+  - [1.3.6. Change location of Window in a window](#136-change-location-of-window-in-a-window)
+  - [1.3.7. Change layout Window (change from horizontal to vertical)](#137-change-layout-window-change-from-horizontal-to-vertical)
 - [1.4. Copy mode](#14-copy-mode)
   - [1.4.1. Enter copy mode](#141-enter-copy-mode)
   - [1.4.2. Escape copy mode](#142-escape-copy-mode)
@@ -28,12 +28,12 @@
 - [1.5. Custom status bar](#15-custom-status-bar)
 - [1.6. Tmux config file](#16-tmux-config-file)
   - [1.6.1. Update config](#161-update-config)
-  - [1.6.2. Change prefix](#162-change-prefix)
-  - [1.6.3. Pane switching with Alt+arrow](#163-pane-switching-with-altarrow)
+  - [start tmux with specified config file and command](#start-tmux-with-specified-config-file-and-command)
+  - [1.6.2. Change Prefix_keys](#162-change-prefix_keys)
+  - [1.6.3. Window switching using Alt+arrow](#163-window-switching-using-altarrow)
   - [1.6.4. Activity Monitoring](#164-activity-monitoring)
   - [1.6.5. Highlighting Current Window Using Specified Colour](#165-highlighting-current-window-using-specified-colour)
-  - [1.6.6. Pane Switching Using Mouse](#166-pane-switching-using-mouse)
-- [1.7. Reference](#17-reference)
+  - [1.6.6. Window Switching Using Mouse](#166-window-switching-using-mouse)
 
 
 ## 1.1. Session
@@ -46,17 +46,24 @@ tmux new -s <session-name>
 
 ### 1.1.2. Escape a session but keep it alive
 
-prefix + d
+Prefix_keys + d
 
-### 1.1.3. Delete session
+### 1.1.3. Delete sessions
 
 ```shell
+# delete current session
 exit
 ```
 
 or
 
-press prefix, then enter command: **:kill-session**
+press Prefix_keys, then enter command: **:kill-session**
+
+kill all sessions
+
+```shell
+tmux kill-server
+```
 
 ### 1.1.4. Attach session
 
@@ -72,99 +79,99 @@ tmux attach -t <session-name-or-session-number>
 tmux ls
 ```
 
-## 1.2. Window tab
+## 1.2. Tab
 
-### 1.2.1. Create window tab
+### 1.2.1. Create Tab
 
-prefix + c
+Prefix_keys + c
 
-### 1.2.2. Delete window tab
+### 1.2.2. Delete Tab
 
-prefix + &
+Prefix_keys + &
 
-### 1.2.3. Change window tab name
+### 1.2.3. Change Tab name
 
-prefix + ,
+Prefix_keys + ,
 
-### 1.2.4. Move between window tab
+### 1.2.4. Move between Tab
 
-prefix + number-of-window-tab
+Prefix_keys + number-of-window-tab
 
 **Note**: ..
 
-### 1.2.5. Move to window tab just accessed before
+### 1.2.5. Move to Tab just accessed before
 
-prefix + p
+Prefix_keys + p
 
-### 1.2.6. Move to next window tab
+### 1.2.6. Move to next Tab
 
-prefix + n
+Prefix_keys + n
 
-## 1.3. Pane
+## 1.3. Window
 
-### 1.3.1. Create pane
+### 1.3.1. Create Window
 
-- Chia đôi 1 pane thành 2 pane theo chiều dọc:
+- Chia đôi 1 Window thành 2 Window theo chiều dọc:
 
-prefix + %
+Prefix_keys + %
 
-- Chia đôi 1 pane thành 2 pane theo chiều ngang:
+- Chia đôi 1 Window thành 2 Window theo chiều ngang:
 
-prefix + "
+Prefix_keys + "
 
-### 1.3.2. Delete pane
+### 1.3.2. Delete Window
 
 ```shell
 exit
 ```
 
-### 1.3.3. Move between pane
+### 1.3.3. Move between Window
 
-- Way 1: prefix + q + number-of-pane
+- Way 1: Prefix_keys + q + number-of-Window
 - Way 2: move as vim style
-  - move to left pane: alt + h
-  - move to right pane: alt + l
-  - move to above pane: alt + k
-  - move to below pane: alt + j
-  - move to just acessed pane: prefix + tab
+  - move to left Window: alt + h
+  - move to right Window: alt + l
+  - move to above Window: alt + k
+  - move to below Window: alt + j
+  - move to just acessed Window: Prefix_keys + tab
 
 ### 1.3.4. Full screen/ un-full screen
 
-prefix + z
+Prefix_keys + z
 
-### 1.3.5. Change size pane
+### 1.3.5. Change size Window
 
 - Way 1: using hot key
 
-  - hold prefix + up-arrow
-  - hold prefix + down-arrow
-  - hold prefix + left-arrow
-  - hold prefix + right-arrow
+  - hold Prefix_keys + up-arrow
+  - hold Prefix_keys + down-arrow
+  - hold Prefix_keys + left-arrow
+  - hold Prefix_keys + right-arrow
 
 - Way 2: using command
 
 ```shell
-:resize-pane
+:resize-Window
 
 # ex: change hight to 8 line
-:resize-pane -y8
+:resize-Window -y8
 ```
 
-### 1.3.6. Change location of pane in a window
+### 1.3.6. Change location of Window in a window
 
-prefix + {
+Prefix_keys + {
 
-prefix + }
+Prefix_keys + }
 
-### 1.3.7. Change layout pane (change from horizontal to vertical)
+### 1.3.7. Change layout Window (change from horizontal to vertical)
 
-prefix + space
+Prefix_keys + space
 
 ## 1.4. Copy mode
 
 ### 1.4.1. Enter copy mode
 
-prefix + [
+Prefix_keys + [
 
 ### 1.4.2. Escape copy mode
 
@@ -186,7 +193,7 @@ q
 - 2: Move mouse pointer to choose text
 - 3: Finish choose process and auto exit copy mode
 - 4: Move to place where text is pasted
-- 5: Paste text: prefix + ]
+- 5: Paste text: Prefix_keys + ]
 
 ### 1.4.5. Increase buffer size of copy mode
 
@@ -200,10 +207,10 @@ set-option -g history-limit 5000
 
   - Phía bên trái:
 
-    - tên window tab
-    - window tab hiện tại (màu xanh lá cây đậm)
-    - window tab trước đó (có dấu trừ ở trước tên window tab)
-    - số thứ tự window tab
+    - tên Tab
+    - Tab hiện tại (màu xanh lá cây đậm)
+    - Tab trước đó (có dấu trừ ở trước tên Tab)
+    - số thứ tự Tab
 
   - Phía bên phải:
     - trạng thái bộ nhớ/ memory hiện tại (cần phải cài thêm chương trình tmux-mem-cpu-load)
@@ -222,22 +229,36 @@ tmux source-file .tmux.conf
 
 or restart server
 
-### 1.6.2. Change prefix
+### start tmux with specified config file and command
+
+```shell
+tmux -f myapp-tmux.conf new-session -d -s myapp 'python myapp.py' 
+```
+
+If you do want to use you existing server (so that changes made via the configuration file can affect your other sessions), then you might want to use source instead:
+
+```shell
+tmux source myapp-tmux.conf \; new-session -d -s myapp 'python myapp.py'
+```
+
+refer : https://stackoverflow.com/a/21902771/7639845https://stackoverflow.com/a/21902771/7639845
+
+### 1.6.2. Change Prefix_keys
 
 open file **.tmux.conf** and add:
 
 ```conf
-unbind C-b
-set -g prefix C-a
+unbind C-b  # default prefix keys are ctrl + b
+set -g Prefix_keys C-a  # set new prefix keys are ctrl + a
 ```
 
-### 1.6.3. Pane switching with Alt+arrow
+### 1.6.3. Window switching using Alt+arrow
 
 ```conf
-bind -n M-Left select-pane -L
-bind -n M-Right select-pane -R
-bind -n M-Up select-pane -U
-bind -n M-Down select-pane -D
+bind -n M-Left select-Window -L
+bind -n M-Right select-Window -R
+bind -n M-Up select-Window -U
+bind -n M-Down select-Window -D
 ```
 
 ### 1.6.4. Activity Monitoring
@@ -253,18 +274,19 @@ set -g visual-activity on
 set-window-option -g window-status-current-bg yellow
 ```
 
-### 1.6.6. Pane Switching Using Mouse
-
-**Note**: if using this function, you can not copy text
+### 1.6.6. Window Switching Using Mouse
 
 ```conf
-# version 2.1 and later
+# version 2.1 and above
 set-option -g mouse on
 
-# version 2.0 and older
+# version 2.0 and below
+set-option -g mouse-select-Window on
 set-option -g mouse-select-pane on
+set-option -g mouse-resize-pane on
 ```
 
-## 1.7. Reference
+**Note**: if using this function, you can not copy text as normal, to copy text ([reference](https://stackoverflow.com/a/58340575/7639845)) :
 
-[https://lukaszwrobel.pl/blog/tmux-tutorial-split-terminal-windows-easily/](https://lukaszwrobel.pl/blog/tmux-tutorial-split-terminal-windows-easily/)
+    1. Hold down Shift and select with your mouse the text you want to copy.
+    2. Now right click to copy the selected text
