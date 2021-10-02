@@ -16,7 +16,7 @@
   - [3.2. Delete pane](#32-delete-pane)
   - [3.3. Move between pane](#33-move-between-pane)
   - [3.4. Full screen/ un-full screen](#34-full-screen-un-full-screen)
-  - [3.5. Change size pane](#35-change-size-pane)
+  - [3.5. Resize pane](#35-resize-pane)
   - [3.6. Change location of pane in a pane](#36-change-location-of-pane-in-a-pane)
   - [3.7. Change layout pane (change from horizontal to vertical)](#37-change-layout-pane-change-from-horizontal-to-vertical)
 - [4. Copy mode](#4-copy-mode)
@@ -140,7 +140,7 @@ exit
 
 Prefix_keys + z
 
-## 3.5. Change size pane
+## 3.5. Resize pane
 
 - Way 1: using hot key
 
@@ -152,10 +152,14 @@ Prefix_keys + z
 - Way 2: using command
 
 ```shell
-:resize-pane
-
-# ex: change hight to 8 line
-:resize-pane -y8
+:resize-pane -D (Resizes the current pane down)
+:resize-pane -U (Resizes the current pane upward)
+:resize-pane -L (Resizes the current pane left)
+:resize-pane -R (Resizes the current pane right)
+:resize-pane -D 10 (Resizes the current pane down by 10 cells)
+:resize-pane -U 10 (Resizes the current pane upward by 10 cells)
+:resize-pane -L 10 (Resizes the current pane left by 10 cells)
+:resize-pane -R 10 (Resizes the current pane right by 10 cells
 ```
 
 ## 3.6. Change location of pane in a pane
