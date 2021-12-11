@@ -1,8 +1,7 @@
 - [1. Install](#1-install)
-- [2. Capture https](#2-capture-https)
-  - [2.1. Installing Burp's CA certificate](#21-installing-burps-ca-certificate)
-    - [2.1.1. android](#211-android)
-      - [2.1.1.1. Facebook app](#2111-facebook-app)
+- [2. Installing Burp's CA certificate android](#2-installing-burps-ca-certificate-android)
+- [3. sample bypass ssl pinning for any application on android](#3-sample-bypass-ssl-pinning-for-any-application-on-android)
+- [4. bypass ssl pinning for Facebook on android Facebook](#4-bypass-ssl-pinning-for-facebook-on-android-facebook)
 
 # 1. Install
 
@@ -13,23 +12,19 @@ chmod +x burpsuite_community_linux_v*.sh
 ./burpsuite_community_linux_v*.sh
 ```
 
-# 2. Capture https
-
-## 2.1. Installing Burp's CA certificate
-
-
-### 2.1.1. android
+# 2. Installing Burp's CA certificate android
 
 **NOTE**: to get certificates, android devices must be connected to burp proxy, as guide here : https://portswigger.net/support/configuring-an-android-device-to-work-with-burp
 
 how to get certificates here : https://portswigger.net/support/installing-burp-suites-ca-certificate-in-an-android-device
 
+# 3. sample bypass ssl pinning for any application on android
 
 sample setup burp suite certificates for android genymotion and bypass ssl pinning here
 
-[sample/devops/ssl/frida-ssl-pinning-bypass/Readme.md](sample/devops/ssl/frida-ssl-pinning-bypass/Readme.md)
+[../../sample/devops/ssl/frida-ssl-pinning-bypass/Readme.md](../../sample/devops/ssl/frida-ssl-pinning-bypass/Readme.md)
 
-#### 2.1.1.1. Facebook app
+# 4. bypass ssl pinning for Facebook on android Facebook
 
 **NOTE: require ROOTED device or you can using device run on Genymotion**
 
