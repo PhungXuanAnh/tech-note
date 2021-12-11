@@ -18,7 +18,7 @@
   - [7.3. List all running processes on device](#73-list-all-running-processes-on-device)
   - [7.4. Locate your application’s package name](#74-locate-your-applications-package-name)
   - [7.5. Hook fridascript.js into target application](#75-hook-fridascriptjs-into-target-application)
-  - [7.6. Bypassed!!](#76-bypassed)
+  - [7.6. Bypassed](#76-bypassed)
 - [8. next time run](#8-next-time-run)
 
 
@@ -274,7 +274,7 @@ Finally, we will hook fridascript.js into the native application with the follow
 frida -U -f com.genefriendway.nightly -l fridascript.js --no-paus
 ```
 
-## 7.6. Bypassed!!
+## 7.6. Bypassed
 
 Once all things go smooth, all traffic of the target app will get intercepted into BurpSuite. We need to keep frida server on as long as we are intercepting traffic into BurpSuite.
 
@@ -286,3 +286,12 @@ next time, just :
    2. connect device through burp suite proxy
    3. open app as normal and see requests/responses on tab Proxy/HTTP History
 
+when app is updated :
+
+```shell
+alias adb=/opt/genymobile/genymobile/tools/adb
+adb shell /data/local/tmp/frida-server &
+# then 
+# frida is installed by pip
+frida -U -f com.genefriendway.nightly -l fridascript.js --no-paus
+```
