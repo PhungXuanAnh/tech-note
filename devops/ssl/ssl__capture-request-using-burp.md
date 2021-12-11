@@ -1,9 +1,9 @@
-- [1. Install](#1-install)
+- [1. Install burp suite community](#1-install-burp-suite-community)
 - [2. Installing Burp's CA certificate android](#2-installing-burps-ca-certificate-android)
 - [3. sample bypass ssl pinning for any application on android](#3-sample-bypass-ssl-pinning-for-any-application-on-android)
 - [4. bypass ssl pinning for Facebook on android Facebook](#4-bypass-ssl-pinning-for-facebook-on-android-facebook)
 
-# 1. Install
+# 1. Install burp suite community
 
 Download from this link : https://portswigger.net/burp/releases/community/latest
 
