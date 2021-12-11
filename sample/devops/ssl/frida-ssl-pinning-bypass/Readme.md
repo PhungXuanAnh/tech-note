@@ -282,7 +282,7 @@ Once all things go smooth, all traffic of the target app will get intercepted in
 
 next time, just :
 
-open burp suite
-connect device through burp suite proxy
-open app as normal and see requests/responses on tab Proxy/HTTP History
+   1. open burp suite
+   2. connect device through burp suite proxy
+   3. open app as normal and see requests/responses on tab Proxy/HTTP History
 
