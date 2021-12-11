@@ -24,6 +24,11 @@ chmod +x burpsuite_community_linux_v*.sh
 
 how to get certificates here : https://portswigger.net/support/installing-burp-suites-ca-certificate-in-an-android-device
 
+
+sample setup burp suite certificates for android genymotion and bypass ssl pinning here
+
+[sample/devops/ssl/frida-ssl-pinning-bypass/Readme.md](sample/devops/ssl/frida-ssl-pinning-bypass/Readme.md)
+
 #### 2.1.1.1. Facebook app
 
 **NOTE: require ROOTED device or you can using device run on Genymotion**
