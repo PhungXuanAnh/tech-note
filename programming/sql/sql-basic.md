@@ -68,20 +68,21 @@ pip3 install -U mycli
 [How to use psql with no password prompt?](https://dba.stackexchange.com/a/14741)
 
 ```shell
-# enter shell using postgres client official
-export PGPASSWORD=123456
-psql -p 5433 -h 127.0.0.1 -U postgres
+# using postgres client official
+export PGPASSWORD=123456  # export for without password prompt
+export PG_HOST=127.0.0.1  # default
+export PG_PORT=5432       # default
+export PG_USER=postgres   # default: root
+export PG_DB=dvdrental    # default: same name as PG_USER
+psql -h $PG_HOST -p $PG_PORT -U $PG_USER -d $PG_DB
 
-# enter shell using postgres client with autocomplement
-pgcli local_database
-# or
-export POSTGRES_USER=postgres
-export POSTGRES_PASS=123456
-export POSTGRES_DB=dvdrental
-pgcli postgres://{POSTGRES_USER}:{POSTGRES_PASS}@example.com:5432/{POSTGRES_DB}
-# or
-export PGPASSWORD=123456
-pgcli -h localhost -p 5433 -U postgres dvdrental
+# using postgres client with autocomplement
+export PG_HOST=127.0.0.1
+export PG_PORT=5432
+export PG_USER=postgres
+export PG_PASS=123456
+export PG_DB=dvdrental
+pgcli postgres://${PG_USER}:${PG_PASS}@${PG_HOST}:${PG_PORT}/${PG_DB}
 
 # exit
 \q
