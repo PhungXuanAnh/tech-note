@@ -110,8 +110,16 @@ mysql --host=127.0.0.1 --port=3308 --user=root --password=123456
 
 ## 2.1. Create database
 
+postgres and mysql
+
 ```sql
 CREATE DATABASE test_db;
+```
+
+postgres create db if not exists
+
+```shell
+psql -U db_user -tc "SELECT 1 FROM pg_database WHERE datname = 'db_name'" | grep -q 1 || psql -U db_user -c "CREATE DATABASE db_name"
 ```
 
 ## 2.2. List database

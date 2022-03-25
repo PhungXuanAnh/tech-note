@@ -362,6 +362,22 @@ docker run -d --name test-postgresql \
 				postgres:9.6
 ```
 
+using below command for using `psql` without other parameters
+
+```shell
+docker rm -f my-postgresql && docker run --name my-postgresql \
+    -e POSTGRES_PASSWORD=password123 \
+    -e POSTGRES_DB=my_database \
+    --user=postgres \
+    postgres:latest
+```
+
+for test: 
+
+```shell
+docker exec my-postgresql psql -c '\l'
+```
+
 ## 5.4. MySQL
 
 ```shell
