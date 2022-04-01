@@ -1,25 +1,26 @@
 - [1. prepare](#1-prepare)
   - [1.1. install python environment](#11-install-python-environment)
   - [1.2. install burp suite](#12-install-burp-suite)
-  - [1.3. install genymotion and create device](#13-install-genymotion-and-create-device)
-  - [2. connect to device](#2-connect-to-device)
-  - [3. Download frida server for supported android device’s arch version](#3-download-frida-server-for-supported-android-devices-arch-version)
-  - [4. Install the target application in the device.](#4-install-the-target-application-in-the-device)
-  - [5. Frida Server Setup](#5-frida-server-setup)
-- [6. Setup BurpSuite’s certificate](#6-setup-burpsuites-certificate)
-  - [6.1. export certificate](#61-export-certificate)
-  - [6.2. Configuring Burp Suite With Android Nougat or lower](#62-configuring-burp-suite-with-android-nougat-or-lower)
-  - [6.3. Configuring Burp Suite With Android Nougat or higher](#63-configuring-burp-suite-with-android-nougat-or-higher)
-    - [6.3.1. Install Burp CA as a system-level trusted CA](#631-install-burp-ca-as-a-system-level-trusted-ca)
-    - [6.3.2. Install burp suite as user CA and modifying and repackaging your app](#632-install-burp-suite-as-user-ca-and-modifying-and-repackaging-your-app)
-- [7. Script injection to bypass SSL pinning](#7-script-injection-to-bypass-ssl-pinning)
-  - [7.1. Push fridascript.js and burp suite to device into devices](#71-push-fridascriptjs-and-burp-suite-to-device-into-devices)
-  - [7.2. Check and run frida server in device](#72-check-and-run-frida-server-in-device)
-  - [7.3. List all running processes on device](#73-list-all-running-processes-on-device)
-  - [7.4. Locate your application’s package name](#74-locate-your-applications-package-name)
-  - [7.5. Hook fridascript.js into target application](#75-hook-fridascriptjs-into-target-application)
-  - [7.6. Bypassed](#76-bypassed)
-- [8. next time run](#8-next-time-run)
+  - [1.3. create android device](#13-create-android-device)
+    - [1.3.1. using android virtual device emulator](#131-using-android-virtual-device-emulator)
+    - [1.3.2. using genymotion](#132-using-genymotion)
+  - [1.4. Download frida server for supported android device’s arch version](#14-download-frida-server-for-supported-android-devices-arch-version)
+  - [1.5. Install the target application in the device.](#15-install-the-target-application-in-the-device)
+  - [1.6. Frida Server Setup](#16-frida-server-setup)
+- [2. Setup BurpSuite’s certificate](#2-setup-burpsuites-certificate)
+  - [2.1. export certificate](#21-export-certificate)
+  - [2.2. Configuring Burp Suite With Android Nougat or lower](#22-configuring-burp-suite-with-android-nougat-or-lower)
+  - [2.3. Configuring Burp Suite With Android Nougat or higher](#23-configuring-burp-suite-with-android-nougat-or-higher)
+    - [2.3.1. Install Burp CA as a system-level trusted CA](#231-install-burp-ca-as-a-system-level-trusted-ca)
+    - [2.3.2. Install burp suite as user CA and modifying and repackaging your app](#232-install-burp-suite-as-user-ca-and-modifying-and-repackaging-your-app)
+- [3. Script injection to bypass SSL pinning](#3-script-injection-to-bypass-ssl-pinning)
+  - [3.1. Push fridascript.js and burp suite to device into devices](#31-push-fridascriptjs-and-burp-suite-to-device-into-devices)
+  - [3.2. Check and run frida server in device](#32-check-and-run-frida-server-in-device)
+  - [3.3. List all running processes on device](#33-list-all-running-processes-on-device)
+  - [3.4. Locate your application’s package name](#34-locate-your-applications-package-name)
+  - [3.5. Hook fridascript.js into target application](#35-hook-fridascriptjs-into-target-application)
+  - [3.6. Bypassed](#36-bypassed)
+- [4. next time run](#4-next-time-run)
 
 
 # 1. prepare
@@ -27,7 +28,7 @@
 ## 1.1. install python environment
 
 ```shell
-python 3.8.0
+cd ~/repo/tech-note/sample/devops/ssl/frida-ssl-pinning-bypass/
 venv-create
 source_python_venv
 pip install -r requirements.txt
@@ -35,13 +36,52 @@ pip install -r requirements.txt
 
 ## 1.2. install burp suite
 
-## 1.3. install genymotion and create device 
+## 1.3. create android device
+
+### 1.3.1. using android virtual device emulator
+
+open Android studio then: Tools -> AVD Manager -> Create Virtual Device
+
+Choose Pixel 4 XL API 28 (Android 9.0), if android > 9 it can not use supper user , read more here: https://stackoverflow.com/a/64397712/7639845
+
+start emulator device:
+
+```shell
+export ANDROID_SDK=~/Android/Sdk
+export PATH=$ANDROID_SDK/emulator:$ANDROID_SDK/tools:$PATH
+rm -rf ~/.android/avd/Pixel_4_XL_API_28.avd/*.lock
+# run emulator with -writable-system to allow adb push any file to /system
+emulator -avd Pixel_4_XL_API_28 -writable-system -no-snapshot-load -qemu
+```
+
+**connect to device**
+
+```shell
+alias adb=/home/xuananh/Android/Sdk/platform-tools/adb
+
+adb devices
+# You should see ip of your device along with device name. as below
+List of devices attached
+192.168.56.105:5555	device
+```
+
+install open google apps, reference here: https://android.stackexchange.com/a/245551
+
+install google playstore, download file [Phonesky.apk](Phonesky.apk), then push to device
+
+```shell
+adb root
+adb remount
+adb push Phonesky.apk /system/priv-app
+```
+
+### 1.3.2. using genymotion
 
 the best way to do this is using rooted device, so we will install genymotion and create device with configurations as below
 
 ![](images_readme/genymotion_vm_config.png)
 
-## 2. connect to device
+**connect to device**
 
 We need to connect our device to adb to run commands on device. But first goto settings >> Developer options and enable debugging mode in device so that adb can communicate with the device.
 
@@ -57,7 +97,7 @@ List of devices attached
 192.168.56.105:5555	device
 ```
 
-## 3. Download frida server for supported android device’s arch version
+## 1.4. Download frida server for supported android device’s arch version
 
 We need to download the frida server package for our android device according to our device’s arch version.
 
@@ -69,13 +109,15 @@ To find out the arch version of the device, run following command.
 adb shell getprop ro.product.cpu.abi
 ```
 
-In this example, I use frida-server-15.1.14-android-x86.xz 
+In this example, I use [frida-server-15.1.14-android-x86.xz](frida-server-15.1.14-android-x86.xz)
 
-## 4. Install the target application in the device.
+Download script: [fridascript.js](fridascript.js)
+
+## 1.5. Install the target application in the device.
 
 Install your application who’s SSL pinning has to be bypassed in our device. Open the application and keep it running in the background.
 
-## 5. Frida Server Setup
+## 1.6. Frida Server Setup
 
 We need to run frida server into device before injection our script. Follow the steps below:
 
@@ -85,9 +127,9 @@ adb push frida-server-*-android-x86 /data/local/tmp/frida-server
 adb shell chmod 777 /data/local/tmp/frida-server
 ```
 
-# 6. Setup BurpSuite’s certificate
+# 2. Setup BurpSuite’s certificate
 
-## 6.1. export certificate
+## 2.1. export certificate
 
 click export :
 ![](images_readme/burp-suit-export-certificates-1.png)
@@ -98,7 +140,7 @@ click select file :
 choose folder and file name as below :
 ![](images_readme/burp-suit-export-certificates-4.png)
 
-## 6.2. Configuring Burp Suite With Android Nougat or lower
+## 2.2. Configuring Burp Suite With Android Nougat or lower
 
 push above exported certificates to android then configure certificates as [link](https://portswigger.net/support/installing-burp-suites-ca-certificate-in-an-android-device
 )
@@ -116,13 +158,13 @@ or follow 2 step below :
     https://portswigger.net/support/installing-burp-suites-ca-certificate-in-an-android-device
 
 
-## 6.3. Configuring Burp Suite With Android Nougat or higher
+## 2.3. Configuring Burp Suite With Android Nougat or higher
 
 There are 2 ways to configure, choose one below :
 
 [Reference here](https://blog.ropnop.com/configuring-burp-suite-with-android-nougat/)
 
-### 6.3.1. Install Burp CA as a system-level trusted CA
+### 2.3.1. Install Burp CA as a system-level trusted CA
 
 If you have rooted device, choose this way
 
@@ -137,7 +179,7 @@ adb push ${hash_str}.0 /system/etc/security/cacerts/
 adb shell "chmod 644 /system/etc/security/cacerts/${hash_str}.0"
 ```
 
-### 6.3.2. Install burp suite as user CA and modifying and repackaging your app
+### 2.3.2. Install burp suite as user CA and modifying and repackaging your app
 
 If you don't have rooted device, choose this way
 
@@ -199,29 +241,28 @@ Lastly, install the new APK with adb:
 adb install TestApp\dist\TestApp.apk
 ```
 
-# 7. Script injection to bypass SSL pinning
+# 3. Script injection to bypass SSL pinning
 
 Now its time for real magic. we will inject ‘fridascript.js’ into the target application.
 
-## 7.1. Push fridascript.js and burp suite to device into devices
+## 3.1. Push fridascript.js and burp suite to device into devices
 
 ```shell
 adb push fridascript.js /data/local/tmp
 adb push cert-der.crt /data/local/tmp/cert-der.crt
 ```
 
-## 7.2. Check and run frida server in device
+## 3.2. Check and run frida server in device
 
 open another terminal and run commands
 
 ```shell
-alias adb=/opt/genymobile/genymobile/tools/adb
 adb shell /data/local/tmp/frida-server
 # adb shell /data/local/tmp/frida-server &
 ```
 This will run frida-server into device. Maybe you will not get any output of this command in terminal.
 
-## 7.3. List all running processes on device
+## 3.3. List all running processes on device
 
 Now, we need to find out id of our target application. We will list all running services on devices including your application process.
 
@@ -251,7 +292,7 @@ output
 ... 
 ```
 
-## 7.4. Locate your application’s package name
+## 3.4. Locate your application’s package name
 
 there are many ways, using one of below commands:
 
@@ -264,21 +305,21 @@ adb shell "ls /data/app | grep gene"
 # com.genefriendway.nightly-M2ZNuzVDZzvI_HORJmn5mQ==
 ```
 
-## 7.5. Hook fridascript.js into target application
+## 3.5. Hook fridascript.js into target application
 
 Finally, we will hook fridascript.js into the native application with the following command:
 
 ```shell
 # frida is installed by pip
 # frida -U -f <your_application_package_name> -l <path_to_fridascript.js_on_your_computer> --no-paus
-frida -U -f com.genefriendway.nightly -l fridascript.js --no-paus
+.venv/bin/frida -U -f com.genefriendway.nightly -l fridascript.js --no-paus
 ```
 
-## 7.6. Bypassed
+## 3.6. Bypassed
 
 Once all things go smooth, all traffic of the target app will get intercepted into BurpSuite. We need to keep frida server on as long as we are intercepting traffic into BurpSuite.
 
-# 8. next time run
+# 4. next time run
 
 next time, just :
 
@@ -289,7 +330,6 @@ next time, just :
 when app is updated :
 
 ```shell
-alias adb=/opt/genymobile/genymobile/tools/adb
 adb shell /data/local/tmp/frida-server &
 # then 
 # frida is installed by pip
