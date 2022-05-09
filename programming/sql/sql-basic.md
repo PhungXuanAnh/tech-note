@@ -15,9 +15,10 @@ This document for practices with Relational Database Management System (RDBMS): 
   - [2.5. Export database](#25-export-database)
   - [2.6. Import database](#26-import-database)
 - [3. Table](#3-table)
-  - [Create table](#create-table)
-  - [Drop table](#drop-table)
-  - [3.1. List tables](#31-list-tables)
+  - [3.1. Create table](#31-create-table)
+  - [3.2. Drop table](#32-drop-table)
+  - [3.3. List tables](#33-list-tables)
+  - [3.4. Add column](#34-add-column)
 - [4. Thao tác với dữ liệu](#4-thao-tác-với-dữ-liệu)
   - [4.1. UPDATE](#41-update)
 - [5. references](#5-references)
@@ -260,7 +261,7 @@ COUNT(*)
 
 # 3. Table
 
-## Create table
+## 3.1. Create table
 
 ```sql
 # mysql
@@ -276,14 +277,14 @@ CREATE TABLE test_db.SINHVIEN(
 DESCRIBE test_db.SINHVIEN;
 ```
 
-## Drop table
+## 3.2. Drop table
 
 ```sql
 # mysql
 DROP TABLE test_db.SINHVIEN;
 ```
 
-## 3.1. List tables
+## 3.3. List tables
 
 ```shell
 # postgresql
@@ -292,6 +293,11 @@ DROP TABLE test_db.SINHVIEN;
 # mysql
 SHOW TABLES;
 ```
+
+## 3.4. Add column
+
+https://www.geeksforgeeks.org/postgresql-add-column/?ref=lbp
+
 
 # 4. Thao tác với dữ liệu
 
