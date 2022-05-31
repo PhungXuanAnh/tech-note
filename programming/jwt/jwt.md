@@ -47,7 +47,7 @@ hay
 <base64-encoded header>.<base64-encoded payload>.<HMACSHA256(base64-encoded signature)>    
 ```
 
-![jwt1](../images/programming/jwt/jwt-1.jpeg)
+![jwt1](../../images/programming/jwt/jwt-1.jpeg)
 
 ## 3.1. Header
 
@@ -111,7 +111,7 @@ Ta có thể xem lại công thức mà mình vừa nhắc ở đầu bài viế
 
 ## 4.1. Sơ lược về luồng xử lý
 
-![jwt2](../images/programming/jwt/jwt-2.png)
+![jwt2](../../images/programming/jwt/jwt-2.png)
 
 Nhìn vào sơ đồ, ta có thể thấy luồng đi như sau
 
@@ -135,13 +135,13 @@ Câu hỏi đặt ra ở đây là hệ thống Verify JWT thế nào:
 
 Trước khi chúng ta đi sâu hơn nữa, lại một lần nữa lướt lại flow làm việc của 2 hệ thống này. Sơ đồ dưới đây sẽ cho thấy sự khác biệt của 2 mô hình
 
-![jwt3](../images/programming/jwt/jwt-3.png)
+![jwt3](../../images/programming/jwt/jwt-3.png)
 
 ## 5.1. Authen bằng Cookie
 
 **Authen** dựa trên **Cookie** dựa trên các phương thức default. **tried-and-true** để xử lý việc authen trong một thời dài. Đây là phương thức **stateful**. Có nghĩa là một record authen ( có thể hiểu là **session**) sẽ phải được giữ cả 2 phía **client** và **server**. **Server** cần theo dõi **active session** trong DB, trong khi đó cookie được tạo ở phía front-end và giữ 1 session định danh. Hãy xem qua flow xử lý truyền thống của phương pháp này :
 
-![jwt4](../images/programming/jwt/jwt-4.png)
+![jwt4](../../images/programming/jwt/jwt-4.png)
 
   1. **User** nhập thông tin đăng nhập
   2. **Server** xác minh các thông tin đó là chính xác và tạo 1 **session** lưu trong DB
@@ -153,7 +153,7 @@ Trước khi chúng ta đi sâu hơn nữa, lại một lần nữa lướt lạ
 
  Phương thức này là **stateless**. **Server** ko cần phải giữ bất kì **record** nào thê hiện **user** đã **log in** hay chưa ? Thay vì thế mọi **request** đều được tới **server** đều được đính kèm một **token** - cái này sẽ được **server** sử dụng để xác thực **authen** của **request** đó.
 
-![jwt5](../images/programming/jwt/jwt-5.png)
+![jwt5](../../images/programming/jwt/jwt-5.png)
 
   1. **User** nhập thông tin đăng nhập
   2. **Server** xác minh thông tin đăng nhập chuẩn ko ? trả về **token** trong **response**
