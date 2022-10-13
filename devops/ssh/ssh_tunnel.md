@@ -19,22 +19,36 @@ DESTINATION_HOST=intra.example
 DESTINATION_PORT=80
 SSH_HOST=gw.example.com
 SSH_USER=user
-
-ssh -f $SSH_USER@$SSH_HOST \
+ssh $SSH_USER@$SSH_HOST \
+    -o ExitOnForwardFailure=yes \
+    -o UserKnownHostsFile=/dev/null \
+    -o StrictHostKeyChecking=no \
+    -fN \
     -L $LOCAL_PORT:$DESTINATION_HOST:$DESTINATION_PORT
 
 # or specify local host
-ssh -f $SSH_USER@$SSH_HOST \
+ssh $SSH_USER@$SSH_HOST \
+    -o ExitOnForwardFailure=yes \
+    -o UserKnownHostsFile=/dev/null \
+    -o StrictHostKeyChecking=no \
+    -fN \
     -L $LOCAL_HOST:$LOCAL_PORT:$DESTINATION_HOST:$DESTINATION_PORT
     
 # test:
-telnet localhost $LOCAL_PORT
+telnet localhost $LOCAL_PORT <<EOF
+ls
+EOF
 ```
 
 example
 
 ```shell
-ssh -L 8001:ubuntu.com:80 xuananh@localhost
+ssh xuananh@localhost \
+    -o ExitOnForwardFailure=yes \
+    -o UserKnownHostsFile=/dev/null \
+    -o StrictHostKeyChecking=no \
+    -fN \
+    -L 8001:ubuntu.com:80
 # now access: http://localhost:8001 it will redirect to http://ubuntu.com:80
 ```
 
@@ -42,6 +56,10 @@ you can open tunnel for multiple destination server, ex:
 
 ```shell
 ssh xuananh@localhost \
+    -o ExitOnForwardFailure=yes \
+    -o UserKnownHostsFile=/dev/null \
+    -o StrictHostKeyChecking=no \
+    -fN \
     -L 12345:github.com:443 \
     -L 12346:ubuntu.com:443 \
     -L 12347:www.ubuntuforums.org:443 \
