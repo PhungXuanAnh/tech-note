@@ -1,9 +1,13 @@
 sample using webhook to setup auto deploy when push code to github
 
 - [1. install webhook on remote servers](#1-install-webhook-on-remote-servers)
-- [2. create configurations for webhook](#2-create-configurations-for-webhook)
-- [3. add to github](#3-add-to-github)
-- [4. reference](#4-reference)
+- [2. create script that will run by webhook](#2-create-script-that-will-run-by-webhook)
+- [3. create configurations for webhook](#3-create-configurations-for-webhook)
+  - [3.1. simple webhook config](#31-simple-webhook-config)
+  - [3.2. using secret to make our webhooks more secure](#32-using-secret-to-make-our-webhooks-more-secure)
+  - [3.3. add more conditions to trigger webhook and pass arguments to commands that in webhook](#33-add-more-conditions-to-trigger-webhook-and-pass-arguments-to-commands-that-in-webhook)
+- [4. add to github](#4-add-to-github)
+- [5. reference](#5-reference)
 
 # 1. install webhook on remote servers
 
@@ -12,48 +16,7 @@ sudo apt update -y && sudo apt upgrade -y
 sudo apt-get install webhook
 ```
 
-# 2. create configurations for webhook
-
-```shell
-mkdir ~/.webhooks
-touch ~/.webhooks/hooks.json
-touch ~/.webhooks/deploy.sh
-chmod +x ~/.webhooks/deploy.sh
-
-vim ~/.webhooks/hooks.json
-```
-
-add below to hooks.json
-
-```json
-[{
-    "id": "deployment-castnet",
-    "execute-command": "/home/ubuntu/./webhooks/deploy.sh",
-    "command-working-directory": "/home/ubuntu/castnet",
-    "response-message": "Executing deploy script...",
-}]
-```
-
-or using secret to make our webhooks more secure
-
-```json
-[{
-    "id": "deployment-castnet",
-    "execute-command": "/home/ubuntu/./webhooks/deploy.sh",
-    "command-working-directory": "/home/ubuntu/castnet",
-    "response-message": "Executing deploy script...",
-    "trigger-rule": {
-        "match": {
-            "type": "payload-hmac-sha1",
-            "secret": "secret@2721991",
-            "parameter": {
-                "source": "header",
-                "name": "X-Hub-Signature"
-            }
-        }
-    }
-}]
-```
+# 2. create script that will run by webhook
 
 `vim ~/.webhooks/deploy.sh`
 
@@ -79,11 +42,100 @@ run webhook
 webhook -hooks ~/.webhooks/hooks.json -verbose
 ```
 
-# 3. add to github
+# 3. create configurations for webhook
+
+```shell
+mkdir ~/.webhooks
+touch ~/.webhooks/hooks.json
+touch ~/.webhooks/deploy.sh
+chmod +x ~/.webhooks/deploy.sh
+
+vim ~/.webhooks/hooks.json
+```
+
+## 3.1. simple webhook config
+
+```json
+[{
+    "id": "deployment-castnet",
+    "execute-command": "/home/ubuntu/./webhooks/deploy.sh",
+    "command-working-directory": "/home/ubuntu/castnet",
+    "response-message": "Executing deploy script...",
+}]
+```
+
+## 3.2. using secret to make our webhooks more secure
+
+```json
+[{
+    "id": "deployment-castnet",
+    "execute-command": "/home/ubuntu/./webhooks/deploy.sh",
+    "command-working-directory": "/home/ubuntu/castnet",
+    "response-message": "Executing deploy script...",
+    "trigger-rule": {
+        "match": {
+            "type": "payload-hmac-sha1",
+            "secret": "your-password",
+            "parameter": {
+                "source": "header",
+                "name": "X-Hub-Signature"
+            }
+        }
+    }
+}]
+```
+
+## 3.3. add more conditions to trigger webhook and pass arguments to commands that in webhook
+
+reference: https://github.com/adnanh/webhook/blob/master/docs/Hook-Examples.md#incoming-github-webhook
+
+to see github webhook payload, After setup and trigger webhook for the first time, go to webhook -> Recent Deliveries
+
+```json
+[{
+    "id": "deployment-ink",
+    "execute-command": "/home/ubuntu/.webhooks/deploy.sh",
+    "command-working-directory": "/home/ubuntu/ink",
+    "response-message": "Executing deploy script...",
+    "pass-arguments-to-command": [
+        {
+            "source": "payload",
+            "name": "head_commit.message"
+        }
+    ],
+    "trigger-rule": {
+        "and": [
+            {
+                "match": {
+                    "type": "payload-hmac-sha1",
+                    "secret": "your-password",
+                    "parameter": {
+                        "source": "header",
+                        "name": "X-Hub-Signature"
+                    }
+                }
+            },
+            {
+                "match":
+                    {
+                        "type": "value",
+                        "value": "refs/heads/staging",
+                        "parameter": {
+                            "source": "payload",
+                            "name": "ref"
+                        }
+                    }
+            }
+        ]
+    }
+}]
+```
+
+# 4. add to github
 
 ![](../../images/devops/remote_tools/github_webhook.png)
 
-# 4. reference
+# 5. reference
 
 https://github.com/adnanh/webhook
 
