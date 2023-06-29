@@ -5,8 +5,11 @@
 - [3. Make Schemas to setup audio streams](#3-make-schemas-to-setup-audio-streams)
 - [4. Set up base on Schemas](#4-set-up-base-on-schemas)
   - [4.1. Create virtual output device (null sink)](#41-create-virtual-output-device-null-sink)
-  - [4.2. Create loopback device](#42-create-loopback-device)
-  - [4.3. Create virtual input device](#43-create-virtual-input-device)
+  - [4.2. Stream audio of Applications to Real devices through Virtual devices](#42-stream-audio-of-applications-to-real-devices-through-virtual-devices)
+    - [4.2.1. List all current sinks in the system to use in next step](#421-list-all-current-sinks-in-the-system-to-use-in-next-step)
+    - [4.2.2. Using module-combine-sink](#422-using-module-combine-sink)
+    - [4.2.3. Using module-loopback](#423-using-module-loopback)
+  - [4.3. Create virtual input device from Virtual outpu device](#43-create-virtual-input-device-from-virtual-outpu-device)
   - [4.4. Setup client applications audio](#44-setup-client-applications-audio)
     - [4.4.1. Setup directly in client application](#441-setup-directly-in-client-application)
     - [4.4.2. Setup using PulseAudio GUI](#442-setup-using-pulseaudio-gui)
@@ -46,7 +49,7 @@ https://unix.stackexchange.com/questions/260981/what-do-the-sink-and-source-keyw
 
 ## 2.2. Describe PulseAudioControl GUI tabs
 
-![](../images/virtual-audio-streams-01.png)
+![](image-01.png)
 
 - Output devices: List all available `sinks` (output devices) in the system, including real sinks and virtual sinks.
 - Input devices: List all available input devices in the system, including real input devices and virtual input devices  
@@ -61,7 +64,7 @@ Purpose of this setup is to redirect audio from video conference applications (s
 
 To do that we have to create a virtual output device to receive audio from video conference applications, then using this new created virtual output device to redirect audio to 2 above destinations
 
-![](../images/virtual-audio-streams-02.png)
+![](image-02.png)
 
 link to above image : https://app.diagrams.net/#G1DWy-Qx-jM86YOKDeggqrN43ccsJEKw5K#%7B%22pageId%22%3A%22U9tqt51FlupvkOq0WFdn%22%7D
 
@@ -81,17 +84,48 @@ pactl load-module module-null-sink \
 
 it will be shown in GUI as below
 
-![Alt text](../images/virtual-audio-streams-06.png)
+![Alt text](image-06.png)
 
-## 4.2. Create loopback device
+## 4.2. Stream audio of Applications to Real devices through Virtual devices
 
-send audio from virtual output device to real output device (speaker or headphone) to connect an virtual output device ( a sink) with a real output device, it must be through a loopback device 
+There are 2 method to do that:
+- Using module-combine-sink (recommended method)
+- Using module-loopback (not recommended, do not understood completely, sometimes sound of application also be streamed to all Input devices, I don't know why)
+
+### 4.2.1. List all current sinks in the system to use in next step
 
 ```shell
-# using this command to list out real sink 
-pacmd list-sinks | grep alsa_output
-# for example output of above command is: 
-# name: <alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp__sink>
+# using this command to list out all sinks (output devices)
+pactl list short sinks
+# output :
+# 0	alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp__sink	module-alsa-card.c	s16le 2ch 48000Hz	IDLE
+# 1	VirtualOutputDevice1	module-null-sink.c	s16le 2ch 44100Hz	IDLE
+```
+
+### 4.2.2. Using module-combine-sink 
+
+```shell
+# slaves list of sinks id or sinks name that are listed in above commands
+
+# using sink id
+pactl load-module module-combine-sink sink_name=VirtualOutputDevice1+RealOutputDevices sink_properties=device.description="VirtualOutputDevice1+RealOutputDevices" slaves=0,1
+
+# using sink name
+pactl load-module module-combine-sink sink_name=VirtualOutputDevice1+RealOutputDevices sink_properties=device.description="VirtualOutputDevice1+RealOutputDevices" slaves=alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp__sink,VirtualOutputDevice1
+```
+
+The above command with create a new virtual output device that combine of VirtualOutputDevice1 and RealOutputDevice
+
+it will be shown in GUI as below
+
+![image](image.png)
+
+![image-1](image-1.png)
+
+### 4.2.3. Using module-loopback
+
+```shell
+# to get speaker name using above command
 SPEAKERS=alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp__sink
 
 pactl load-module module-loopback \
@@ -101,10 +135,11 @@ pactl load-module module-loopback \
 
 it will be shown in GUI as below
 
-![Alt text](../images/virtual-audio-streams-07.png)
-![Alt text](../images/virtual-audio-streams-08.png)
+![Alt text](image-07.png)
+![Alt text](image-08.png)
 
-## 4.3. Create virtual input device
+
+## 4.3. Create virtual input device from Virtual outpu device
 
 create an virtual input device to send audio from virtual output device created above to this input device, then an application (google docs voice typing) can using this virtual input device to receive audio from another application
 
@@ -130,7 +165,7 @@ pactl load-module module-remap-source \
 
 it will be shown in GUI as below
 
-![Alt text](../images/virtual-audio-streams-09.png)
+![Alt text](image-09.png)
 
 ## 4.4. Setup client applications audio
 
@@ -144,21 +179,21 @@ Restart all client applications
 
 setup google meet or skype or slack to output audio to virtual output device
 
-![Alt text](../images/virtual-audio-streams-04.png)
+![Alt text](image-04.png)
 
-![Alt text](../images/virtual-audio-streams-05.png)
+![Alt text](image-05.png)
 
 setup google docs voice typing to choose virtual input device
 
-![Alt text](../images/virtual-audio-streams-12.png)
+![Alt text](image-12.png)
 
-![Alt text](../images/virtual-audio-streams-03.png)
+![Alt text](image-03.png)
 
 ### 4.4.2. Setup using PulseAudio GUI
 
-![Alt text](../images/virtual-audio-streams-10.png)
+![Alt text](image-10.png)
 
-![Alt text](../images/virtual-audio-streams-11.png)
+![Alt text](image-11.png)
 
 ## 4.5. Other commands for troubleshooting
 
@@ -178,14 +213,21 @@ sudo vim /etc/pulse/default.pa
 ```shell
 load-module module-null-sink sink_name=VirtualOutputDevice1 sink_properties=device.description="VirtualOutputDevice1"
 
+load-module module-virtual-source source_name=VirtualMicrophone master=VirtualOutputDevice1.monitor source_properties=device.description="Virtual_Mic_to_emit_audio_from_VirtualOutputDevice1"
+
+# using module-combine-sink 
+load-module module-combine-sink sink_name=VirtualOutputDevice1+RealOutputDevices sink_properties=device.description="VirtualOutputDevice1+RealOutputDevices" slaves=alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp__sink,VirtualOutputDevice1
+
+# using module-loopback
 load-module module-loopback source=VirtualOutputDevice1.monitor sink="alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp__sink" latency_msec=1
 
-load-module module-remap-source source_name=VirtualMicrophone1 master=VirtualOutputDevice1.monitor source_properties=device.description="Virtual_Mic1_to_emit_audio_from_VirtualOutputDevice1"
 ```
 
 then run cmd:
 
 ```shell
+pulseaudio -k
+# or
 pulseaudio --kill && pulseaudio --start
 ```
 
