@@ -64,6 +64,10 @@ Purpose of this setup is to redirect audio from video conference applications (s
 
 To do that we have to create a virtual output device to receive audio from video conference applications, then using this new created virtual output device to redirect audio to 2 above destinations
 
+Using module-combine-sink (**recommended**)
+![](image-13.png)
+
+Using module-loopback
 ![](image-02.png)
 
 link to above image : https://app.diagrams.net/#G1DWy-Qx-jM86YOKDeggqrN43ccsJEKw5K#%7B%22pageId%22%3A%22U9tqt51FlupvkOq0WFdn%22%7D
