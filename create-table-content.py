@@ -34,6 +34,11 @@ with open('README.md', 'w+') as f:
     results = find_pattern("*.md", "programming")
     for _file in results:
         f.write("[{}]({})\n\n".format(os.path.basename(_file), _file))
+        
+    f.write("linux\n---\n\n")
+    results = find_pattern("*.md", "linux")
+    for _file in results:
+        f.write("[{}]({})\n\n".format(os.path.basename(_file), _file))
 
         
     # print(json.dumps(result, indent=4, sort_keys=True))
