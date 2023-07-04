@@ -245,3 +245,5 @@ https://endless.ersoft.org/pulseaudio-loopback/
 
 https://www.freedesktop.org/wiki/Software/PulseAudio/About/
 
+https://wiki.archlinux.org/title/PulseAudio/Examples
+
