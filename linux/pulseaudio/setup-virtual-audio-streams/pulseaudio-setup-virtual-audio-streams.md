@@ -14,7 +14,10 @@
     - [4.4.1. Setup directly in client application](#441-setup-directly-in-client-application)
     - [4.4.2. Setup using PulseAudio GUI](#442-setup-using-pulseaudio-gui)
   - [4.5. Other commands for troubleshooting](#45-other-commands-for-troubleshooting)
+- [Cancel echo](#cancel-echo)
 - [5. Permanently above setup](#5-permanently-above-setup)
+  - [Method 1: create command then add to autostart app (recommended)](#method-1-create-command-then-add-to-autostart-app-recommended)
+  - [Method 2: Add pulse default.pa file](#method-2-add-pulse-defaultpa-file)
 - [6. Reference](#6-reference)
 
 
@@ -205,9 +208,89 @@ reset pulseaudio: `pulseaudio --kill && pulseaudio --start`
 
 if you cannot hear from a real output device, using this command to check `alsamixer`
 
+# Cancel echo
+
+When using headset, the audio playback from any application on any output device will be captured by microphone of headset, to fix it we use module-echo-cancel. In our case, the new schema as below:
+
+![](image-14.png)
+
+reference:
+
+https://askubuntu.com/a/765024/1077704
+
+https://www.linuxuprising.com/2020/09/how-to-enable-echo-noise-cancellation.html
+
+https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/Modules/#module-echo-cancel
+
+https://docs.pipewire.org/page_module_echo_cancel.html#:~:text=The%20echo%2Dcancel%20module%20performs,video%20or%20audio%20conference%20applications.
+
 # 5. Permanently above setup
 
-Add below lines to file: 
+## Method 1: create command then add to autostart app (recommended)
+
+This is recommended method because it's easy to debug and test
+
+create a shell script file named `/home/xuananh/Dropbox/Work/Other/conf.d/pulseaudio/create_virtualoutput_and_virtual_mic.sh`, then add this command to autostart app, content of this file:
+
+```shell
+#!/bin/bash
+
+VIRTUAL_SINK=VirtualOutputDevice1
+REAL_SINK=alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp__sink
+COMBINED_SINK_NAME=${VIRTUAL_SINK}_RealOutputDevices
+
+MICROPHONE_HEDSET=alsa_input.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp__source
+MICROPHONE_BUITIN=alsa_input.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp_6__source
+
+# create virtual output device
+pacmd load-module module-null-sink \
+    sink_name=${VIRTUAL_SINK} \
+    sink_properties=device.description="${VIRTUAL_SINK}"
+
+# create virtual input device from virtual output dvice
+pacmd load-module module-virtual-source \
+    source_name=VirtualMicrophone \
+    master=${VIRTUAL_SINK}.monitor \
+    source_properties=device.description="Virtual_Mic_to_emit_audio_from_${VIRTUAL_SINK}"
+
+# stream audio from virtual output device to real output device
+pacmd load-module module-combine-sink \
+    sink_name=${COMBINED_SINK_NAME} \
+    sink_properties=device.description="${VIRTUAL_SINK}+RealOutputDevices" \
+    slaves=${REAL_SINK},${VIRTUAL_SINK}
+
+### ------ create source and sink tha cancel echo then set default to them
+# pacmd load-module module-echo-cancel source_name=EchoCancelSource sink_name=EchoCancelSink
+
+pacmd load-module module-echo-cancel \
+  sink_name=${VIRTUAL_SINK}_Headphone_EchoCancelSink \
+  sink_properties=device.description="${VIRTUAL_SINK}+Headphone+EchoCancelSink" \
+  sink_master=${COMBINED_SINK_NAME} \
+  source_name=WireHedset_mic_EchoCancel \
+  source_master=$MICROPHONE_HEDSET \
+  source_properties=device.description="WireHedset_mic_EchoCancel"
+
+VIRTUAL_SPEAKER_ECHOCANCEL_SINKS=${VIRTUAL_SINK}_Speaker_EchoCancelSink
+BUILIN_MIC_ECHOCANCEL_SOURCE=BuitIn_mic_EchoCancel
+pacmd load-module module-echo-cancel \
+  sink_name=$VIRTUAL_SPEAKER_ECHOCANCEL_SINKS \
+  sink_properties=device.description="${VIRTUAL_SINK}+Speaker+EchoCancelSink" \
+  sink_master=${COMBINED_SINK_NAME} \
+  source_name=$BUILIN_MIC_ECHOCANCEL_SOURCE \
+  source_master=$MICROPHONE_BUITIN \
+  source_properties=device.description="$BUILIN_MIC_ECHOCANCEL_SOURCE"
+
+
+### --- set default output and input devices
+### output is realdevice
+pacmd set-default-sink $VIRTUAL_SPEAKER_ECHOCANCEL_SINKS
+### input is built in speaker
+pacmd set-default-source $BUILIN_MIC_ECHOCANCEL_SOURCE
+
+# pulseaudio -k
+```
+
+## Method 2: Add pulse default.pa file
 
 ```shell
 sudo cp /etc/pulse/default.pa /etc/pulse/default.pa.bk
@@ -224,7 +307,6 @@ load-module module-combine-sink sink_name=VirtualOutputDevice1+RealOutputDevices
 
 # using module-loopback
 load-module module-loopback source=VirtualOutputDevice1.monitor sink="alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp__sink" latency_msec=1
-
 ```
 
 then run cmd:
