@@ -14,11 +14,12 @@
     - [4.4.1. Setup directly in client application](#441-setup-directly-in-client-application)
     - [4.4.2. Setup using PulseAudio GUI](#442-setup-using-pulseaudio-gui)
   - [4.5. Other commands for troubleshooting](#45-other-commands-for-troubleshooting)
-- [Cancel echo](#cancel-echo)
-- [5. Permanently above setup](#5-permanently-above-setup)
-  - [Method 1: create command then add to autostart app (recommended)](#method-1-create-command-then-add-to-autostart-app-recommended)
-  - [Method 2: Add pulse default.pa file](#method-2-add-pulse-defaultpa-file)
-- [6. Reference](#6-reference)
+- [5. Cancel echo](#5-cancel-echo)
+- [6. Create virtual input device directly from real sink](#6-create-virtual-input-device-directly-from-real-sink)
+- [7. Permanently above setup](#7-permanently-above-setup)
+  - [7.1. Method 1: create command then add to autostart app (recommended)](#71-method-1-create-command-then-add-to-autostart-app-recommended)
+  - [7.2. Method 2: Add pulse default.pa file](#72-method-2-add-pulse-defaultpa-file)
+- [8. Reference](#8-reference)
 
 
 # 1. Install
@@ -68,10 +69,10 @@ Purpose of this setup is to redirect audio from video conference applications (s
 To do that we have to create a virtual output device to receive audio from video conference applications, then using this new created virtual output device to redirect audio to 2 above destinations
 
 Using module-combine-sink (**recommended**)
-![](image-13.png)
+![Alt text](image-2.png)
 
 Using module-loopback
-![](image-02.png)
+![Alt text](image-3.png)
 
 link to above image : https://app.diagrams.net/#G1DWy-Qx-jM86YOKDeggqrN43ccsJEKw5K#%7B%22pageId%22%3A%22U9tqt51FlupvkOq0WFdn%22%7D
 
@@ -208,7 +209,7 @@ reset pulseaudio: `pulseaudio --kill && pulseaudio --start`
 
 if you cannot hear from a real output device, using this command to check `alsamixer`
 
-# Cancel echo
+# 5. Cancel echo
 
 When using headset, the audio playback from any application on any output device will be captured by microphone of headset, to fix it we use module-echo-cancel. In our case, the new schema as below:
 
@@ -224,9 +225,38 @@ https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/Modules/
 
 https://docs.pipewire.org/page_module_echo_cancel.html#:~:text=The%20echo%2Dcancel%20module%20performs,video%20or%20audio%20conference%20applications.
 
-# 5. Permanently above setup
+# 6. Create virtual input device directly from real sink
 
-## Method 1: create command then add to autostart app (recommended)
+![](image2.gif)
+
+as above image there are 2 methods to create a virtual input device, using `module-remap-source` or using `module-virtual-source`
+
+Bellows commands are using `module-remap-source`
+
+```shell
+
+### analog speaker
+pactl load-module module-remap-source \
+    source_name=V_Mic_remapped_from_usb_analog_speaker \
+    master=alsa_output.usb-Generic_USB_Audio_20210726905926-00.analog-stereo.monitor \
+    source_properties=device.description="V_Mic_remapped_from_usb_analog_speaker"
+
+### digital built in speaker
+pactl load-module module-remap-source \
+    source_name=Virtual_Microphone_remapped_from_digital_built_in_speaker \
+    master=alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp__sink.monitor \
+    source_properties=device.description="V_Mic_remapped_from_digital_built_in_speaker"
+
+### bluetooth speaker
+pactl load-module module-remap-source \
+    source_name=V_Mic_remapped_from_bluetooth_headset_speaker \
+    master=bluez_sink.74_45_CE_22_CC_55.handsfree_head_unit.monitor \
+    source_properties=device.description="V_Mic_remapped_from_bluetooth_headset_speaker"
+```
+
+# 7. Permanently above setup
+
+## 7.1. Method 1: create command then add to autostart app (recommended)
 
 This is recommended method because it's easy to debug and test
 
@@ -290,7 +320,7 @@ pacmd set-default-source $BUILIN_MIC_ECHOCANCEL_SOURCE
 # pulseaudio -k
 ```
 
-## Method 2: Add pulse default.pa file
+## 7.2. Method 2: Add pulse default.pa file
 
 ```shell
 sudo cp /etc/pulse/default.pa /etc/pulse/default.pa.bk
@@ -317,7 +347,7 @@ pulseaudio -k
 pulseaudio --kill && pulseaudio --start
 ```
 
-# 6. Reference
+# 8. Reference
 
 https://askubuntu.com/questions/257992/how-can-i-use-pulseaudio-virtual-audio-streams-to-play-music-over-skype
 
