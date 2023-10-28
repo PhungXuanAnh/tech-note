@@ -56,6 +56,7 @@ sed [tùy chọn] commands [file]
   - **sed s/pattern/replace_string/g file** : Thay thế tất cả các chuỗi tìm thấy trong mỗi dòng
   - **sed 1,3s/pattern/replace_string/g file** : Thay thế tất cả các lần xuất hiện chuỗi trong một loạt các dòng
   - **sed -i s/pattern/replace_string/g file** : Lưu các thay đổi để thay thế chuỗi trong cùng một tệp
+  - có thể thay thế ký tự / bằng ký tự khác trong trường hợp pattern có chưa ký tự / hoặc sử dụng biến môi trường, ví dụ: **sed -i "s|.venv/bin/isort|$isort_path|g" /home/xuananh/Downloads/pre-commit.sh**
 
 **Lưu ý**: Tùy chọn -i sử dụng một cách cẩn thận, vì không thể quay lại trạng thái trước khi thực hiện tuỳ chọn -i.
 
