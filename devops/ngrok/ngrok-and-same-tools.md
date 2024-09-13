@@ -7,11 +7,14 @@
   - [1.6. ngrok python](#16-ngrok-python)
   - [1.7. Document](#17-document)
 - [2. Other services sample ngrok](#2-other-services-sample-ngrok)
-  - [2.1. staqlab-tunnel](#21-staqlab-tunnel)
-    - [2.1.1. Install](#211-install)
-    - [2.1.2. Using](#212-using)
-  - [2.2. localtunnel](#22-localtunnel)
-  - [2.3. Other](#23-other)
+  - [2.1. cloudflare](#21-cloudflare)
+    - [2.1.1. install](#211-install)
+    - [2.1.2. using](#212-using)
+  - [2.2. staqlab-tunnel](#22-staqlab-tunnel)
+    - [2.2.1. Install](#221-install)
+    - [2.2.2. Using](#222-using)
+  - [2.3. localtunnel](#23-localtunnel)
+  - [2.4. Other](#24-other)
 
 
 # 1. Ngrok and same tools
@@ -64,11 +67,32 @@ https://ngrok.com/docs
 
 # 2. Other services sample ngrok
 
-## 2.1. staqlab-tunnel
+## 2.1. cloudflare
+
+### 2.1.1. install 
+
+Download deb file and install here: https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/#linux
+
+### 2.1.2. using
+
+```
+cloudflared tunnel --url http://localhost:3000
+```
+
+Visit the generated link and then do as guiden in this page to access your real page
+
+refer: 
+
+- https://developers.cloudflare.com/pages/how-to/preview-with-cloudflare-tunnel/#start-a-cloudflare-tunnel
+- https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-local-tunnel/
+
+
+
+## 2.2. staqlab-tunnel
 
 https://tunnel.staqlab.com/
 
-### 2.1.1. Install
+### 2.2.1. Install
 
 ```shell
 # ubuntu
@@ -86,7 +110,7 @@ chmod +x ~/.local/bin/staqlab-tunnel
 rm -rf staqlab-tunnel.zip
 ```
 
-### 2.1.2. Using
+### 2.2.2. Using
 
 ```shell
 staqlab-tunnel <port> hostname=<desired-domain>
@@ -96,11 +120,11 @@ staqlab-tunnel 8000 hostname=my-domain
 https://my-domain.staqlab-tunnel.com/
 ```
 
-## 2.2. localtunnel
+## 2.3. localtunnel
 
 https://github.com/localtunnel/localtunnel
 
-## 2.3. Other
+## 2.4. Other
 
 https://www.softwaretestinghelp.com/ngrok-alternatives/
 
