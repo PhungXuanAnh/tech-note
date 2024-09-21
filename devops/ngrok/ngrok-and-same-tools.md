@@ -75,8 +75,12 @@ Download deb file and install here: https://developers.cloudflare.com/cloudflare
 
 ### 2.1.2. using
 
-```
+```shell
 cloudflared tunnel --url http://localhost:3000
+
+# or run in background
+
+cloudflared tunnel --url http://localhost:8443 & disown
 ```
 
 Visit the generated link and then do as guiden in this page to access your real page
