@@ -56,5 +56,8 @@ https://github.com/coder/code-server/discussions/5063
 
 1. Add your publish key `id_rsa.pub` to authorized_keys
 2. Inside docker container in the below command to ssh to host:
-   1. Linux: `ssh DOCKER_HOST_USERNAME@172.17.0.1` -i /.ssh/id_rsa
-   2. Mac: `ssh DOCKER_HOST_USERNAME@host.docker.internal` -i /.ssh/id_rsa
+   1. Linux: `ssh -o "IdentitiesOnly=yes" DOCKER_HOST_USERNAME@172.17.0.1` -i /.ssh/id_rsa
+   2. Mac: `ssh -o "IdentitiesOnly=yes" DOCKER_HOST_USERNAME@host.docker.internal` -i /.ssh/id_rsa
+
+Reference: 
+    https://medium.com/cloud-native-daily/ssh-to-docker-host-from-docker-container-e8ee0965802
