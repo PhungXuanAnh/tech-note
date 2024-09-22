@@ -2,6 +2,7 @@
 - [2. start code server](#2-start-code-server)
 - [3. setup copilot](#3-setup-copilot)
 - [4. Troubeshot](#4-troubeshot)
+- [5. SSH to host from inside container](#5-ssh-to-host-from-inside-container)
 
 
 # 1. preprare workspace
@@ -22,7 +23,7 @@ Access code server in this link: http://localhost:8443
 
 Install copilot from VSIX file as below image:
 
-![alt text](image.png)
+![alt text](readme_img/image.png)
 ![alt text](readme_img/image-1.png)
 
 install copilot first, and then install copilot chat
@@ -51,3 +52,9 @@ https://www.vsixhub.com/vsix/144782/
 
 https://github.com/coder/code-server/discussions/5063
 
+# 5. SSH to host from inside container
+
+1. Add your publish key `id_rsa.pub` to authorized_keys
+2. Inside docker container in the below command to ssh to host:
+   1. Linux: `ssh DOCKER_HOST_USERNAME@172.17.0.1` -i /.ssh/id_rsa
+   2. Mac: `ssh DOCKER_HOST_USERNAME@host.docker.internal` -i /.ssh/id_rsa

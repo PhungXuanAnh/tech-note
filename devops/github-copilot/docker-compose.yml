@@ -1,6 +1,9 @@
 services:
   code-server:
-    image: lscr.io/linuxserver/code-server:4.92.2-ls231
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: code-server:with-ssh
     environment:
       - PUID=1000
       - PGID=1000
@@ -13,5 +16,6 @@ services:
       - DEFAULT_WORKSPACE=/config/workspace #optional
     volumes:
       - ./:/config/workspace/
+      - ~/.ssh/:/.ssh:ro
     ports:
       - 8443:8443
