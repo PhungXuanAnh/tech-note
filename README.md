@@ -42,7 +42,9 @@ devops
 
 [git-command.md](devops/git/git-command.md)
 
-[run-github-copilot-in-code-server.md](devops/github-copilot/run-github-copilot-in-code-server.md)
+[run-github-copilot-in-code-server.md](devops/github-copilot/run-github-copilot-in-code-server/run-github-copilot-in-code-server.md)
+
+[log-in-github-copilot-in-other-instance-of-vscode.md](devops/github-copilot/log-in-github-copilot-in-other-instance-of-vscode/log-in-github-copilot-in-other-instance-of-vscode.md)
 
 [jenkins-docker-ansible.md](devops/ci-cd/jenkins-docker-ansible.md)
 
