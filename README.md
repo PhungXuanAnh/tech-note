@@ -36,6 +36,8 @@ devops
 
 [git-fork.md](devops/git/git-fork.md)
 
+[git-Changing-the-message-of-older-or-multiple-commit-messages.md](devops/git/git-Changing-the-message-of-older-or-multiple-commit-messages.md)
+
 [git-merge-vs-git-rebase.md](devops/git/git-merge-vs-git-rebase.md)
 
 [git-undo-commit-or-remove-commit.md](devops/git/git-undo-commit-or-remove-commit.md)
