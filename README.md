@@ -94,6 +94,8 @@ devops
 
 [slack_slash_command.md](devops/slack/slack_slash_command.md)
 
+[slack_interactive_message_integration.md](devops/slack/slack_interactive_message_integration.md)
+
 [deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md](devops/monitor/deploy-grafana-influxdb-telegraf-or-collectd-using-docker.md)
 
 [prometheus.md](devops/monitor/prometheus.md)
