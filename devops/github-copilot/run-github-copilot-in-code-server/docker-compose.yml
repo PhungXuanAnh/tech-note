@@ -17,5 +17,6 @@ services:
     volumes:
       - ./:/config/workspace/
       - ~/.ssh/:/.ssh:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 8443:8443
