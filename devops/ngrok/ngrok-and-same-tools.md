@@ -10,6 +10,7 @@
   - [2.1. cloudflare](#21-cloudflare)
     - [2.1.1. install](#211-install)
     - [2.1.2. using](#212-using)
+    - [2.1.3. tunnel tcp traffic](#213-tunnel-tcp-traffic)
   - [2.2. staqlab-tunnel](#22-staqlab-tunnel)
     - [2.2.1. Install](#221-install)
     - [2.2.2. Using](#222-using)
@@ -90,7 +91,9 @@ refer:
 - https://developers.cloudflare.com/pages/how-to/preview-with-cloudflare-tunnel/#start-a-cloudflare-tunnel
 - https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-local-tunnel/
 
+### 2.1.3. tunnel tcp traffic
 
+https://ryan-schachte.com/blog/cf_tunnel_tcp/
 
 ## 2.2. staqlab-tunnel
 
