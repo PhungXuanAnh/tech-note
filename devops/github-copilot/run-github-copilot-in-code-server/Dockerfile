@@ -1,7 +1,8 @@
 FROM lscr.io/linuxserver/code-server:4.92.2-ls231
 
 RUN apt update && apt install -y \
-    openssh-client telnet iputils-ping
+    openssh-client telnet iputils-ping \
+    build-essential
 
 # Install docker client only, reference: https://docs.docker.com/engine/install/ubuntu/
 RUN  apt-get update && \
@@ -15,3 +16,7 @@ RUN  apt-get update && \
      tee /etc/apt/sources.list.d/docker.list > /dev/null && \
   apt-get update && \
   apt install -y docker-ce-cli
+
+RUN groupadd docker
+# RUN useradd -m abc
+RUN usermod -aG docker abc
