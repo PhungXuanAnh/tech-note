@@ -17,6 +17,8 @@ RUN  apt-get update && \
   apt-get update && \
   apt install -y docker-ce-cli
 
-RUN groupadd docker
-# RUN useradd -m abc
-RUN usermod -aG docker abc
+# RUN groupadd -g 999 docker
+# NOTE: 999 is the docker group id of the host machine, obtained by running `getent group docker`
+# if there's no group with id 999 in the container, you can create it by uncommenting the above line
+# another way is run chmod 777 /var/run/docker.sock, but it's not recommended
+RUN usermod -aG 999 abc

@@ -17,6 +17,6 @@ services:
     volumes:
       - ./:/config/workspace/
       # - ~/.ssh/:/.ssh:ro
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock # NOTE: if permission denied, read Dockerfile to fix it
     ports:
       - 8443:8443
