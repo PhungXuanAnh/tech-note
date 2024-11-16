@@ -12,7 +12,7 @@ In the above flow, after create ssh tunnels from PC1 and PC2 to remote server, t
 
 # 2. Remote Forwarding
 
-Remote Forwarding allows anyone on the remote server to connect to TCP port 22 of PC2 through port 2222 on the remote server
+Remote Forwarding allows anyone on the remote server to connect to TCP port 22 of PC2 through port 2222 on the remote server. [See more here](https://www.ssh.com/academy/ssh/tunneling-example#remote-forwarding)
 
 ```shell
 PC2_HOST=localhost
@@ -32,7 +32,7 @@ ssh -R 2222:localhost:22 ubuntu@3.210.251.138
 
 # 3. Local Forwarding
 
-Local forwarding is used to forward a port from the client machine to a port on the server machine. In this example we are forwording traffic from port 3333 in PC1 to port 2222 in the server
+Local forwarding is used to forward a port from the client machine to a port on the server machine. In this example we are forwording traffic from port 3333 in PC1 to port 2222 in the server. [See more here](https://www.ssh.com/academy/ssh/tunneling-example#local-forwarding)
 
 ```shell
 PC1_HOST=localhost
