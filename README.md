@@ -112,7 +112,7 @@ devops
 
 [digitalocean_cli.md](devops/digitalocean/digitalocean_cli.md)
 
-[ssh_tunnel.md](devops/ssh/ssh_tunnel.md)
+[ssh_tunnel.md](devops/ssh/ssh_tunnel/ssh_tunnel.md)
 
 [rsync.md](devops/rsync/rsync.md)
 

@@ -1,41 +1,64 @@
-- [1. Types of server](#1-types-of-server)
-- [2. Local Forwarding](#2-local-forwarding)
-- [3. reference](#3-reference)
+- [1. Diagram](#1-diagram)
+- [2. Remote Forwarding](#2-remote-forwarding)
+- [3. Local Forwarding](#3-local-forwarding)
+- [4. reference](#4-reference)
 
-# 1. Types of server
+# 1. Diagram
 
-LOCAL SERVER - SSH SERVER - DESTINATION SERVER 
-                tunnel
-LOCAL SERVER ============== DESTINATION SERVER
+![alt text](image.gif)
+[Link to this flow](https://drive.google.com/file/d/1128e6AAZQdWvPZPdr9xcEj1-A9HLOnC_/view?usp=drive_link)
 
-# 2. Local Forwarding
+In the above flow, after create ssh tunnels from PC1 and PC2 to remote server, then we can ssh from PC1 to PC2 through these tunnels by command `ssh PC_2_user@localhost:3333`. See below explanation
 
-This example opens a connection to the **gw.example.com** jump server, and forwards any connection to port **80** on the local machine to port **80** on **intra.example.com**.
+# 2. Remote Forwarding
+
+Remote Forwarding allows anyone on the remote server to connect to TCP port 22 of PC2 through port 2222 on the remote server
 
 ```shell
-LOCAL_HOST=localhost    # 192.168.1.2
-LOCAL_PORT=8001
-DESTINATION_HOST=intra.example
-DESTINATION_PORT=80
-SSH_HOST=gw.example.com
-SSH_USER=user
-ssh $SSH_USER@$SSH_HOST \
+PC2_HOST=localhost
+PC1_PORT=22
+SERVER_HOST=localhost # any address that is accessible on server, 
+                         # if not sepcify this addess, its default is localhost
+SERVER_PORT=2222
+SERVER_PUBLIC_ADDRESS=public.example.com
+SERVER_USER=user
+ssh $SERVER_USER@$SERVER_PUBLIC_ADDRESS \
+    -fN \
+    -R $SERVER_HOST:$SERVER_PORT:$PC2_HOST:$PC2_PORT
+
+# or simply 
+ssh -R 2222:localhost:22 ubuntu@3.210.251.138
+```
+
+# 3. Local Forwarding
+
+Local forwarding is used to forward a port from the client machine to a port on the server machine. In this example we are forwording traffic from port 3333 in PC1 to port 2222 in the server
+
+```shell
+PC1_HOST=localhost
+PC1_PORT=3333
+SERVER_HOST=localhost # any address that is accessible on server, 
+                         # if not sepcify this addess, its default is localhost
+SERVER_PORT=2222
+SERVER_PUBLIC_ADDRESS=public.example.com
+SERVER_USER=user
+ssh $SERVER_USER@$SERVER_PUBLIC_ADDRESS \
     -o ExitOnForwardFailure=yes \
     -o UserKnownHostsFile=/dev/null \
     -o StrictHostKeyChecking=no \
     -fN \
-    -L $LOCAL_PORT:$DESTINATION_HOST:$DESTINATION_PORT
+    -L $PC1_PORT:$SERVER_HOST:$SERVER_PORT
 
 # or specify local host
-ssh $SSH_USER@$SSH_HOST \
+ssh $SERVER_USER@$SERVER_PUBLIC_ADDRESS \
     -o ExitOnForwardFailure=yes \
     -o UserKnownHostsFile=/dev/null \
     -o StrictHostKeyChecking=no \
     -fN \
-    -L $LOCAL_HOST:$LOCAL_PORT:$DESTINATION_HOST:$DESTINATION_PORT
+    -L $PC1_HOST:$PC1_PORT:$SERVER_HOST:$SERVER_PORT
     
 # test:
-telnet localhost $LOCAL_PORT <<EOF
+telnet localhost $PC1_PORT <<EOF
 ls
 EOF
 ```
@@ -74,7 +97,7 @@ ssh xuananh@localhost \
 
 ```
 
-# 3. reference
+# 4. reference
 
 https://www.ssh.com/academy/ssh/tunneling
 
