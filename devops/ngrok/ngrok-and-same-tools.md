@@ -19,6 +19,9 @@
 
 
 # 1. Ngrok and same tools
+
+You can share everything using ngrok, see this link: https://ngrok.com/blog-post/everything-you-can-tunnel-with-ngrok
+
 ## 1.1. Install
 
 Se in file: new-os-install.sh
