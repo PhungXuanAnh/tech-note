@@ -25,32 +25,67 @@ Se in file: new-os-install.sh
 
 ## 1.2. Add token
 
-Get token from [here](https://dashboard.ngrok.com/auth)
+Get token from [here](https://dashboard.ngrok.com/get-started/your-authtoken)
 
-`ngrok authtoken <token>`
+`ngrok config add-authtoken $YOUR_AUTHTOKEN`
 
-Or add to ngrok.yml
+Or add to [ngrok.yml](https://ngrok.com/docs/agent/config/v3/#example-configuration-files)
 
 ## 1.3. sample how to run
 
 
 ```shell
-ngrok http 80
-# or
-ngrok http --region=us --host-header=rewrite 4200
-# or secify a domain
-ngrok http --region=us --host-header=site1.dev 4200
-ngrok http --region=us --hostname *.example.com 80
-ngrok http 192.168.1.1:8080
-ngrok http -config=/opt/ngrok/conf/ngrok.yml 8000
-ngrok start -config ~/ngrok.yml -config ~/projects/example/ngrok.yml demo admin
+ngrok tcp 5432                              # forword TCP traffic to port 5432 in localhost 
+ngrok http 8080                             # forward ngrok subdomain to port 80
+ngrok http example.com:9000                 # forward traffic to example.com:9000
+ngrok http --url=bar.ngrok.dev 80           # request url name: 'bar.ngrok.dev'
+ngrok http --url=example.com 1234           # request endpoint 'example.com' (DNS CNAME)
+ngrok http --basic-auth='falken:joshua' 80  # enforce basic auth on tunnel endpoint
+ngrok http --host-header=example.com 80     # rewrite the Host header to 'example.com'
+ngrok http file:///var/log                  # serve local files in /var/log
+ngrok http https://localhost:8443           # forward to a local https server
 ```
+
+or if your configuration file content as below:
+
+```yml
+# Version of the ngrok Agent Configuration file. Required.
+version: 3
+
+# Agent Configuration
+agent:
+  authtoken: 4nq9771bPxe8ctg7LKr_2ClH7Y15Zqe4bWLWF9p
+
+# Endpoint Definitions
+endpoints:
+  - name: basic
+    url: basic.ngrok.app
+    upstream:
+      url: 8080
+  - name: httpbin
+    url: https://alan-httpbin.ngrok.dev
+    upstream:
+      url: 8080
+  - name: demo
+    url: https://demo.inconshreveable.com
+    upstream:
+      url: 8181
+  - name: ssh
+    url: tcp://1.tcp.ngrok.io:12345
+    upstream:
+      url: 22
+  - name: demo-2
+    url: tls://myexample.ngrok.app
+    upstream:
+      url: 443
+```
+
+you can start endpoint named `basic` by command: `ngrok start basic`
+
 
 ## 1.4. Configuration file
 
-https://ngrok.com/docs#config-examples
-
-https://www.dropbox.com/s/l94bvbo7cwu5qrl/ngrok.yml
+https://ngrok.com/docs/agent/config/v3/#example-configuration-files
 
 ## 1.5. Ngrok api client
 
