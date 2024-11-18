@@ -49,6 +49,12 @@ ngrok http file:///var/log                  # serve local files in /var/log
 ngrok http https://localhost:8443           # forward to a local https server
 ```
 
+## 1.4. Configuration file
+
+https://ngrok.com/docs/agent/config/v3/#example-configuration-files
+
+**NOTE**: you cannot run 2 ngrok commands at the same time because it will create 2 agents, the free account is limitted to 1 agents to overcome this, we can use ngrok config file to define multiple endpoints/tunnels in one agent
+
 or if your configuration file content as below:
 
 ```yml
@@ -84,11 +90,6 @@ endpoints:
 ```
 
 you can start endpoint named `basic` by command: `ngrok start basic`
-
-
-## 1.4. Configuration file
-
-https://ngrok.com/docs/agent/config/v3/#example-configuration-files
 
 ## 1.5. Ngrok api client
 
