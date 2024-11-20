@@ -155,6 +155,8 @@ programming
 
 [markdown.md](programming/markdown/markdown.md)
 
+[pydev_eclipse_liclipse.md](programming/python/pydev_eclipse_liclipse/pydev_eclipse_liclipse.md)
+
 [jwt.md](programming/jwt/jwt.md)
 
 [css-basic-to-advance.md](programming/css/css-basic-to-advance.md)
