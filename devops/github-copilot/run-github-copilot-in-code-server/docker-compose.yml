@@ -21,6 +21,8 @@ services:
                               # ssh host-user@host.docker.internal (MAC) 
                               # to connect to host
                               # refer to https://medium.com/cloud-native-daily/ssh-to-docker-host-from-docker-container-e8ee0965802
+                              # NOTE: to enable ssh by key, you need to add ssh public key to ~/.ssh/authorized_keys
+                              # refer to https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server
       - /var/run/docker.sock:/var/run/docker.sock # NOTE: if permission denied, read Dockerfile to fix it
     ports:
       - 8443:8443
