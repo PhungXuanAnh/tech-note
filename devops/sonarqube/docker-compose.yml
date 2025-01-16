@@ -1,0 +1,51 @@
+# https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/install-the-server/installing-sonarqube-from-docker/
+
+x-default: &default_sonarqube
+  env_file:
+    - ./env_file.sonarqube
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10M"
+      max-file: "3"
+  networks:
+    - sonarqube-network
+
+services:
+  sonarqube:
+    <<: *default_sonarqube
+    image: sonarqube:25.1.0.102122-community
+    ports:
+      - 9000:9000
+    volumes:
+      # - ./plugins:/opt/sonarqube/extensions/plugins
+      - ./tmp/data:/opt/sonarqube/data
+      - ./tmp/logs:/opt/sonarqube/logs
+    depends_on:
+      - postgres
+    # --------------- for debug container ------------------------
+    # user: root
+    # entrypoint: bash
+    # command:
+    #   - -c
+    #   - |
+    #     apt update && apt install -y iputils-ping
+    #     while true; do echo "this is test command"; sleep 1; done
+
+  postgres:
+    <<: *default_sonarqube
+    image: postgres:latest
+    ports:
+      - 5433:5432
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+
+networks:
+  sonarqube-network:
+    driver: bridge
+
+volumes:
+  postgresql_data:
