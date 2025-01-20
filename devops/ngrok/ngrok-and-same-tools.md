@@ -132,7 +132,39 @@ refer:
 
 ### 2.1.3. tunnel tcp traffic
 
-https://ryan-schachte.com/blog/cf_tunnel_tcp/
+Download [websocat](https://github.com/vi/websocat/releases/download/v1.13.0/websocat.x86_64-unknown-linux-musl) in server and PC
+
+```
+chmod +x websocat.x86_64-unknown-linux-musl
+mv websocat.x86_64-unknown-linux-musl ~/.local/bin
+```
+
+Open new terminal.
+
+On the server behind the firewall:
+
+```
+### Start a WS <-> TCP forwarder
+websocat -E -b ws-l:127.0.0.1:40008 tcp:127.0.0.1:22 &
+### Create a free CF Tunnel:
+cloudflared tunnel --url http://localhost:40008 --no-autoupdate
+
+```
+
+The CF tunnel will show you an URL similar to this one:
+
+![alt text](image.png)
+
+On your workstation:
+
+```
+### Start a TCP <-> WS forwarder to above URL
+websocat -E -b tcp-l:127.0.0.1:2222 ws://<YourUrlFromAbove>.trycloudflare.com &
+### Connect using SSH:
+ssh -p 2222 root@127.0.0.1
+```
+
+https://iq.thc.org/tunnel-via-cloudflare-to-any-tcp-service
 
 ## 2.2. staqlab-tunnel
 
