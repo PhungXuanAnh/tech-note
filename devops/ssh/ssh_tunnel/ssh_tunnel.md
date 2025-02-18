@@ -17,7 +17,7 @@ Remote Forwarding allows anyone on the remote server to connect to TCP port 22 o
 
 ```shell
 PC2_HOST=localhost
-PC1_PORT=22
+PC2_PORT=22
 SERVER_HOST=localhost # any address that is accessible on server, 
                          # if not sepcify this addess, its default is localhost
 SERVER_PORT=2222
