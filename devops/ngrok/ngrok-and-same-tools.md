@@ -12,7 +12,7 @@
     - [2.1.2. using](#212-using)
     - [2.1.3. tunnel a tcp port](#213-tunnel-a-tcp-port)
     - [2.1.4. tunnel any tcp ports](#214-tunnel-any-tcp-ports)
-      - [2.1.4.1. in marchine A](#2141-in-marchine-a)
+      - [2.1.4.1. in machine A](#2141-in-machine-a)
       - [2.1.4.2. in machine B](#2142-in-machine-b)
       - [2.1.4.3. Example of using proxy and how it works](#2143-example-of-using-proxy-and-how-it-works)
   - [2.2. staqlab-tunnel](#22-staqlab-tunnel)
@@ -172,11 +172,11 @@ https://iq.thc.org/tunnel-via-cloudflare-to-any-tcp-service
 
 ### 2.1.4. tunnel any tcp ports
 
+Reference: https://iq.thc.org/tunnel-via-cloudflare-to-any-tcp-service
+
 ![alt text](image-2.png)
 
-Download [websocat](https://github.com/vi/websocat/releases/download/v1.13.0/websocat.x86_64-unknown-linux-musl) in server and PC
-
-#### 2.1.4.1. in marchine A
+#### 2.1.4.1. in machine A
 
 Install `gost`
 
