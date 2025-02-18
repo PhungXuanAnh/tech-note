@@ -10,7 +10,11 @@
   - [2.1. cloudflare](#21-cloudflare)
     - [2.1.1. install](#211-install)
     - [2.1.2. using](#212-using)
-    - [2.1.3. tunnel tcp traffic](#213-tunnel-tcp-traffic)
+    - [2.1.3. tunnel a tcp port](#213-tunnel-a-tcp-port)
+    - [2.1.4. tunnel any tcp ports](#214-tunnel-any-tcp-ports)
+      - [2.1.4.1. in marchine A](#2141-in-marchine-a)
+      - [2.1.4.2. in machine B](#2142-in-machine-b)
+      - [2.1.4.3. Example of using proxy and how it works](#2143-example-of-using-proxy-and-how-it-works)
   - [2.2. staqlab-tunnel](#22-staqlab-tunnel)
     - [2.2.1. Install](#221-install)
     - [2.2.2. Using](#222-using)
@@ -130,13 +134,13 @@ refer:
 - https://developers.cloudflare.com/pages/how-to/preview-with-cloudflare-tunnel/#start-a-cloudflare-tunnel
 - https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-local-tunnel/
 
-### 2.1.3. tunnel tcp traffic
+### 2.1.3. tunnel a tcp port
 
 Download [websocat](https://github.com/vi/websocat/releases/download/v1.13.0/websocat.x86_64-unknown-linux-musl) in server and PC
 
 ```
 chmod +x websocat.x86_64-unknown-linux-musl
-mv websocat.x86_64-unknown-linux-musl ~/.local/bin
+mv websocat.x86_64-unknown-linux-musl ~/.local/bin/websocat
 ```
 
 Open new terminal.
@@ -165,6 +169,84 @@ ssh -p 2222 root@127.0.0.1
 ```
 
 https://iq.thc.org/tunnel-via-cloudflare-to-any-tcp-service
+
+### 2.1.4. tunnel any tcp ports
+
+![alt text](image-2.png)
+
+Download [websocat](https://github.com/vi/websocat/releases/download/v1.13.0/websocat.x86_64-unknown-linux-musl) in server and PC
+
+#### 2.1.4.1. in marchine A
+
+Install `gost`
+
+```shell
+sudo snap install core
+sudo snap install gost
+```
+
+Run below command. This command instructs gost to listen on port 40009 using the mws protocol, waiting for incoming connections from clients that support the WebSocket-based MWS protocol.
+
+```shell
+gost -L mws://:40009
+```
+
+Continue run below command to expose a local service to the internet securely through Cloudflare's network
+
+```shell
+cloudflared tunnel --url http://localhost:40009 --no-autoupdate
+```
+
+#### 2.1.4.2. in machine B
+
+Install `gost` and `proxychains`
+
+```shell
+sudo snap install core
+sudo snap install gost
+sudo apt -y install proxychains
+```
+
+Run below command to create a proxy on a different computer (say, Computer B) and connect it to the Cloudflare Tunnel that was set up earlier on Computer A
+
+```
+gost -L :1080 -F 'mwss://<YourUrlFromAbove>.trycloudflare.com:443'
+```
+
+Create a ProxyChains configuration, to use created proxy in the previous command
+
+```
+echo -e "[ProxyList]\nsocks5 127.0.0.1 1080" >pc.conf
+```
+
+Now, you can use `proxychains -f pc.conf -q <command>` to make any traffic from Machine B appear as if it comes from Machine A.
+
+
+```shell
+# SSH to 192.168.1.1 via the tunnel
+proxychains -f pc.conf -q ssh root@192.168.1.1  # remove -q if you don't want to run in quite mode
+
+# open a web in chrome via the tunnel
+google-chrome --proxy-server="socks5://127.0.0.1:1080" "https://web.dev.showheroes.com/app/backoffice/video-adsources/"
+```
+
+#### 2.1.4.3. Example of using proxy and how it works
+
+1. Computer A (Machine A): You are running the gost proxy on this machine, and you expose it via a Cloudflare Tunnel. Computer A has knowledge of Machine C's IP (192.168.1.1), meaning it can directly communicate with Machine C over the local network or within the same environment.
+
+2. Computer B (Machine B): You're trying to initiate an SSH connection to Machine C from Computer B, but Computer B doesn't know Machine C's IP. It only knows how to connect to the Cloudflare Tunnel set up by Machine A.
+
+3. The flow of traffic:
+
+- When you run the ssh command from Computer B with proxychains (which uses the SOCKS5 proxy), the traffic will first go to Computer B's local gost proxy (on port 1080).
+- gost on Computer B then forwards this traffic through the Cloudflare Tunnel established by Machine A.
+- Once the traffic reaches Machine A, the gost proxy there forwards the SSH request to Machine C (which it can directly access on 192.168.1.1).
+- Machine C then responds to the SSH request through the same path (via Machine A and the Cloudflare Tunnel) back to Computer B.
+
+**Summary of your flow:**
+
+- Machine A (through the Cloudflare Tunnel and gost) acts as a middleman to forward traffic between Machine B (which initiates the SSH request) and Machine C (which is the destination machine).
+- Machine B's SSH traffic appears to come from Machine A, and Machine C sees the request as coming from Machine A via the Cloudflare Tunnel, not directly from Machine B.
 
 ## 2.2. staqlab-tunnel
 
