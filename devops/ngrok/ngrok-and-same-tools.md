@@ -197,6 +197,8 @@ Continue run below command to expose a local service to the internet securely th
 cloudflared tunnel --url http://localhost:40009 --no-autoupdate
 ```
 
+**NOTE**: you can use other services to expose this proxy, for example: ngrok, or ssh tunnel. As long as it provide an address that you can use to connect from other computer
+
 #### 2.1.4.2. in machine B
 
 Install `gost` and `proxychains`
