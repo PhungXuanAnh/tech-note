@@ -102,6 +102,8 @@ devops
 
 [stress-test-cpu-memory-network.md](devops/monitor/stress-test-cpu-memory-network.md)
 
+[Readme.md](devops/sonarqube/Readme.md)
+
 [vagrant-multiple-vm.md](devops/vagrant/vagrant-multiple-vm.md)
 
 [vagrant-and-virtual-box.md](devops/vagrant/vagrant-and-virtual-box.md)
@@ -195,4 +197,10 @@ linux
 ---
 
 [pulseaudio-setup-virtual-audio-streams.md](linux/pulseaudio/setup-virtual-audio-streams/pulseaudio-setup-virtual-audio-streams.md)
+
+[virtual-camera.md](linux/virtual-camera/virtual-camera.md)
+
+[LICENSE.md](linux/virtual-camera/.venv/lib/python3.11/site-packages/numpy/random/LICENSE.md)
+
+[AUTHORS.md](linux/virtual-camera/.venv/lib/python3.11/site-packages/black-25.1.0.dist-info/licenses/AUTHORS.md)
 
