@@ -173,7 +173,7 @@ set_lag_mode() {
            -framerate 30 \
            -video_size 1280x720 \
            -i "$REAL_CAMERA" \
-           -vf "fps=5,setpts=2.0*PTS" \
+           -vf "fps=4,setpts=2.5*PTS" \
            -pix_fmt yuv420p \
            -f v4l2 \
            -threads 2 \
