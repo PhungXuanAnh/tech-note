@@ -171,7 +171,7 @@ echo "v4l2loopback" | sudo tee /etc/modules-load.d/v4l2loopback.conf > /dev/null
 
 # Create the module options file
 echo "Setting module parameters..."
-echo 'options v4l2loopback video_nr=3 card_label="Virtual Camera" exclusive_caps=1' | sudo tee /etc/modprobe.d/v4l2loopback.conf > /dev/null
+echo 'options v4l2loopback video_nr=3 card_label="Virtual Camera" exclusive_caps=1 max_buffers=2' | sudo tee /etc/modprobe.d/v4l2loopback.conf > /dev/null
 
 # Update initramfs
 echo "Updating initramfs..."
@@ -179,7 +179,7 @@ sudo update-initramfs -u
 
 # Load the module now
 echo "Loading v4l2loopback module..."
-sudo modprobe v4l2loopback video_nr=3 card_label="Virtual Camera" exclusive_caps=1 || true
+sudo modprobe v4l2loopback video_nr=3 card_label="Virtual Camera" exclusive_caps=1 max_buffers=2 || true
 
 # Verify if loaded
 if lsmod | grep -q v4l2loopback; then
@@ -234,8 +234,19 @@ EOL
 
 chmod +x ~/.local/share/applications/Camera_Freeze_Toggle.desktop
 
-# Step 6: Set up autostart
-echo -e "\n${BOLD}Step 6: Setting up autostart...${RESET}"
+# Step 6: Add user to video group for camera access
+echo -e "\n${BOLD}Step 6: Setting up permissions...${RESET}"
+echo "Adding current user to the video group for camera access..."
+if groups | grep -q video; then
+    echo -e "${GREEN}User already belongs to the video group.${RESET}"
+else
+    sudo usermod -a -G video $USER
+    echo -e "${YELLOW}Added user to the video group. This change requires logging out and back in to take effect.${RESET}"
+    echo "You may need to restart your system or log out and back in for the changes to take effect."
+fi
+
+# Step 7: Set up autostart
+echo -e "\n${BOLD}Step 7: Setting up autostart...${RESET}"
 
 # Create autostart directory if it doesn't exist
 mkdir -p ~/.config/autostart
@@ -244,8 +255,8 @@ mkdir -p ~/.config/autostart
 echo "Setting up autostart for Camera Control..."
 cp "${CURRENT_DIR}/Camera_Control.desktop" ~/.config/autostart/
 
-# Step 7: Update script configuration
-echo -e "\n${BOLD}Step 7: Updating script configuration...${RESET}"
+# Step 8: Update script configuration
+echo -e "\n${BOLD}Step 8: Updating script configuration...${RESET}"
 
 # Get real camera device
 REAL_CAMERA=$(v4l2-ctl --list-devices 2>/dev/null | grep -A2 "Integrated Camera\|Webcam" | grep "/dev/video" | head -n1 | xargs) || true
@@ -290,6 +301,8 @@ echo -e "${YELLOW}Important:${RESET}"
 echo "1. Camera will start automatically at login"
 echo "2. To freeze/unfreeze the camera, use the 'Camera Freeze Toggle' option from your applications menu"
 echo "3. When using video conferencing apps, select 'Virtual Camera' from the camera list"
+echo "4. You may need to log out and log back in for the video group permissions to take effect"
+echo "5. If your camera doesn't work in web browsers, try restarting the virtual camera service"
 echo ""
 
 # Show additional warning if Secure Boot is enabled

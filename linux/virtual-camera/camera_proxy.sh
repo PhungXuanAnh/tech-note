@@ -3,21 +3,21 @@
 # Configuration
 REAL_CAMERA="/dev/video0"
 VIRTUAL_CAMERA="/dev/video3"
-LOCK_FILE="/tmp/camera_frozen.lock"
-SNAPSHOT_FILE="/tmp/camera_snapshot.jpg"
-FFMPEG_PROXY_PID_FILE="/tmp/ffmpeg_camera_proxy.pid"
-FFMPEG_FREEZE_PID_FILE="/tmp/ffmpeg_camera_freeze.pid"
+LOCK_FILE="/tmp/camera_mode.lock"
+FFMPEG_PID_FILE="/tmp/ffmpeg_camera.pid"
+CONFIG_FILE="/tmp/camera_config.txt"
 
 # Show help function
 show_help() {
-    echo "Camera Control Script - Freeze and unfreeze your camera"
+    echo "Camera Control Script - Normal and lag simulation for virtual camera"
     echo ""
     echo "Usage: $0 [OPTION]"
     echo ""
     echo "Options:"
     echo "  start             Start the camera proxy (streaming from real to virtual camera)"
-    echo "  freeze            Freeze the camera on current frame"
-    echo "  <no arguments>    Toggle between frozen and unfrozen state"
+    echo "  lag               Enable lag simulation mode (slow motion and delay)"
+    echo "  normal            Return to normal camera mode"
+    echo "  <no arguments>    Toggle between normal and lag simulation mode"
     echo "  stop              Stop all processes related to the camera proxy"
     echo "  status            Show the current status of camera proxies"
     echo "  -h, --help        Display this help message and exit"
@@ -28,8 +28,9 @@ show_help() {
     echo ""
     echo "Examples:"
     echo "  $0 start          # Start streaming from real to virtual camera"
-    echo "  $0 freeze         # Freeze the camera on the current frame"
-    echo "  $0                # Toggle between frozen and unfrozen"
+    echo "  $0 lag            # Enable lag simulation mode"
+    echo "  $0 normal         # Return to normal mode"
+    echo "  $0                # Toggle between normal and lag mode"
     echo "  $0 stop           # Stop all processes"
     echo ""
     exit 0
@@ -49,7 +50,7 @@ check_dependencies() {
         # Unload if it exists with wrong parameters
         sudo modprobe -r v4l2loopback 2>/dev/null
         # Load with card_label parameter for a friendly name
-        sudo modprobe v4l2loopback card_label="Virtual Camera" exclusive_caps=1
+        sudo modprobe v4l2loopback card_label="Virtual Camera" exclusive_caps=1 max_buffers=2
         
         if [ $? -ne 0 ]; then
             echo "Failed to load v4l2loopback module. Please install it first with:"
@@ -77,133 +78,166 @@ find_virtual_camera() {
     echo "Using virtual camera device: $VIRTUAL_CAMERA"
 }
 
-# Start proxy - stream from real camera to virtual device
+# Check if camera is running
+is_camera_running() {
+    if [ -f "$FFMPEG_PID_FILE" ]; then
+        if ps -p $(cat "$FFMPEG_PID_FILE") > /dev/null; then
+            return 0  # Running
+        else
+            # Stale PID file
+            rm -f "$FFMPEG_PID_FILE"
+        fi
+    fi
+    return 1  # Not running
+}
+
+# Get current camera mode
+get_camera_mode() {
+    if [ -f "$LOCK_FILE" ]; then
+        echo "lag"
+    else
+        echo "normal"
+    fi
+}
+
+# Start camera proxy
 start_camera_proxy() {
-    if [ -f "$FFMPEG_PROXY_PID_FILE" ]; then
+    # If camera is already running, do nothing
+    if is_camera_running; then
         echo "Camera proxy is already running."
         return 0
     fi
     
     echo "Starting camera proxy from $REAL_CAMERA to $VIRTUAL_CAMERA..."
     
-    # Try to stream from real camera to virtual camera with NVIDIA hardware acceleration
+    # Check if camera is already in use by something else
+    if ! v4l2-ctl --device="$REAL_CAMERA" --all &>/dev/null; then
+        echo "Warning: Real camera is busy or cannot be accessed. Starting with test pattern."
+        # Use test pattern for busy camera
+        ffmpeg -f lavfi -i testsrc=size=1280x720:rate=30 -pix_fmt yuv420p -f v4l2 "$VIRTUAL_CAMERA" -loglevel error &
+        echo $! > "$FFMPEG_PID_FILE"
+        echo "Camera proxy started with test pattern. Use 'Virtual Camera' in your applications."
+        return 0
+    fi
+    
+    # Set initial normal mode
+    echo "normal" > "$CONFIG_FILE"
+    
+    # Start ffmpeg with default normal settings - using web-compatible format
     ffmpeg -f v4l2 \
            -input_format yuv420p \
            -framerate 30 \
            -video_size 1280x720 \
            -i "$REAL_CAMERA" \
-           -c:v h264_nvenc \
-           -preset p1 \
-           -tune ll \
-           -rc cbr \
-           -zerolatency 1 \
-           -f v4l2 \
            -pix_fmt yuv420p \
+           -f v4l2 \
            -fflags nobuffer \
            -flags low_delay \
-           -probesize 32 \
-           -analyzeduration 0 \
            -threads 4 \
            "$VIRTUAL_CAMERA" \
            -loglevel error &
-    PROXY_PID=$!
-    echo $PROXY_PID > "$FFMPEG_PROXY_PID_FILE"
+    
+    # Save PID
+    echo $! > "$FFMPEG_PID_FILE"
     
     # Wait to ensure the stream is established
     sleep 1
     
     # Verify proxy is actually running
-    if ! ps -p $PROXY_PID > /dev/null; then
-        echo "Warning: Camera is busy or cannot be accessed. Using placeholder instead."
-        rm -f "$FFMPEG_PROXY_PID_FILE"
-        # Use direct freeze instead
-        direct_freeze_camera
+    if ! ps -p $(cat "$FFMPEG_PID_FILE") > /dev/null; then
+        rm -f "$FFMPEG_PID_FILE"
+        echo "Error: Failed to start camera proxy. Check if camera is in use by another application."
         return 1
     fi
     
-    echo "Camera proxy started with NVIDIA hardware acceleration. Use 'Virtual Camera' in your applications."
-    echo "Run this script again to freeze the camera."
+    echo "Camera proxy started in normal mode. Use 'Virtual Camera' in your applications."
+    echo "Run this script again to toggle between normal and lag modes."
     return 0
 }
 
-# Direct freeze - create/use a placeholder image when camera is busy
-direct_freeze_camera() {
-    echo "Creating placeholder for virtual camera..."
+# Set lag mode
+set_lag_mode() {
+    echo "Enabling lag simulation mode..."
     
-    # Create a timestamp for the image
-    TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
+    # If camera is not running, start it first
+    if ! is_camera_running; then
+        start_camera_proxy
+    fi
     
-    # Create a nice looking placeholder image
-    ffmpeg -f lavfi -i color=c=blue:s=1280x720 -vf "drawtext=text='Virtual Camera - Active':fontcolor=white:fontsize=36:x=(w-text_w)/2:y=(h/2-text_h-40), drawtext=text='$TIMESTAMP':fontcolor=white:fontsize=24:x=(w-text_w)/2:y=(h/2+40)" -frames:v 1 -y "$SNAPSHOT_FILE" -loglevel error
+    # Restart camera with lag settings, but same device
+    stop_camera_proxy
     
-    # Stream the placeholder to the virtual device
-    ffmpeg -loop 1 -re -i "$SNAPSHOT_FILE" -f v4l2 -pix_fmt yuv420p "$VIRTUAL_CAMERA" -loglevel error &
-    echo $! > "$FFMPEG_PROXY_PID_FILE"
+    # Start ffmpeg with lag settings
+    ffmpeg -f v4l2 \
+           -input_format yuv420p \
+           -framerate 30 \
+           -video_size 1280x720 \
+           -i "$REAL_CAMERA" \
+           -vf "fps=5,setpts=2.0*PTS" \
+           -pix_fmt yuv420p \
+           -f v4l2 \
+           -threads 2 \
+           "$VIRTUAL_CAMERA" \
+           -loglevel error &
     
-    echo "Virtual camera activated with placeholder. Use 'Virtual Camera' in your applications."
-    return 0
+    # Save PID
+    echo $! > "$FFMPEG_PID_FILE"
+    
+    # Mark as lag mode
+    touch "$LOCK_FILE"
+    
+    echo "Camera set to lag simulation mode. Video will appear delayed and slow."
 }
 
-# Freeze camera - take a snapshot and display it on virtual device
-freeze_camera() {
-    if [ ! -f "$FFMPEG_PROXY_PID_FILE" ]; then
-        echo "Camera proxy is not running. Starting it first..."
+# Set normal mode
+set_normal_mode() {
+    echo "Returning to normal video mode..."
+    
+    # If camera is not running, just start it
+    if ! is_camera_running; then
         start_camera_proxy
         return
     fi
     
-    echo "Freezing camera..."
+    # Restart camera with normal settings, but same device
+    stop_camera_proxy
     
-    # Stop the proxy stream
-    kill $(cat "$FFMPEG_PROXY_PID_FILE") 2>/dev/null
-    rm "$FFMPEG_PROXY_PID_FILE"
+    # Start ffmpeg with normal settings
+    ffmpeg -f v4l2 \
+           -input_format yuv420p \
+           -framerate 30 \
+           -video_size 1280x720 \
+           -i "$REAL_CAMERA" \
+           -pix_fmt yuv420p \
+           -f v4l2 \
+           -fflags nobuffer \
+           -flags low_delay \
+           -threads 4 \
+           "$VIRTUAL_CAMERA" \
+           -loglevel error &
     
-    # Wait for the resource to be freed
-    sleep 1
+    # Save PID
+    echo $! > "$FFMPEG_PID_FILE"
     
-    # Try different methods to capture a frame
-    # Method 1: Try direct ffmpeg capture
-    if ffmpeg -f v4l2 -i "$REAL_CAMERA" -frames:v 1 -y "$SNAPSHOT_FILE" -loglevel error; then
-        echo "Successfully captured frame from camera."
-    # Method 2: Try v4l2-ctl
-    elif v4l2-ctl --device="$REAL_CAMERA" --set-fmt-video=width=1280,height=720,pixelformat=YUYV --stream-mmap --stream-to="$SNAPSHOT_FILE" --stream-count=1; then
-        echo "Successfully captured frame using v4l2-ctl."
-    # Method 3: Generate a placeholder image with text
-    else
-        echo "Failed to capture a frame. Creating a placeholder image."
-        # Create a timestamp for the image
-        TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
-        # Create a black image with text showing it's frozen
-        ffmpeg -f lavfi -i color=c=black:s=1280x720 -vf "drawtext=text='Camera Frozen at $TIMESTAMP':fontcolor=white:fontsize=36:x=(w-text_w)/2:y=(h-text_h)/2" -frames:v 1 -y "$SNAPSHOT_FILE" -loglevel error
-    fi
+    # Remove lag mode marker
+    rm -f "$LOCK_FILE"
     
-    # Stream the static image to the virtual device
-    ffmpeg -loop 1 -re -i "$SNAPSHOT_FILE" -f v4l2 -pix_fmt yuv420p "$VIRTUAL_CAMERA" -loglevel error &
-    echo $! > "$FFMPEG_FREEZE_PID_FILE"
-    
-    # Create lock file
-    touch "$LOCK_FILE"
-    echo "Camera frozen. Current frame is now fixed on $VIRTUAL_CAMERA"
+    echo "Camera returned to normal mode with full frame rate."
 }
 
-# Unfreeze camera - restart the proxy stream
-unfreeze_camera() {
-    echo "Unfreezing camera..."
-    
-    # Stop the frozen image stream
-    if [ -f "$FFMPEG_FREEZE_PID_FILE" ]; then
-        kill $(cat "$FFMPEG_FREEZE_PID_FILE") 2>/dev/null
-        rm "$FFMPEG_FREEZE_PID_FILE"
+# Toggle between modes
+toggle_camera_mode() {
+    # Check if camera is running
+    if ! is_camera_running; then
+        start_camera_proxy
+        return
     fi
     
-    # Remove the snapshot file and lock file
-    rm -f "$SNAPSHOT_FILE" "$LOCK_FILE"
-    
-    # Try to restart the proxy stream
-    if ! start_camera_proxy; then
-        echo "Unable to access real camera. It may be in use by another application."
-        echo "Using a placeholder stream instead."
-        direct_freeze_camera
+    # Toggle mode
+    if [ -f "$LOCK_FILE" ]; then
+        set_normal_mode
+    else
+        set_lag_mode
     fi
 }
 
@@ -211,19 +245,14 @@ unfreeze_camera() {
 stop_camera_proxy() {
     echo "Stopping camera proxy..."
     
-    # Kill any running ffmpeg processes
-    if [ -f "$FFMPEG_PROXY_PID_FILE" ]; then
-        kill $(cat "$FFMPEG_PROXY_PID_FILE") 2>/dev/null
-        rm "$FFMPEG_PROXY_PID_FILE"
+    # Kill ffmpeg process
+    if [ -f "$FFMPEG_PID_FILE" ]; then
+        kill $(cat "$FFMPEG_PID_FILE") 2>/dev/null
+        rm -f "$FFMPEG_PID_FILE"
     fi
     
-    if [ -f "$FFMPEG_FREEZE_PID_FILE" ]; then
-        kill $(cat "$FFMPEG_FREEZE_PID_FILE") 2>/dev/null
-        rm "$FFMPEG_FREEZE_PID_FILE"
-    fi
-    
-    # Remove temporary files
-    rm -f "$SNAPSHOT_FILE" "$LOCK_FILE"
+    # Remove other files
+    rm -f "$LOCK_FILE" "$CONFIG_FILE"
     
     echo "Camera proxy stopped."
 }
@@ -244,10 +273,9 @@ status() {
     fi
     
     # Check if proxy is running
-    if [ -f "$FFMPEG_PROXY_PID_FILE" ] && ps -p $(cat "$FFMPEG_PROXY_PID_FILE") > /dev/null; then
-        echo "Camera proxy: Running (PID: $(cat "$FFMPEG_PROXY_PID_FILE"))"
-    elif [ -f "$FFMPEG_FREEZE_PID_FILE" ] && ps -p $(cat "$FFMPEG_FREEZE_PID_FILE") > /dev/null; then
-        echo "Camera status: Frozen (PID: $(cat "$FFMPEG_FREEZE_PID_FILE"))"
+    if is_camera_running; then
+        mode=$(get_camera_mode)
+        echo "Camera proxy: Running (PID: $(cat "$FFMPEG_PID_FILE"), Mode: $mode)"
     else
         echo "Camera proxy: Not running"
     fi
@@ -269,7 +297,7 @@ if [ "$1" = "stop" ]; then
 fi
 
 if [ "$1" = "start" ]; then
-    start_camera_proxy || direct_freeze_camera
+    start_camera_proxy
     exit 0
 fi
 
@@ -278,26 +306,17 @@ if [ "$1" = "status" ]; then
     exit 0
 fi
 
-if [ "$1" = "freeze" ]; then
-    # Force freezing regardless of current state
-    if [ -f "$FFMPEG_PROXY_PID_FILE" ]; then
-        freeze_camera
-    else
-        direct_freeze_camera
-    fi
+if [ "$1" = "lag" ]; then
+    set_lag_mode
     exit 0
 fi
 
-# If no arguments, toggle between frozen and normal
-if [ ! -f "$FFMPEG_PROXY_PID_FILE" ] && [ ! -f "$FFMPEG_FREEZE_PID_FILE" ]; then
-    # If nothing is running, start the proxy or create placeholder
-    start_camera_proxy || direct_freeze_camera
-elif [ -f "$LOCK_FILE" ]; then
-    # If frozen, unfreeze
-    unfreeze_camera
-else
-    # If running normally, freeze
-    freeze_camera
+if [ "$1" = "normal" ]; then
+    set_normal_mode
+    exit 0
 fi
+
+# No arguments, toggle mode
+toggle_camera_mode
 
 exit 0 
