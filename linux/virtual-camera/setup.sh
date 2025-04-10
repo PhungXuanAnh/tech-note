@@ -15,7 +15,8 @@ echo "This script will set up the camera control system for freezing and unfreez
 echo ""
 
 # Get current directory (for creating correct paths in desktop files)
-CURRENT_DIR=$(pwd)
+CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo "Current directory: $CURRENT_DIR"
 
 # Function to check if a command exists
 command_exists() {
@@ -197,24 +198,6 @@ echo ""
 
 # Step 5: Create shortcuts
 echo -e "\n${BOLD}Step 5: Creating shortcuts...${RESET}"
-
-# Create Camera Control shortcut (for autostart)
-echo "Creating Camera Control shortcut..."
-cat > ~/.config/autostart/Camera_Control.desktop << EOL
-[Desktop Entry]
-Name=Camera Control
-Comment=Start Virtual Camera Proxy (video3)
-Exec=bash -c "cd ${CURRENT_DIR} && ./camera_proxy.sh start"
-Icon=camera-web
-Terminal=false
-Type=Application
-Categories=Utility;
-Keywords=camera;webcam;virtual;
-StartupNotify=false
-X-GNOME-Autostart-enabled=true
-EOL
-
-chmod +x ~/.config/autostart/Camera_Control.desktop
 
 # Create Camera Freeze Toggle shortcut (for applications menu)
 echo "Creating Camera Freeze Toggle shortcut..."
