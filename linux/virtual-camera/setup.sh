@@ -199,55 +199,27 @@ echo ""
 # Step 5: Create shortcuts
 echo -e "\n${BOLD}Step 5: Creating shortcuts...${RESET}"
 
-# Create helper scripts directory
-echo "Creating helper scripts directory..."
-mkdir -p "${CURRENT_DIR}/helpers"
-
-# Create the persistent camera toggle script
-echo "Creating persistent camera toggle script..."
-cat > "${CURRENT_DIR}/helpers/persistent_camera.sh" << EOL
-#!/bin/bash
-
-# Ensure script runs in the correct directory
-cd "\$(dirname "\$(dirname "\$0")")" || exit 1
-
-# Check current status
-CURRENT_STATUS=\$(./camera_proxy.sh status)
-
-# Detect current mode
-if echo "\$CURRENT_STATUS" | grep -q "Camera proxy: Running"; then
-    CURRENT_MODE=\$(echo "\$CURRENT_STATUS" | grep "Mode:" | awk '{print \$NF}' | tr -d ')')
-    echo "Current mode: \$CURRENT_MODE"
-    
-    # Toggle mode
-    if [ "\$CURRENT_MODE" = "normal" ]; then
-        echo "Switching to lag mode..."
-        ./camera_proxy.sh stop
-        nohup ./camera_proxy.sh lag >/dev/null 2>&1 &
-    else
-        echo "Switching to normal mode..."
-        ./camera_proxy.sh stop
-        nohup ./camera_proxy.sh normal >/dev/null 2>&1 &
-    fi
+# Create helper scripts directory if it doesn't exist
+echo "Checking for helper scripts directory..."
+if [ ! -d "${CURRENT_DIR}/helpers" ]; then
+    echo "Creating helper scripts directory..."
+    mkdir -p "${CURRENT_DIR}/helpers"
+    echo -e "${GREEN}Helper scripts directory created.${RESET}"
 else
-    # Not running, start in normal mode
-    echo "Starting camera in normal mode..."
-    nohup ./camera_proxy.sh start >/dev/null 2>&1 &
+    echo -e "${GREEN}Helper scripts directory already exists.${RESET}"
 fi
 
-# Report status after change
-sleep 1
-./camera_proxy.sh status
+# Check if persistent_camera.sh exists
+if [ ! -f "${CURRENT_DIR}/helpers/persistent_camera.sh" ]; then
+    echo -e "${YELLOW}Warning: persistent_camera.sh not found. Please create it manually or run this script again with the --create-scripts flag.${RESET}"
+else
+    echo -e "${GREEN}persistent_camera.sh script found.${RESET}"
+    # Make sure it's executable
+    chmod +x "${CURRENT_DIR}/helpers/persistent_camera.sh"
+fi
 
-echo "Camera will continue running after terminal closes."
-echo "Status saved to: \$(pwd)/nohup.out"
-EOL
-
-# Make the script executable
-chmod +x "${CURRENT_DIR}/helpers/persistent_camera.sh"
-
-# Create Camera Lag Toggle (Persistent) desktop file
-echo "Creating Camera Lag Toggle (Persistent) shortcut..."
+# Create Camera Lag Toggle desktop file
+echo "Creating Camera Lag Toggle shortcut..."
 mkdir -p ~/.local/share/applications
 cat > ~/.local/share/applications/Camera_Persistent.desktop << EOL
 [Desktop Entry]
