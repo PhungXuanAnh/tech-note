@@ -199,23 +199,70 @@ echo ""
 # Step 5: Create shortcuts
 echo -e "\n${BOLD}Step 5: Creating shortcuts...${RESET}"
 
-# Create Camera Freeze Toggle shortcut (for applications menu)
-echo "Creating Camera Freeze Toggle shortcut..."
+# Create helper scripts directory
+echo "Creating helper scripts directory..."
+mkdir -p "${CURRENT_DIR}/helpers"
+
+# Create the persistent camera toggle script
+echo "Creating persistent camera toggle script..."
+cat > "${CURRENT_DIR}/helpers/persistent_camera.sh" << EOL
+#!/bin/bash
+
+# Ensure script runs in the correct directory
+cd "\$(dirname "\$(dirname "\$0")")" || exit 1
+
+# Check current status
+CURRENT_STATUS=\$(./camera_proxy.sh status)
+
+# Detect current mode
+if echo "\$CURRENT_STATUS" | grep -q "Camera proxy: Running"; then
+    CURRENT_MODE=\$(echo "\$CURRENT_STATUS" | grep "Mode:" | awk '{print \$NF}' | tr -d ')')
+    echo "Current mode: \$CURRENT_MODE"
+    
+    # Toggle mode
+    if [ "\$CURRENT_MODE" = "normal" ]; then
+        echo "Switching to lag mode..."
+        ./camera_proxy.sh stop
+        nohup ./camera_proxy.sh lag >/dev/null 2>&1 &
+    else
+        echo "Switching to normal mode..."
+        ./camera_proxy.sh stop
+        nohup ./camera_proxy.sh normal >/dev/null 2>&1 &
+    fi
+else
+    # Not running, start in normal mode
+    echo "Starting camera in normal mode..."
+    nohup ./camera_proxy.sh start >/dev/null 2>&1 &
+fi
+
+# Report status after change
+sleep 1
+./camera_proxy.sh status
+
+echo "Camera will continue running after terminal closes."
+echo "Status saved to: \$(pwd)/nohup.out"
+EOL
+
+# Make the script executable
+chmod +x "${CURRENT_DIR}/helpers/persistent_camera.sh"
+
+# Create Camera Lag Toggle (Persistent) desktop file
+echo "Creating Camera Lag Toggle (Persistent) shortcut..."
 mkdir -p ~/.local/share/applications
-cat > ~/.local/share/applications/Camera_Freeze_Toggle.desktop << EOL
+cat > ~/.local/share/applications/Camera_Persistent.desktop << EOL
 [Desktop Entry]
-Name=Camera Freeze Toggle
-Comment=Toggle between freezing and unfreezing the camera
-Exec=bash -c "cd ${CURRENT_DIR} && ./camera_proxy.sh"
+Name=Camera Lag Toggle
+Comment=Toggle between normal and lag modes (stays running after closing)
+Exec=gnome-terminal -- ${CURRENT_DIR}/helpers/persistent_camera.sh
 Icon=camera-photo
-Terminal=true
+Terminal=false
 Type=Application
 Categories=Utility;
-Keywords=camera;webcam;virtual;freeze;toggle;
+Keywords=camera;webcam;virtual;lag;toggle;persistent;
 StartupNotify=true
 EOL
 
-chmod +x ~/.local/share/applications/Camera_Freeze_Toggle.desktop
+chmod +x ~/.local/share/applications/Camera_Persistent.desktop
 
 # Step 6: Add user to video group for camera access
 echo -e "\n${BOLD}Step 6: Setting up permissions...${RESET}"
@@ -228,18 +275,8 @@ else
     echo "You may need to restart your system or log out and back in for the changes to take effect."
 fi
 
-# Step 7: Set up autostart
-echo -e "\n${BOLD}Step 7: Setting up autostart...${RESET}"
-
-# Create autostart directory if it doesn't exist
-mkdir -p ~/.config/autostart
-
-# Create symlink in autostart directory
-echo "Setting up autostart for Camera Control..."
-cp "${CURRENT_DIR}/Camera_Control.desktop" ~/.config/autostart/
-
-# Step 8: Update script configuration
-echo -e "\n${BOLD}Step 8: Updating script configuration...${RESET}"
+# Step 7: Update script configuration
+echo -e "\n${BOLD}Step 7: Updating script configuration...${RESET}"
 
 # Get real camera device
 REAL_CAMERA=$(v4l2-ctl --list-devices 2>/dev/null | grep -A2 "Integrated Camera\|Webcam" | grep "/dev/video" | head -n1 | xargs) || true
@@ -281,8 +318,8 @@ echo -e "The virtual camera has been configured as ${BOLD}${VIRTUAL_CAMERA}${RES
 echo -e "The real camera is configured as ${BOLD}${REAL_CAMERA}${RESET}"
 echo ""
 echo -e "${YELLOW}Important:${RESET}"
-echo "1. Camera will start automatically at login"
-echo "2. To freeze/unfreeze the camera, use the 'Camera Freeze Toggle' option from your applications menu"
+echo "1. To use the virtual camera, click the 'Camera Lag Toggle' shortcut in your applications menu"
+echo "2. The camera will continue running even if you close the terminal window"
 echo "3. When using video conferencing apps, select 'Virtual Camera' from the camera list"
 echo "4. You may need to log out and log back in for the video group permissions to take effect"
 echo "5. If your camera doesn't work in web browsers, try restarting the virtual camera service"
