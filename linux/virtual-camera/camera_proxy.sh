@@ -123,17 +123,20 @@ start_camera_proxy() {
     # Set initial normal mode
     echo "normal" > "$CONFIG_FILE"
     
-    # Start ffmpeg with default normal settings - using web-compatible format
+    # Start ffmpeg with enhanced smoothness settings
     ffmpeg -f v4l2 \
            -input_format yuv420p \
            -framerate 30 \
            -video_size 1280x720 \
+           -thread_queue_size 512 \
            -i "$REAL_CAMERA" \
            -pix_fmt yuv420p \
+           -vf "fps=30,mpdecimate,setpts=N/FRAME_RATE/TB" \
+           -preset ultrafast \
+           -tune zerolatency \
+           -bufsize 512k \
+           -threads 6 \
            -f v4l2 \
-           -fflags nobuffer \
-           -flags low_delay \
-           -threads 4 \
            "$VIRTUAL_CAMERA" \
            -loglevel error &
     
