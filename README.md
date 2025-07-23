@@ -42,6 +42,8 @@ devops
 
 [git-undo-commit-or-remove-commit.md](devops/git/git-undo-commit-or-remove-commit.md)
 
+[git-update-a-commit.md](devops/git/git-update-a-commit.md)
+
 [git-command.md](devops/git/git-command.md)
 
 [run-github-copilot-in-code-server.md](devops/github-copilot/run-github-copilot-in-code-server/run-github-copilot-in-code-server.md)
@@ -77,6 +79,8 @@ devops
 [create_open_vpn_server.md](devops/VPN/create_open_vpn_server.md)
 
 [VPN-hamachi.md](devops/VPN/VPN-hamachi.md)
+
+[vpn_free.md](devops/VPN/vpn_free/vpn_free.md)
 
 [jenkins-SSH-remote-hosts.md](devops/jenkins/jenkins-SSH-remote-hosts.md)
 
