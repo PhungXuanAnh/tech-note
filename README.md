@@ -202,6 +202,8 @@ linux
 
 [pulseaudio-setup-virtual-audio-streams.md](linux/pulseaudio/setup-virtual-audio-streams/pulseaudio-setup-virtual-audio-streams.md)
 
+[virtual-camera-show-an-image.md](linux/virtual-camera-show-an-image/virtual-camera-show-an-image.md)
+
 [virtual-camera.md](linux/virtual-camera/virtual-camera.md)
 
 [LICENSE.md](linux/virtual-camera/.venv/lib/python3.11/site-packages/numpy/random/LICENSE.md)
