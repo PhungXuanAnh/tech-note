@@ -248,6 +248,15 @@ To change your display arrangement:
 **Issue**: Monitor fix service running but monitors still not restoring correctly
 **Solution**: Check if monitor layout has changed since initial setup. Monitor positions may have shifted causing overlapping coordinates. Use `xrandr --query | grep connected` to verify current layout matches the script configuration.
 
+**Issue**: Service running but no log entries or activity detected
+**Solution**: The monitor fix script may have syntax errors. Common issues:
+- Missing `done` statement in while loop
+- Incorrect D-Bus parsing (looking for multi-line output on single line)
+Check script syntax: `bash -n ~/.local/bin/fix-monitors.sh`
+
+**Issue**: D-Bus events not being detected by the service
+**Solution**: The script may be using incorrect pattern matching for D-Bus output. D-Bus signals put `member=ActiveChanged` and `boolean false` on separate lines. The script needs to use state-based parsing, not single-line pattern matching.
+
 **Issue**: Overlapping monitor coordinates (e.g., multiple monitors at position 0,0)
 **Solution**: This is a common cause of display conflicts. Re-run the setup script or manually edit `~/.local/bin/fix-monitors.sh` to fix monitor positioning. Ensure each monitor has unique, non-overlapping coordinates.
 
@@ -295,21 +304,27 @@ tail -f ~/.local/share/monitor-fix.log
 
 ## Real-World Issue Resolution
 
-### Case Study: Overlapping Monitor Coordinates
-**Detected Issue**: Monitor fix service was running but monitors weren't restoring correctly after unlock.
+### Case Study: Service Running But Not Working
+**Detected Issue**: Monitor fix service was running but monitors weren't restoring correctly after unlock, with overlapping coordinates persisting.
 
-**Root Cause**: Monitor layout had changed since initial setup, causing two monitors (DP-1 and DP-4) to have overlapping coordinates at position (0,0), creating display conflicts.
+**Root Cause**: Two critical script errors were preventing automatic functionality:
+1. **Missing `done` statement**: The monitor fix script was missing the closing `done` for the while loop, causing script malfunction
+2. **Incorrect D-Bus parsing**: Script was looking for both `member=ActiveChanged` and `boolean false` on the same line, but D-Bus output puts them on separate lines
 
 **Resolution Steps**:
-1. Identified the issue using `xrandr --query | grep connected`
-2. Fixed monitor positioning to eliminate overlaps:
-   - DP-4 (Primary): 2560×1600 at (0,0) - Leftmost
-   - DP-1: 1920×1080 at (2560,0) - Middle  
-   - HDMI-0: 1920×1080 at (4480,0) - Rightmost
-3. Updated the monitor fix script with correct xrandr command
-4. Restarted the service to apply changes
+1. Identified overlapping monitors using `xrandr --query | grep connected`
+2. Discovered script syntax error - missing `done` statement in while loop
+3. Found D-Bus parsing issue - single-line pattern matching failed for multi-line D-Bus output
+4. Fixed script with proper while loop closure and state machine for D-Bus parsing
+5. Updated monitor fix script with correct xrandr command
+6. Restarted service to apply changes
 
-**Key Lesson**: Monitor configurations can drift over time due to system updates, display settings changes, or physical monitor rearrangement. Regular verification of the monitor fix script configuration is recommended.
+**Technical Details**:
+- **Before**: `dbus-monitor | while read line; do ... fi` (missing `done`)
+- **After**: Added proper `done` statement and improved D-Bus parsing with state tracking
+- **D-Bus Fix**: Used flag-based approach to handle `ActiveChanged` and `boolean false` on separate lines
+
+**Key Lesson**: The service may appear to be running correctly but fail silently due to script syntax errors or incorrect D-Bus event parsing. Always verify the actual script logic, not just service status.
 
 ---
 

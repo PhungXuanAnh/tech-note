@@ -213,13 +213,28 @@ restore_monitors() {
     fi
 }
 
-# Main monitoring loop
+# Main monitoring loop with improved D-Bus parsing
 log_message "Monitor fix service started"
+
+unlock_detected=false
 
 dbus-monitor --session "type='signal',interface='org.gnome.ScreenSaver'" 2>/dev/null | \
 while read -r line; do
-    if echo "$line" | grep -q "member=ActiveChanged" && echo "$line" | grep -q "boolean false"; then
+    # Check if this line contains ActiveChanged
+    if echo "$line" | grep -q "member=ActiveChanged"; then
+        unlock_detected=true
+    fi
+    
+    # Check if this line contains boolean false and we previously detected ActiveChanged
+    if [[ "$unlock_detected" == "true" ]] && echo "$line" | grep -q "boolean false"; then
         restore_monitors
+        # Reset the flag
+        unlock_detected=false
+    fi
+    
+    # Reset flag if we see a different signal
+    if echo "$line" | grep -q "member=" && ! echo "$line" | grep -q "member=ActiveChanged"; then
+        unlock_detected=false
     fi
 done
 EOF
@@ -230,7 +245,14 @@ EOF
     # Make script executable
     chmod +x "$HOME/.local/bin/fix-monitors.sh"
     
-    print_status "Monitor fix script created at $HOME/.local/bin/fix-monitors.sh"
+    # Validate script syntax
+    if bash -n "$HOME/.local/bin/fix-monitors.sh"; then
+        print_status "Monitor fix script created and validated at $HOME/.local/bin/fix-monitors.sh"
+    else
+        print_error "Script syntax validation failed!"
+        exit 1
+    fi
+    
     echo ""
 }
 

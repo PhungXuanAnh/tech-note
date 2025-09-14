@@ -97,11 +97,20 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     # This is a basic update - for complex scenarios, use the full setup script
     sed -i "s|xrandr.*|    $XRANDR_CMD|" "$HOME/.local/bin/fix-monitors.sh"
     
-    # Restart service
-    systemctl --user restart monitor-fix.service
-    
-    print_status "Update completed. Test with lock/unlock cycle."
-    print_status "Backup saved as: $HOME/.local/bin/fix-monitors.sh.backup"
+    # Validate script syntax
+    if bash -n "$HOME/.local/bin/fix-monitors.sh"; then
+        print_status "Script syntax validated successfully"
+        
+        # Restart service
+        systemctl --user restart monitor-fix.service
+        
+        print_status "Update completed. Test with lock/unlock cycle."
+        print_status "Backup saved as: $HOME/.local/bin/fix-monitors.sh.backup"
+    else
+        print_error "Script syntax validation failed! Restoring backup..."
+        cp "$HOME/.local/bin/fix-monitors.sh.backup" "$HOME/.local/bin/fix-monitors.sh"
+        print_error "Update failed. Use the full setup script for reliable updates."
+    fi
 else
     print_status "Update cancelled. Use the full setup script for reliable updates."
 fi

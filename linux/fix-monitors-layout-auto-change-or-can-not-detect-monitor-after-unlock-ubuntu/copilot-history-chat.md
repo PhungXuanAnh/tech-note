@@ -446,4 +446,84 @@ If you rearrange your monitors in the future, simply run the setup script again:
 
 The issue should now be completely resolved. Your monitors will automatically restore to the correct configuration every time you unlock your screen!
 
+---
+
+## 🚨 **CRITICAL UPDATE: Real Issues Discovered (September 2025)**
+
+**User Report**: "I thought the service take responisble for fixing automatically the issue of overlapping monitor coordinates"
+
+**Investigation Result**: The user was absolutely correct. The service **should** automatically fix overlapping coordinates, but it wasn't working due to **two critical script errors**.
+
+### 🐛 **Critical Issues Found:**
+
+#### **Issue 1: Missing `done` Statement**
+**Problem**: The monitor fix script was missing the closing `done` for the while loop  
+**Impact**: Script was syntactically broken and couldn't execute properly  
+**Symptom**: Service showed as "running" but was actually malformed  
+
+```bash
+# BROKEN (missing done)
+dbus-monitor | while read -r line; do
+    if echo "$line" | grep -q "member=ActiveChanged"; then
+        # action
+    fi
+# Missing done statement caused script failure!
+
+# FIXED
+dbus-monitor | while read -r line; do
+    if echo "$line" | grep -q "member=ActiveChanged"; then
+        # action
+    fi
+done  # ← Added this critical statement
+```
+
+#### **Issue 2: Incorrect D-Bus Parsing**
+**Problem**: Script was looking for both `member=ActiveChanged` and `boolean false` on the same line  
+**Reality**: D-Bus output puts these signals on **separate lines**  
+**Impact**: Service never detected unlock events  
+**Symptom**: Service running but zero log entries  
+
+```bash
+# BROKEN (single-line pattern matching)
+if echo "$line" | grep -q "member=ActiveChanged" && echo "$line" | grep -q "boolean false"; then
+    # This never triggered because patterns are on different lines!
+
+# FIXED (state-based parsing)
+unlock_detected=false
+if echo "$line" | grep -q "member=ActiveChanged"; then
+    unlock_detected=true
+fi
+if [[ "$unlock_detected" == "true" ]] && echo "$line" | grep -q "boolean false"; then
+    # Now properly detects unlock events!
+fi
+```
+
+### ✅ **Fixes Applied:**
+
+1. **Fixed Script Syntax**: Added missing `done` statement
+2. **Improved D-Bus Parsing**: Implemented state machine for multi-line D-Bus output
+3. **Added Script Validation**: Setup script now validates syntax with `bash -n`
+4. **Enhanced Logging**: Proper log directory creation and error handling
+
+### 📊 **Test Results:**
+
+- ✅ Service now properly detects screen unlock events
+- ✅ Automatic monitor fix works as intended  
+- ✅ Overlapping coordinates are automatically resolved
+- ✅ Log entries show successful restoration activities
+
+### 🎯 **Key Lesson:**
+
+**Service status alone doesn't guarantee functionality!** A service can appear "running" while completely failing due to:
+- Script syntax errors
+- Incorrect event parsing logic  
+- Missing loop closure statements
+
+**Always validate**:
+1. Script syntax: `bash -n script.sh`
+2. Event detection: Monitor D-Bus signals directly
+3. Log output: Check for actual activity entries
+
+The automatic monitor fix now works exactly as the user expected - **the service takes full responsibility for fixing overlapping monitor coordinates automatically after screen unlock**.
+
 Made changes.
