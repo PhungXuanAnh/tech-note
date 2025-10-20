@@ -2,3 +2,5 @@
 **/log/*
 .DS_Store
 **/__pycache__/*
+# MCP configuration with sensitive tokens
+.vscode/mcp.json
