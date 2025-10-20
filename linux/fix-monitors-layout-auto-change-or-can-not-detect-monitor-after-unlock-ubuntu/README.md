@@ -363,10 +363,15 @@ tail -f ~/.local/share/monitor-fix.log
 ### Case Study: User Rearranged Physical Monitors
 **Situation**: User physically rearranged monitors and asked what to do next.
 
-**Current Layout After Rearrangement**:
+**Previous Layout**:
 - DP-1: 1920×1080 at (0,0) - Left monitor
 - HDMI-0: 1920×1080 at (1920,0) - Right monitor  
 - DP-4: 2560×1600 at (605,1080) - Primary (bottom center)
+
+**Current Layout After Rearrangement (October 20, 2025)**:
+- HDMI-0: 1920×1080 at (0,0) - Left monitor (swapped with DP-1)
+- DP-1: 1920×1080 at (1920,0) - Right monitor (swapped with HDMI-0)
+- DP-4: 2560×1600 at (746,1080) - Primary (bottom center, repositioned)
 
 **Resolution**: Updated the fix script configuration to match new layout and restarted service.
 
