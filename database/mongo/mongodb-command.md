@@ -2,7 +2,9 @@
   - [1.1. Using Docker](#11-using-docker)
   - [1.2. Install directly](#12-install-directly)
 - [2. Install mongo command line](#2-install-mongo-command-line)
-  - [2.1. Get URI of sharding server](#21-get-uri-of-sharding-server)
+  - [2.1. Modern Installation (Ubuntu 22.04+) - Recommended](#21-modern-installation-ubuntu-2204---recommended)
+  - [2.2. Legacy Installation (Ubuntu 18.04) - Deprecated](#22-legacy-installation-ubuntu-1804---deprecated)
+  - [2.3. Get URI of sharding server](#23-get-uri-of-sharding-server)
 - [3. Command](#3-command)
   - [3.1. Access mongo command](#31-access-mongo-command)
   - [3.2. Help command](#32-help-command)
@@ -48,6 +50,60 @@ docker run -d \
 
 If install mongo directly, it will come with mongo commanline else we can install it
 
+## 2.1. Modern Installation (Ubuntu 22.04+) - Recommended
+
+Install MongoDB Shell (mongosh) and Database Tools on Ubuntu 22.04 (Jammy), reference: https://www.mongodb.com/docs/mongodb-shell/install/
+
+**Step 1: Add MongoDB GPG Key**
+
+```shell
+wget -qO- https://www.mongodb.org/static/pgp/server-8.0.asc | sudo tee /etc/apt/trusted.gpg.d/mongodb-server-8.0.asc
+```
+
+**Step 2: Add MongoDB Repository**
+
+```shell
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/8.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
+```
+
+**Step 3: Update Package List**
+
+```shell
+sudo apt-get update
+```
+
+**Step 4: Install MongoDB Shell and Database Tools**
+
+```shell
+# Install MongoDB Shell (mongosh) - modern shell with enhanced features
+sudo apt-get install -y mongodb-mongosh
+
+# Install MongoDB Database Tools (mongodump, mongorestore, mongoexport, mongoimport, etc.)
+sudo apt-get install -y mongodb-database-tools
+```
+
+**Step 5: Verify Installation**
+
+```shell
+mongosh --version
+mongodump --version
+mongorestore --version
+```
+
+The installed tools include:
+
+- **mongodb-mongosh** - Modern MongoDB Shell (mongosh) with enhanced features
+- **mongodb-database-tools** - Command-line tools including:
+  - `mongodump` - Backup utility
+  - `mongorestore` - Restore utility
+  - `mongoexport` - Export data to JSON/CSV
+  - `mongoimport` - Import data from JSON/CSV
+  - `mongostat` - Performance statistics
+  - `mongotop` - Collection activity tracking
+  - And more...
+
+## 2.2. Legacy Installation (Ubuntu 18.04) - Deprecated
+
 Install mongo comamnd line on ubuntu 18.04, reference: https://askubuntu.com/a/1127143
 
 Add source:
@@ -62,8 +118,8 @@ The source contains few packages. According to the MongoDB Manual it's like this
 - **mongodb-org** - A metapackage that will automatically install the four component packages listed below.
 - **mongodb-org-server** - Contains the mongod daemon and associated configuration and init scripts.
 - **mongodb-org-mongos** - Contains the mongos daemon.
-- **mongodb-org-shell** - Contains the mongo shell.
-- **mongodb-org-tools** - Contains the following MongoDB tools: mongoimport bsondump, mongodump, - mongoexport, mongofiles, mongooplog, mongoperf, mongorestore, mongostat, and mongotop.
+- **mongodb-org-shell** - Contains the mongo shell (legacy).
+- **mongodb-org-tools** - Contains the following MongoDB tools: mongoimport bsondump, mongodump, mongoexport, mongofiles, mongooplog, mongoperf, mongorestore, mongostat, and mongotop.
 
 Setup needed tools:
 
@@ -73,7 +129,37 @@ sudo apt-get install -y mongodb-org-shell
 sudo apt-get install -y mongodb-org-tools
 ```
 
-Test:
+**Test Connection:**
+
+Using modern mongosh (recommended):
+
+```shell
+export MONGO_HOST=
+export MONGO_PORT=
+export MONGO_USER=
+export MONGO_PASS=
+mongosh --host $MONGO_HOST --port $MONGO_PORT \
+  --username $MONGO_USER --password $MONGO_PASS \
+  --authenticationDatabase admin
+```
+
+Or using connection URI (recommended for complex connections):
+
+```shell
+export MONGO_HOST=
+export MONGO_PORT=
+export MONGO_USER=
+export MONGO_PASS=
+export MONGO_DB_NAME=
+
+# Standard connection string
+mongosh "mongodb://$MONGO_USER:$MONGO_PASS@$MONGO_HOST:$MONGO_PORT/$MONGO_DB_NAME?authSource=admin"
+
+# For MongoDB Atlas (srv)
+mongosh "mongodb+srv://$MONGO_USER:$MONGO_PASS@$MONGO_HOST/$MONGO_DB_NAME?retryWrites=true&w=majority"
+```
+
+Using legacy mongo shell (Ubuntu 18.04):
 
 ```shell
 export MONGO_HOST=
@@ -85,25 +171,8 @@ mongo --host=$MONGO_HOST --port=$MONGO_PORT \
   --verbose
 ```
 
-or using uri:
 
-```shell
-export MONGO_HOST=
-export MONGO_PORT=
-export MONGO_USER=
-export MONGO_PASS=
-export MONGO_DB_NAME=
-# if using this uri:
-"mongodb+srv://$MONGO_USER:$MONGO_PASS@$MONGO_HOST/$MONGO_DB_NAME?authSource=staging&retryWrites=true&w=majority"
-# we can connect to mongodb using this command
-mongo --host="mongodb+srv://$MONGO_HOST:$MONGO_PORT/staging?username=$MONGO_USER" \
-  --username=$MONGO_USER \
-  --password=$MONGO_PASS \
-  --verbose
-```
-
-
-## 2.1. Get URI of sharding server
+## 2.3. Get URI of sharding server
 
 ```shell
 export MONGO_HOST=
@@ -115,7 +184,7 @@ export MONGO_DB_NAME=
 "mongodb+srv://$MONGO_USER:$MONGO_PASS@$MONGO_HOST/$MONGO_DB_NAME?authSource=staging&retryWrites=true&w=majority"
 ```
 
-Get sharding uri using *mongo* command:
+Get sharding uri using *mongosh* command (modern) or *mongo* command (legacy):
 
 https://docs.mongodb.com/manual/reference/connection-string/
 
@@ -124,6 +193,13 @@ https://docs.mongodb.com/manual/reference/program/mongodump/#mongodump-examples
 https://docs.mongodb.com/manual/reference/program/mongorestore/#bin.mongorestore
 
 ```shell
+# Using modern mongosh (recommended)
+mongosh "mongodb+srv://$MONGO_HOST/$MONGO_DB_NAME" \
+  --username $MONGO_USER \
+  --password $MONGO_PASS \
+  --verbose
+
+# Or using legacy mongo
 mongo --host="mongodb+srv://$MONGO_HOST:$MONGO_PORT/staging?username=$MONGO_USER" \
   --username=$MONGO_USER \
   --password=$MONGO_PASS \
@@ -140,10 +216,10 @@ connecting to: mongodb://mongodb-domain-00-00-d1oi2.mongodb.net.:27017,mongodb-d
 
 replace *.:27017* by *:27017* remove *&gssapiServiceName=mongodb*, add database_name, we get needed uri:
 
-**NOTE**: don't using `mongdb+srv` with any UI software or commmand `mongodump` and `mongostore`. Just using it with `mongo` command
+**NOTE**: Don't use `mongodb+srv` with any UI software or commands `mongodump` and `mongorestore`. Just use it with `mongosh` or legacy `mongo` command. For backup/restore tools, use the standard `mongodb://` connection string.
 
 ```shell
-mongodb://mongodb-domain-00-00-d1oi2.mongodb.net:27017,mongodb-domain-00-01-d1oi2.mongodb.net:27017,mongodb-domain-00-02-d1oi2.mongodb.net:27017/$MONGO_DB_NAME?authSource=admin&gssapiServiceName=mongodb&replicaSet=mongodb-domain-0&ssl=true
+mongodb://mongodb-domain-00-00-d1oi2.mongodb.net:27017,mongodb-domain-00-01-d1oi2.mongodb.net:27017,mongodb-domain-00-02-d1oi2.mongodb.net:27017/$MONGO_DB_NAME?authSource=admin&replicaSet=mongodb-domain-0&ssl=true
 ```
 
 
@@ -151,14 +227,34 @@ mongodb://mongodb-domain-00-00-d1oi2.mongodb.net:27017,mongodb-domain-00-01-d1oi
 
 ## 3.1. Access mongo command
 
+Using modern MongoDB Shell (recommended):
+
+```shell
+mongosh
+
+# Or connect to specific database
+mongosh mydatabase
+
+# Or connect to remote server
+mongosh "mongodb://host:port/database"
+```
+
+Using legacy mongo shell (Ubuntu 18.04):
+
 ```shell
 mongo
 ```
 
 ## 3.2. Help command
 
+In mongosh or mongo shell:
+
 ```shell
 >help
+
+# Or get help for specific command
+>db.help()
+>db.collection.help()
 ```
 
 ## 3.3. Database
@@ -205,11 +301,20 @@ Lệnh này sẽ xóa cơ sở dữ liệu đã chọn. Nếu bạn không chọ
 
 **Backup single database**
 
+Using modern tools (recommended):
+
 ```shell
-mongodump --host localhost --port 27017 --username=admin --password=123 --db=db_name --out=/home/user/ --verbose=4
+# Using connection URI (recommended)
+mongodump --uri="mongodb://username:password@host:port/database_name?authSource=admin" --out=/path/to/backup --verbose
+
+# Or using individual parameters
+mongodump --host localhost --port 27017 --username=admin --password=123 --authenticationDatabase=admin --db=db_name --out=/home/user/ --verbose
+```
+
+Using short format:
+
+```shell
 mongodump -d <database_name> -o <directory_backup>
-# or
-mongodump --uri=$MONGO_URI --verbose
 ```
 
 It will export to folder named `dump`
@@ -217,21 +322,34 @@ It will export to folder named `dump`
 **Restore single database**
 
 ```shell
+# Using connection URI (recommended)
+mongorestore --uri="mongodb://username:password@host:port?authSource=admin" --db=target_db_name /path/to/backup/source_db_name
+
+# Or using individual parameters
+mongorestore --host localhost --port 27017 --username=admin --password=123 --authenticationDatabase=admin --db=target_db_name /path/to/backup/source_db_name
+
+# Short format
 mongorestore -d <database_name> <directory_backup>
-mongorestore --host localhost --port 27017 --db **** dump/db_name
-# (In this case, **** represents any name for the database)
 ```
+
+**Note**: In the restore command, you can specify a different database name for the target than the source backup.
 
 **Backup all databases**
 
 ```shell
-mongodump --host localhost --port 27017
+mongodump --uri="mongodb://username:password@host:port?authSource=admin" --out=/path/to/backup
+
+# Or
+mongodump --host localhost --port 27017 --username=admin --password=123 --authenticationDatabase=admin --out=/path/to/backup
 ```
 
 **Restore all databases**
 
 ```shell
-mongorestore --host localhost --port 27017  dump
+mongorestore --uri="mongodb://username:password@host:port?authSource=admin" /path/to/backup
+
+# Or
+mongorestore --host localhost --port 27017 --username=admin --password=123 --authenticationDatabase=admin /path/to/backup
 ```
 
 ## 3.4. Collection
