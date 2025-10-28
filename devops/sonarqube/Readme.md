@@ -13,7 +13,7 @@
 
 # 1. Run project with sonarqube
 
-See this file [../README.md](../README.md)
+in Makefile, change SONARQUBE_PROJECT_NAME, then run docker compose up -d
 
 Access: http://localhost:9000
 
