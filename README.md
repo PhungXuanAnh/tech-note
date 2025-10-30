@@ -200,7 +200,15 @@ programming
 linux
 ---
 
+[iPhone_Ubuntu_File_Transfer_Guide.md](linux/iphone/iPhone_Ubuntu_File_Transfer_Guide.md)
+
 [pulseaudio-setup-virtual-audio-streams.md](linux/pulseaudio/setup-virtual-audio-streams/pulseaudio-setup-virtual-audio-streams.md)
+
+[README.md](linux/fix-monitors-layout-auto-change-or-can-not-detect-monitor-after-unlock-ubuntu/README.md)
+
+[copilot-history-chat.md](linux/fix-monitors-layout-auto-change-or-can-not-detect-monitor-after-unlock-ubuntu/copilot-history-chat.md)
+
+[research_report.md](linux/fix-monitors-layout-auto-change-or-can-not-detect-monitor-after-unlock-ubuntu/research_report.md)
 
 [virtual-camera-show-an-image.md](linux/virtual-camera-show-an-image/virtual-camera-show-an-image.md)
 
