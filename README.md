@@ -202,6 +202,8 @@ linux
 
 [iPhone_Ubuntu_File_Transfer_Guide.md](linux/iphone/iPhone_Ubuntu_File_Transfer_Guide.md)
 
+[merge_videos_images_into_a_video.md](linux/merge_videos_images_into_a_video/merge_videos_images_into_a_video.md)
+
 [pulseaudio-setup-virtual-audio-streams.md](linux/pulseaudio/setup-virtual-audio-streams/pulseaudio-setup-virtual-audio-streams.md)
 
 [README.md](linux/fix-monitors-layout-auto-change-or-can-not-detect-monitor-after-unlock-ubuntu/README.md)
