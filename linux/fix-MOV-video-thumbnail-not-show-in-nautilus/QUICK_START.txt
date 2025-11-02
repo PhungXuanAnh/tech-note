@@ -1,0 +1,122 @@
+╔══════════════════════════════════════════════════════════════╗
+║                                                              ║
+║  MOV THUMBNAIL FIX FOR UBUNTU - QUICK START GUIDE           ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
+
+📁 FILES CREATED:
+  • fix-mov-thumbnails.sh         - Complete automated script
+  • MOV_THUMBNAIL_FIX_README.md   - Detailed documentation
+  • QUICK_START.txt               - This file
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 HOW TO RUN:
+
+   Execute the script with interactive prompts:
+
+   $ ./fix-mov-thumbnails.sh
+
+   This will:
+   ✓ Check your system compatibility
+   ✓ Install packages (asks for sudo password if needed)
+   ✓ Configure thumbnailers automatically
+   ✓ Let you choose options interactively
+   ✓ Test the configuration
+   ✓ Show detailed progress with colored output
+   ✓ Optionally generate thumbnails for existing MOV files
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📖 WHAT GETS FIXED:
+
+   ❌ BEFORE: MOV files show generic video icon
+   ✅ AFTER:  MOV files show actual video preview
+
+   The scripts:
+   • Install ffmpegthumbnailer (better than default totem)
+   • Configure Nautilus to use it for all videos
+   • Disable buggy totem thumbnailer
+   • Enable thumbnail generation in GNOME
+   • Clear old cache to force regeneration
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 AFTER RUNNING THE SCRIPT:
+
+   1. Open Nautilus file manager
+   2. Navigate to a folder with MOV files
+   3. Switch to grid view: Ctrl+2
+   4. Wait a few seconds for thumbnails to generate
+   5. Enjoy your video previews! 🎬
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🐛 TROUBLESHOOTING:
+
+   Thumbnails not showing?
+
+   • Press Ctrl+R in Nautilus to refresh
+   • Close and reopen Nautilus completely
+   • Check View menu → Show thumbnails is enabled
+   • Wait 10-30 seconds (first generation takes time)
+
+   Still not working?
+
+   • Run the script again (safe to run multiple times)
+   • Reboot your computer
+   • Read MOV_THUMBNAIL_FIX_README.md for details
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 MANUAL TESTING:
+
+   Test if ffmpegthumbnailer works:
+
+   $ ffmpegthumbnailer -i video.mov -o test.png -s 256 -f
+
+   If this creates test.png, the fix is working!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 FOR NEW UBUNTU INSTALLATIONS:
+
+   On a fresh Ubuntu install, just run:
+
+   $ cd ~
+   $ ./fix-mov-thumbnails.sh
+
+   Follow the prompts and your MOV thumbnails will work!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 DOCUMENTATION:
+
+   Read MOV_THUMBNAIL_FIX_README.md for:
+   • Detailed explanation of the issue
+   • What each script does
+   • Advanced troubleshooting
+   • Manual configuration steps
+   • Technical details
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ FEATURES:
+
+   ✓ Safe to run multiple times
+   ✓ Works on Ubuntu 20.04, 22.04, 24.04+
+   ✓ Handles iPhone MOV files perfectly
+   ✓ Works with all video formats
+   ✓ Detailed colored output
+   ✓ Interactive prompts (main script)
+   ✓ Automatic testing included
+   ✓ No manual configuration needed
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎉 ENJOY YOUR MOV THUMBNAILS!
+
+   Questions? Check the README:
+   $ cat MOV_THUMBNAIL_FIX_README.md | less
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

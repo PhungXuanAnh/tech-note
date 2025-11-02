@@ -212,6 +212,8 @@ linux
 
 [research_report.md](linux/fix-monitors-layout-auto-change-or-can-not-detect-monitor-after-unlock-ubuntu/research_report.md)
 
+[MOV_THUMBNAIL_FIX_README.md](linux/fix-MOV-video-thumbnail-not-show-in-nautilus/MOV_THUMBNAIL_FIX_README.md)
+
 [virtual-camera-show-an-image.md](linux/virtual-camera-show-an-image/virtual-camera-show-an-image.md)
 
 [virtual-camera.md](linux/virtual-camera/virtual-camera.md)
