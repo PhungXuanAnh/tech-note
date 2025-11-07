@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 
 # Load environment variables from script directory
-ENV_FILE="$SCRIPT_DIR/scan.env"
+ENV_FILE=$1
 if [ -f "$ENV_FILE" ]; then
     export $(cat "$ENV_FILE" | xargs)
 else

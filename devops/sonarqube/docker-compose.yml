@@ -15,6 +15,7 @@ services:
   sonarqube:
     <<: *default_sonarqube
     image: sonarqube:25.9.0.112764-community
+    container_name: sonarqube
     ports:
       - 9000:9000
     environment:
@@ -39,6 +40,7 @@ services:
   postgres:
     <<: *default_sonarqube
     image: postgres:latest
+    container_name: sonarqube_postgres
     ports:
       - 5433:5432
     volumes:

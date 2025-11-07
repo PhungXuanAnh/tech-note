@@ -1,6 +1,7 @@
 #! /bin/bash
 
-export $(cat .vscode/local_files/sonarqube/scripts/scan.env | xargs)
+ENV_FILE=$1
+export $(cat $ENV_FILE | xargs)
 
 ~/Downloads/sonar-scanner-6.2.1.4610-linux-x64/bin/sonar-scanner \
     -Dsonar.projectKey=$PROJECT_KEY \
