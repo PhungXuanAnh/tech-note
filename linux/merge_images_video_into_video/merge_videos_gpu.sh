@@ -1,0 +1,263 @@
+#!/bin/bash
+
+# Video Merger v1.0 - GPU Edition
+# Merge multiple MOV/MP4 videos into a single 8K video for YouTube
+# GPU-accelerated with NVENC support
+
+set -euo pipefail
+
+# ═══════════════════════════════════════════════════════════════
+# CRITICAL FIX: Add NVIDIA libraries to library path
+# ═══════════════════════════════════════════════════════════════
+export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}"
+
+# Configuration
+declare -A RESOLUTIONS=(["1080p"]="1920:1080" ["4k"]="3840:2160" ["8k"]="7680:4320")
+declare -A BITRATES=(["1080p"]="20M" ["4k"]="60M" ["8k"]="150M")
+
+DEFAULT_RES="8k"
+DEFAULT_FPS="30"
+
+# Colors
+R='\033[0;31m'
+G='\033[0;32m'
+Y='\033[1;33m'
+C='\033[0;36m'
+N='\033[0m'
+
+# Detect GPU
+detect_gpu() {
+    local gpu="" use_gpu=false preset="p7" hevc=false
+    
+    if [[ ! -f "/usr/lib/x86_64-linux-gnu/libnvidia-encode.so" ]] && [[ ! -f "/lib/x86_64-linux-gnu/libnvidia-encode.so" ]]; then
+        echo -e "${R}⚠ NVIDIA encode libraries not installed${N}" >&2
+        echo "$use_gpu $preset $hevc"
+        return
+    fi
+    
+    if ! command -v nvidia-smi &>/dev/null; then
+        echo -e "${Y}⚠ nvidia-smi not found - GPU encoding disabled${N}" >&2
+        echo "$use_gpu $preset $hevc"
+        return
+    fi
+    
+    gpu=$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -n1 || true)
+    
+    if [[ -z "$gpu" ]]; then
+        echo -e "${Y}⚠ No GPU detected - using CPU encoding${N}" >&2
+        echo "$use_gpu $preset $hevc"
+        return
+    fi
+    
+    if ffmpeg -hide_banner -loglevel error \
+        -f lavfi -i nullsrc=s=256x256:d=0.1 \
+        -c:v h264_nvenc -f null - 2>&1 | grep -qi "no capable devices"; then
+        echo -e "${R}✗ GPU detected but NVENC failed - using CPU${N}" >&2
+        echo -e "${Y}  GPU: $gpu${N}" >&2
+        echo "$use_gpu $preset $hevc"
+        return
+    fi
+    
+    use_gpu=true
+    echo -e "${G}✓ GPU detected and NVENC working!${N}" >&2
+    echo -e "${G}  GPU: $gpu${N}" >&2
+    
+    if [[ "$gpu" =~ RTX\ (40|30) ]]; then
+        preset="p7"
+        hevc=true
+    elif [[ "$gpu" =~ RTX\ 20 ]] || [[ "$gpu" =~ GTX\ 16 ]]; then
+        preset="p6"
+        hevc=true
+    else
+        preset="p4"
+    fi
+    
+    echo "$use_gpu $preset $hevc"
+}
+
+# Build codec params
+codec_params() {
+    local res="$1" gpu="$2" preset="$3" hevc="$4" br="${BITRATES[$res]}"
+    
+    if [[ "$gpu" == "true" ]]; then
+        if [[ "$res" == "8k" && "$hevc" == "true" ]]; then
+            echo "-c:v hevc_nvenc -preset $preset -rc vbr -cq 18 -b:v $br -multipass fullres -profile:v main10 -bf 3 -g 60"
+        else
+            echo "-c:v h264_nvenc -preset $preset -rc vbr -cq 20 -b:v $br -multipass fullres -profile:v high -bf 3 -g 60"
+        fi
+    else
+        if [[ "$res" == "8k" ]]; then
+            echo "-c:v libx265 -preset slow -crf 18 -b:v $br -profile:v high -bf 3 -g 60"
+        else
+            echo "-c:v libx264 -preset slow -crf 20 -b:v $br -profile:v high -bf 3 -g 60"
+        fi
+    fi
+}
+
+# Main
+main() {
+    local res="$DEFAULT_RES" fps="$DEFAULT_FPS" out="" scale_mode="fit"
+    
+    # Parse args
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -r|--resolution) res="$2"; shift 2 ;;
+            -f|--fps) fps="$2"; shift 2 ;;
+            -o|--output) out="$2"; shift 2 ;;
+            -s|--scale) scale_mode="$2"; shift 2 ;;
+            -h|--help)
+                echo "Usage: $0 [-r 1080p|4k|8k] [-f FPS] [-o OUTPUT] [-s fit|crop|stretch]"
+                echo ""
+                echo "Video merger for YouTube uploads (v1.0)"
+                echo ""
+                echo "Options:"
+                echo "  -r, --resolution   Video resolution: 1080p, 4k, or 8k (default: 8k)"
+                echo "  -f, --fps          Frame rate (default: 30)"
+                echo "  -o, --output       Output filename (default: auto-generated)"
+                echo "  -s, --scale        Scaling mode: fit (letterbox), crop, or stretch (default: fit)"
+                echo "  -h, --help         Show this help"
+                echo ""
+                echo "Scaling modes:"
+                echo "  fit     - Scale to fit with black bars (preserves aspect ratio)"
+                echo "  crop    - Scale and crop to fill frame (preserves aspect ratio)"
+                echo "  stretch - Stretch to fill frame (may distort)"
+                echo ""
+                echo "Examples:"
+                echo "  $0                           # Merge to 8K with letterboxing"
+                echo "  $0 -r 4k -s crop             # Merge to 4K, crop to fill"
+                echo "  $0 -r 1080p -f 60            # Merge to 1080p at 60fps"
+                echo ""
+                echo "Output filename format: merged_videos_<resolution>_<timestamp>.mp4"
+                exit 0 ;;
+            *) echo -e "${R}Unknown option: $1${N}"; exit 1 ;;
+        esac
+    done
+    
+    [[ -z "$out" ]] && out="merged_videos_${res}_$(date +%Y%m%d_%H%M%S).mp4"
+    
+    # Get dimensions
+    IFS=':' read -r w h <<< "${RESOLUTIONS[$res]}"
+    
+    echo -e "${C}╔════════════════════════════════════════╗${N}"
+    echo -e "${C}║      Video Merger v1.0 GPU            ║${N}"
+    echo -e "${C}╚════════════════════════════════════════╝${N}"
+    
+    # GPU detection
+    echo -e "${Y}Detecting GPU and testing NVENC...${N}"
+    read -r gpu preset hevc <<< $(detect_gpu)
+    
+    # Build codec
+    codec=$(codec_params "$res" "$gpu" "$preset" "$hevc")
+    
+    echo -e "${C}Configuration:${N}"
+    echo -e "  Resolution: ${G}$res ($w x $h)${N}"
+    echo -e "  FPS: ${G}$fps${N}"
+    echo -e "  Scale mode: ${G}$scale_mode${N}"
+    echo -e "  GPU Encoding: ${G}$([[ "$gpu" == "true" ]] && echo "Yes (NVENC $preset)" || echo "No (CPU fallback)")${N}"
+    echo -e "  Output: ${G}$out${N}"
+    echo ""
+    
+    # Find videos
+    mapfile -d '' -t videos < <(find . -maxdepth 1 -type f \( -iname "*.mov" -o -iname "*.mp4" -o -iname "*.avi" -o -iname "*.mkv" \) -print0 | sort -z)
+    total=${#videos[@]}
+    
+    [[ $total -eq 0 ]] && { echo -e "${R}No video files found!${N}"; exit 1; }
+    
+    echo -e "${C}Found $total videos${N}"
+    echo ""
+    
+    # Create temp dir
+    tmp="temp_merge_$$"
+    mkdir -p "$tmp"
+    
+    # Build scale filter based on mode
+    case "$scale_mode" in
+        fit)
+            scale_filter="scale=$w:$h:force_original_aspect_ratio=decrease,pad=$w:$h:(ow-iw)/2:(oh-ih)/2:black"
+            ;;
+        crop)
+            scale_filter="scale=$w:$h:force_original_aspect_ratio=increase,crop=$w:$h"
+            ;;
+        stretch)
+            scale_filter="scale=$w:$h"
+            ;;
+        *)
+            echo -e "${R}Invalid scale mode: $scale_mode${N}"
+            exit 1
+            ;;
+    esac
+    
+    # Process videos
+    echo -e "${Y}Re-encoding videos to uniform format...${N}"
+    idx=1
+    start_time=$(date +%s)
+    
+    for vid_in in "${videos[@]}"; do
+        bn=$(basename "$vid_in")
+        vid_out="$tmp/vid_$(printf "%05d" $idx).mp4"
+        echo -e "${Y}[$idx/$total]${N} $bn"
+        
+        # Get input video info
+        duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$vid_in" 2>/dev/null || echo "0")
+        
+        ffmpeg -hide_banner -loglevel error \
+            -i "$vid_in" \
+            -vf "$scale_filter,format=yuv420p,fps=$fps" \
+            $codec \
+            -c:a aac -b:a 320k -ar 48000 -ac 2 \
+            -y "$vid_out" 2>&1 | grep -v "^$" || true
+        
+        if [[ -f "$vid_out" ]]; then
+            sz=$(du -h "$vid_out" | cut -f1)
+            dur=$(printf "%.1f" "$duration")
+            echo -e "${G}✓ Done ($sz, ${dur}s)${N}"
+        else
+            echo -e "${R}✗ Failed${N}"
+        fi
+        ((idx++))
+    done
+    
+    end_time=$(date +%s)
+    elapsed=$((end_time - start_time))
+    echo ""
+    echo -e "${C}Re-encoding completed in ${elapsed}s${N}"
+    
+    # Merge
+    echo -e "${Y}Concatenating videos...${N}"
+    concat="$tmp/concat.txt"
+    find "$tmp" -name "vid_*.mp4" | sort | while read v; do
+        echo "file '$(realpath "$v")'"
+    done > "$concat"
+    
+    ffmpeg -hide_banner -loglevel warning -stats \
+        -f concat -safe 0 -i "$concat" \
+        -c copy -movflags +faststart \
+        -y "$out"
+    
+    # Cleanup
+    rm -rf "$tmp"
+    
+    echo ""
+    if [[ -f "$out" ]]; then
+        sz=$(du -h "$out" | cut -f1)
+        echo -e "${G}✓ Success! Created: $out ($sz)${N}"
+        
+        echo -e "${C}Video information:${N}"
+        ffprobe -v error -select_streams v:0 \
+            -show_entries stream=width,height,codec_name,duration,bit_rate \
+            -of default=noprint_wrappers=1 "$out" 2>/dev/null | sed 's/^/  /'
+        
+        echo ""
+        echo -e "${C}Performance:${N}"
+        echo -e "  Total time: ${G}${elapsed}s${N}"
+        echo -e "  Videos merged: ${G}$total${N}"
+        
+        echo ""
+        echo -e "${G}✓ YouTube Upload Ready!${N}"
+    else
+        echo -e "${R}✗ Failed to create output${N}"
+        exit 1
+    fi
+}
+
+main "$@"
