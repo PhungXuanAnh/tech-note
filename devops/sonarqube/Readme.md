@@ -38,12 +38,23 @@ curl -s -u admin:Sona@1234567 -X POST \
 ```
 
 ## 2.2. Branch Scan (Full Analysis)
-```bash
-./scripts/scan_branch.sh path/to/scan.env
-```
+
 - Scans entire codebase
 - Enables branch comparison in UI
 - Required for "New Code" tab to show differences
+
+Scan python only
+
+```bash
+./scripts/scan_branch.sh path/to/scan.env
+```
+
+Enhanced script that scans both Python and JavaScript/React code in a single command.
+
+```bash
+# Create sonar-project.properties in the root folder of the project that you want to scan, see sample file
+./scripts/scan_branch_multi_lang.sh path/to/scan.env
+```
 
 ## 2.3. Diff-Only Scan (Fast)
 ```bash
@@ -58,11 +69,11 @@ curl -s -u admin:Sona@1234567 -X POST \
 
 # 3. Community Branch Plugin Setup
 
-## 3.2. Components Required
+## 3.1. Components Required
 1. **Backend JAR**: `sonarqube-community-branch-plugin-25.9.0.jar` in `plugins/` directory
 2. **Frontend WebApp**: Modified webapp in `webapp/` directory (enables branch dropdown in UI)
 
-## 3.3. Installation Steps (Already Done)
+## 3.2. Installation Steps (Already Done)
 
 > 💡 These files are already installed. This section documents what was done during the upgrade.
 > 
@@ -92,7 +103,7 @@ volumes:
   - ./webapp:/opt/sonarqube/web  # Persists modified webapp
 ```
 
-## 3.4. Version Compatibility
+## 3.3. Version Compatibility
 
 | SonarQube Version | Plugin Version | Status |
 |-------------------|----------------|---------|
@@ -102,13 +113,13 @@ volumes:
 
 **Rule**: Plugin major.minor version must match SonarQube version (e.g., Plugin 25.9.0 for SonarQube 25.9.x)
 
-## 4. Troubleshooting
+## 3.4. Troubleshooting
 
 > 🔧 **For detailed troubleshooting**, see:
 > - Container restart issues: `FIX_CONTAINER_RESTART_ISSUE.md`
 > - Upgrade-related issues: `UPGRADE_TO_25.9_COMPLETE.md`
 
-### 4.2. Branch Dropdown Missing in UI
+### 3.4.1. Branch Dropdown Missing in UI
 
 **Symptoms**: API shows branches but UI doesn't show dropdown
 
@@ -124,7 +135,7 @@ docker exec sonarqube ls -lh /opt/sonarqube/web/
 
 **Fix**: If webapp missing, re-download and restart (see Installation section above)
 
-### 4.3. Plugin Not Loaded
+### 3.4.2. Plugin Not Loaded
 
 **Check logs**:
 ```bash
@@ -138,7 +149,7 @@ ls -lh plugins/sonarqube-community-branch-plugin-25.9.0.jar
 docker compose restart sonarqube
 ```
 
-### 4.4. No New Code Differences Between Branches
+### 3.4.3. No New Code Differences Between Branches
 
 **Cause**: New Code period not configured for branch comparison
 
@@ -151,7 +162,7 @@ curl -u admin:Sona@1234567 -X POST \
 ./scripts/scan_branch.sh
 ```
 
-# 5. References
+# 4. References
 
 - **Plugin Repository**: https://github.com/mc1arke/sonarqube-community-branch-plugin
 - **Plugin Release 25.9.0**: https://github.com/mc1arke/sonarqube-community-branch-plugin/releases/tag/25.9.0

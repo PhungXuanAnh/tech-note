@@ -35,7 +35,7 @@ echo "Scanning branch: $CURRENT_BRANCH with branch analysis enabled"
     -Dsonar.projectKey=$PROJECT_KEY \
     -Dsonar.sources=$SOURCE_DIR \
     -Dsonar.inclusions="**/*.py" \
-    -Dsonar.exclusions="**/tests/**, **/migrations/**,  **/whitelabels/**, **/.*/**, **/*.css, **/*.js" \
+    -Dsonar.exclusions=".tests/**,**/tests/**,**/migrations/**,**/whitelabels/**,**/.git/**,**/.vscode/**,**/__pycache__/**,**/*.css,**/*.js,**/node_modules/**" \
     -Dsonar.host.url=http://localhost:9000 \
     -Dsonar.token=$TOKEN \
     -Dsonar.python.version=3.11 \
