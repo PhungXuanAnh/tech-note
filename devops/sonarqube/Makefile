@@ -1,3 +1,4 @@
+# NOTE: these commands are added to .vscode/local_files/Makefile
 
 SONARQUBE_PROJECT_NAME := sona_viralize
 sonarqube-start:

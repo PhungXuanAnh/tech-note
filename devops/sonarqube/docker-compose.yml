@@ -14,13 +14,17 @@ x-default: &default_sonarqube
 services:
   sonarqube:
     <<: *default_sonarqube
-    image: sonarqube:25.1.0.102122-community
+    image: sonarqube:25.9.0.112764-community
     ports:
       - 9000:9000
+    environment:
+      SONAR_WEB_JAVAADDITIONALOPTS: "-javaagent:/opt/sonarqube/extensions/plugins/sonarqube-community-branch-plugin-25.9.0.jar=web"
+      SONAR_CE_JAVAADDITIONALOPTS: "-javaagent:/opt/sonarqube/extensions/plugins/sonarqube-community-branch-plugin-25.9.0.jar=ce"
     volumes:
-      # - ./plugins:/opt/sonarqube/extensions/plugins
-      - ./tmp/data:/opt/sonarqube/data
-      - ./tmp/logs:/opt/sonarqube/logs
+      - ./plugins:/opt/sonarqube/extensions/plugins
+      - ./webapp:/opt/sonarqube/web
+      # - /tmp/data:/opt/sonarqube/data
+      # - /tmp/logs:/opt/sonarqube/logs
     depends_on:
       - postgres
     # --------------- for debug container ------------------------

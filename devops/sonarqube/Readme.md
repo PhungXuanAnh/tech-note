@@ -1,146 +1,213 @@
-- [1. Run project with sonarqube](#1-run-project-with-sonarqube)
-  - [1.1. issues and how to fix](#11-issues-and-how-to-fix)
-- [2. Create sonarqube project](#2-create-sonarqube-project)
-- [3. Run sonarqube client](#3-run-sonarqube-client)
-  - [3.1. Install sonarqube client](#31-install-sonarqube-client)
-  - [3.2. Run with config](#32-run-with-config)
-  - [3.3. Run directly](#33-run-directly)
-  - [3.4. See test result](#34-see-test-result)
-- [4. Config quality gates](#4-config-quality-gates)
-- [5. Config slack alert](#5-config-slack-alert)
-- [6. Steps to run sonarqube in a project](#6-steps-to-run-sonarqube-in-a-project)
+# SonarQube Setup Guide
 
+**Current Version**: SonarQube 25.9.0.112764-community + Community Branch Plugin 25.9.0
 
-# 1. Run project with sonarqube
+**Access**: http://localhost:9000 (admin / Sona@1234567)
 
-in Makefile, change SONARQUBE_PROJECT_NAME, then run docker compose up -d
+> 📖 **Detailed Documentation**:
+> - Upgrade history: See `UPGRADE_TO_25.9_COMPLETE.md`
+> - Container restart fix details: See `FIX_CONTAINER_RESTART_ISSUE.md`
 
-Access: http://localhost:9000
+## Quick Start
 
-Default account : admin/admin
+### 1. Start SonarQube
 
-## 1.1. issues and how to fix
+```bash
+# Fix vm.max_map_count if needed (first time only)
+sudo sysctl -w vm.max_map_count=262144
 
-**bootstrap checks failed | max > virtual memory areas vm.max_map_count [65530] is too low, increase to > at least [262144]**
-
-fix: `sudo sysctl -w vm.max_map_count=262144`
-
-refer: https://stackoverflow.com/questions/57998092/docker-compose-error-bootstrap-checks-failed-max-virtual-memory-areas-vm-ma
-
-
-# 2. Create sonarqube project 
-
-http://localhost:9000/projects/create?mode=manual
-
-enter project key, display name and token name, for ex: django_project, then click Set Up / Generate 
-
-![](images/create-project.png)
-
-save this token for replace in file [sonar-project.properties](sonar-project.properties) then click Continue:
-
-![](images/gen-token.png)
-
-Then, at step 2, choose Other and OS is Linux
-
-![](images/gen-token-2.png)
-
-For more information, access this link for guide how to run install and run sonarqube scanner:
-
-http://localhost:9000/documentation/analysis/scan/sonarscanner/
-
-# 3. Run sonarqube client
-
-## 3.1. Install sonarqube client
-
-On client where you want to run sonarqube client :
-
-```shell
-# --------- for linux
-cd ~/Downloads
-wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.1.0.4477-linux-x64.zip
-unzip sonar-scanner-cli-6.1.0.4477-linux-x64.zip
-
-~/Downloads/sonar-scanner-6.1.0.4477-linux-x64/bin/sonar-scanner
-
-```
-
-## 3.2. Run with config
-
-Add config as file [sonar-project.properties](../sonar-project.properties) to your project folder, change `sonar.login` value by `token` that you generated in step 2
-
-then run :
-
-```shell
-~/Downloads/sonar-scanner-6.1.0.4477-linux-x64/bin/sonar-scanner
-# or for debug
-~/Downloads/sonar-scanner-6.1.0.4477-linux-x64/bin/sonar-scanner -X
-```
-
-## 3.3. Run directly 
-
-NOTE: This command temporary error, fix it
-
-```shell
-cd django-rest-framework-sample
-~/Downloads/sonar-scanner-6.1.0.4477-linux-x64/bin/sonar-scanner \
-  -Dsonar.projectKey=django_project \
-  -Dsonar.sources=. \   
-  -Dsonar.host.url=http://localhost:9000 \
-  -Dsonar.login=e1383f4cc2855787495ade5fd9ea3d03c42eb252
-```
-
-## 3.4. See test result
-
-http://localhost:9000/project/issues?id=django_project&resolved=false
-
-See part: Critical, Major
-
-![](images/test-result.png)
-
-# 4. Config quality gates
-
-config how to scan and test source code
-
-http://localhost:9000/quality_gates
-
-copy already built-in config **Sonar way** and set another name 
-
-![](images/config-quality-gate.png)
-
-Add and remove some conditions as below :
-
-![](images/config-quality-gate-1.png)
-
-There are to part to apply a condition, apply a condition to **Conditions on New Code** or **Conditions on Overall Code**
-
-
-# 5. Config slack alert
-
-Get webhook:
-
-        1. How to get webhook, go to: https://api.slack.com/apps
-        2. Choose your app in below of website
-        3. Choose `In-comming Webhooks` , at left side
-        4. Choose `Activate Incoming Webhooks` button if it not enabled yet
-        5. Move to below, Choose `Add New Webhook to Workspace`
-
-http://localhost:9000/admin/settings?category=slack
-
-![](images/slack-config.png)
-
-# 6. Steps to run sonarqube in a project
-
-Copy 2 sona command in Makefile
-
-Update SONARQUBE_PROJECT_NAME in make file to this format: sona_project-name
-
-Start sona services
-
-```
+# Start services
 make sonarqube-start
 ```
 
-Access sona web and then create new project http://localhost:9000
+### 2. Generate Token
 
-Update this file: .vscode/local_files/sonarqube/scripts/scan.env
+```bash
+# Option A: Via API (fastest)
+curl -s -u admin:Sona@1234567 -X POST \
+  "http://localhost:9000/api/user_tokens/generate?name=viralize-scanner" \
+  | jq -r '.token'
+
+# Option B: Via UI
+# 1. Login at http://localhost:9000
+# 2. My Account → Security → Generate Token
+```
+
+### 3. Update Token
+
+```bash
+# Edit scan.env and replace TOKEN value
+nano .vscode/local_files/sonarqube/scripts/scan.env
+```
+
+### 4. Scan Branch
+
+```bash
+cd /home/xuananh/work/viralize
+./.vscode/local_files/sonarqube/scripts/scan_branch.sh
+```
+
+## Community Branch Plugin Setup
+
+### Current Status
+✅ SonarQube 25.9.0 + Plugin 25.9.0 with full branch support
+
+### Components Required
+1. **Backend JAR**: `sonarqube-community-branch-plugin-25.9.0.jar` in `plugins/` directory
+2. **Frontend WebApp**: Modified webapp in `webapp/` directory (enables branch dropdown in UI)
+
+### Installation (Already Done)
+
+> 💡 These files are already installed. This section documents what was done during the upgrade.
+> 
+> **For upgrade history and detailed steps**, see `UPGRADE_TO_25.9_COMPLETE.md`
+
+**Plugin JAR** (6.3 MB):
+```bash
+cd .vscode/local_files/sonarqube/plugins
+# Download from: https://github.com/mc1arke/sonarqube-community-branch-plugin/releases/download/25.9.0/sonarqube-community-branch-plugin-25.9.0.jar
+```
+
+**Modified WebApp** (30.1 MB extracted):
+```bash
+cd .vscode/local_files/sonarqube
+
+# Download webapp (8.9 MB) from plugin release
+curl -L -o sonarqube-webapp.zip \
+  "https://github.com/mc1arke/sonarqube-community-branch-plugin/releases/download/25.9.0/sonarqube-webapp.zip"
+
+# Extract to webapp directory
+unzip -q sonarqube-webapp.zip -d webapp
+```
+
+**docker-compose.yml** configuration:
+```yaml
+environment:
+  SONAR_WEB_JAVAADDITIONALOPTS: "-javaagent:/opt/sonarqube/extensions/plugins/sonarqube-community-branch-plugin-25.9.0.jar=web"
+  SONAR_CE_JAVAADDITIONALOPTS: "-javaagent:/opt/sonarqube/extensions/plugins/sonarqube-community-branch-plugin-25.9.0.jar=ce"
+volumes:
+  - ./plugins:/opt/sonarqube/extensions/plugins
+  - ./webapp:/opt/sonarqube/web  # Persists modified webapp
+```
+
+### Version Compatibility
+
+| SonarQube Version | Plugin Version | Status |
+|-------------------|----------------|---------|
+| 25.9.x | 25.9.0 | ✅ Current |
+| 25.8.x | 25.8.0 | ✅ Compatible |
+| 10.6.x | 1.23.0 | ✅ Legacy |
+
+**Rule**: Plugin major.minor version must match SonarQube version (e.g., Plugin 25.9.0 for SonarQube 25.9.x)
+
+## Scanning
+
+### Branch Scan (Full Analysis)
+```bash
+./.vscode/local_files/sonarqube/scripts/scan_branch.sh
+```
+- Scans entire codebase
+- Enables branch comparison in UI
+- Required for "New Code" tab to show differences
+
+### Diff-Only Scan (Fast)
+```bash
+./.vscode/local_files/sonarqube/scripts/scan_diff_only.sh
+```
+- Scans only changed files vs master
+- Quick feedback during development
+
+### View Results
+- **UI**: http://localhost:9000 → Select branch from dropdown → Click "New Code" tab
+- **API**: `curl -u admin:Sona@1234567 "http://localhost:9000/api/project_branches/list?project=viralize"`
+
+## Troubleshooting
+
+> 🔧 **For detailed troubleshooting**, see:
+> - Container restart issues: `FIX_CONTAINER_RESTART_ISSUE.md`
+> - Upgrade-related issues: `UPGRADE_TO_25.9_COMPLETE.md`
+
+### Container Start Fails
+
+**Error**: "The version of SonarQube you are trying to upgrade from is too old"
+
+**Cause**: Old database schema from previous version
+
+**Fix**: Reset database and restart
+```bash
+cd .vscode/local_files/sonarqube
+docker compose --project-name sona_viralize down -v  # Remove old data
+make sonarqube-start  # Fresh start
+```
+
+### Branch Dropdown Missing in UI
+
+**Symptoms**: API shows branches but UI doesn't show dropdown
+
+**Cause**: Modified webapp not installed or lost
+
+**Check**:
+```bash
+# Verify webapp files exist
+ls -lh .vscode/local_files/sonarqube/webapp/
+
+# Verify mounted in container
+docker exec sona_viralize-sonarqube-1 ls -lh /opt/sonarqube/web/
+```
+
+**Fix**: If webapp missing, re-download and restart (see Installation section above)
+
+### Plugin Not Loaded
+
+**Check logs**:
+```bash
+docker logs sona_viralize-sonarqube-1 | grep "Community Branch"
+# Expected: "Loaded core extensions: Community Branch Plugin"
+```
+
+**Fix**: Verify files exist and restart
+```bash
+ls -lh .vscode/local_files/sonarqube/plugins/sonarqube-community-branch-plugin-25.9.0.jar
+docker compose --project-name sona_viralize restart sonarqube
+```
+
+### No New Code Differences Between Branches
+
+**Cause**: New Code period not configured for branch comparison
+
+**Fix**: Set reference branch
+```bash
+curl -u admin:Sona@1234567 -X POST \
+  "http://localhost:9000/api/new_code_periods/set?project=viralize&branch=YOUR_BRANCH&type=REFERENCE_BRANCH&value=master"
+
+# Re-scan branch
+./.vscode/local_files/sonarqube/scripts/scan_branch.sh
+```
+
+## Container Management
+
+```bash
+# Start
+make sonarqube-start
+
+# Stop
+cd .vscode/local_files/sonarqube
+docker compose --project-name sona_viralize down
+
+# Restart
+docker compose --project-name sona_viralize restart sonarqube
+
+# Logs
+docker logs sona_viralize-sonarqube-1 --tail 50
+
+# Status
+curl http://localhost:9000/api/system/status
+```
+
+## References
+
+- **Plugin Repository**: https://github.com/mc1arke/sonarqube-community-branch-plugin
+- **Plugin Release 25.9.0**: https://github.com/mc1arke/sonarqube-community-branch-plugin/releases/tag/25.9.0
+- **Detailed Upgrade Log**: `UPGRADE_TO_25.9_COMPLETE.md`
+- **Container Restart Fix**: `FIX_CONTAINER_RESTART_ISSUE.md`
     
