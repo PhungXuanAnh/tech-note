@@ -21,6 +21,8 @@ services:
     environment:
       SONAR_WEB_JAVAADDITIONALOPTS: "-javaagent:/opt/sonarqube/extensions/plugins/sonarqube-community-branch-plugin-25.9.0.jar=web"
       SONAR_CE_JAVAADDITIONALOPTS: "-javaagent:/opt/sonarqube/extensions/plugins/sonarqube-community-branch-plugin-25.9.0.jar=ce"
+      # Disable Elasticsearch disk space checks
+      SONAR_SEARCH_JAVAADDITIONALOPTS: "-Dcluster.routing.allocation.disk.threshold_enabled=false"
     volumes:
       - ./plugins:/opt/sonarqube/extensions/plugins
       - ./webapp:/opt/sonarqube/web
@@ -46,7 +48,7 @@ services:
     volumes:
       - postgresql_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-root}"]
       interval: 5s
 
 networks:

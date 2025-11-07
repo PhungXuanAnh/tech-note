@@ -37,7 +37,7 @@ docker compose --env-file env_file.sonarqube up -d
 
 check_sona_is_up
 
-google-chrome http://localhost:9000
-
 # set admin password
 curl -u admin:admin -X POST "http://localhost:9000/api/users/change_password?login=admin&previousPassword=admin&password=Sona@1234567" ||:
+
+google-chrome http://localhost:9000
