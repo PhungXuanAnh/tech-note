@@ -27,8 +27,9 @@ Generate Token
 
 ```bash
 # Option A: Via API (fastest)
+# Without expiration:
 curl -s -u admin:Sona@1234567 -X POST \
-  "http://localhost:9000/api/user_tokens/generate?name=project_name-scanner" \
+  "http://localhost:9000/api/user_tokens/generate?name=my-token&type=USER_TOKEN" \
   | jq -r '.token'
 
 # Option B: Via UI
