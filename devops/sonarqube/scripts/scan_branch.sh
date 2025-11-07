@@ -4,8 +4,7 @@
 # It will show the full analysis of the current branch (not just diff, but enables branch comparison in UI)
 
 # Get script directory and project root
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
+PROJECT_ROOT="$(pwd)"
 
 # Load environment variables from script directory
 ENV_FILE=$1

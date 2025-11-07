@@ -4,8 +4,7 @@
 # It uses the SonarQube Community Branch Plugin to enable branch analysis
 
 # Get script directory and project root
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
+PROJECT_ROOT="$(pwd)"
 
 # Load environment variables from script directory
 ENV_FILE=$1
