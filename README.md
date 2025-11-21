@@ -106,8 +106,6 @@ devops
 
 [stress-test-cpu-memory-network.md](devops/monitor/stress-test-cpu-memory-network.md)
 
-[UPGRADE_TO_25.9_COMPLETE.md](devops/sonarqube/UPGRADE_TO_25.9_COMPLETE.md)
-
 [sonaqube_multiple_branches.md](devops/sonarqube/sonaqube_multiple_branches.md)
 
 [vagrant-multiple-vm.md](devops/vagrant/vagrant-multiple-vm.md)
