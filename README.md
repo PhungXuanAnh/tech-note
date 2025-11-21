@@ -106,7 +106,9 @@ devops
 
 [stress-test-cpu-memory-network.md](devops/monitor/stress-test-cpu-memory-network.md)
 
-[Readme.md](devops/sonarqube/Readme.md)
+[UPGRADE_TO_25.9_COMPLETE.md](devops/sonarqube/UPGRADE_TO_25.9_COMPLETE.md)
+
+[sonaqube_multiple_branches.md](devops/sonarqube/sonaqube_multiple_branches.md)
 
 [vagrant-multiple-vm.md](devops/vagrant/vagrant-multiple-vm.md)
 
@@ -202,23 +204,15 @@ linux
 
 [iPhone_Ubuntu_File_Transfer_Guide.md](linux/iphone/iPhone_Ubuntu_File_Transfer_Guide.md)
 
-[merge_videos_images_into_a_video.md](linux/merge_videos_images_into_a_video/merge_videos_images_into_a_video.md)
-
 [pulseaudio-setup-virtual-audio-streams.md](linux/pulseaudio/setup-virtual-audio-streams/pulseaudio-setup-virtual-audio-streams.md)
 
-[README.md](linux/fix-monitors-layout-auto-change-or-can-not-detect-monitor-after-unlock-ubuntu/README.md)
+[fix-monitors-layout-auto-change-or-can-not-detect-monitor-after-unlock-ubuntu.md](linux/fix-monitors-layout-auto-change-or-can-not-detect-monitor-after-unlock-ubuntu/fix-monitors-layout-auto-change-or-can-not-detect-monitor-after-unlock-ubuntu.md)
 
-[copilot-history-chat.md](linux/fix-monitors-layout-auto-change-or-can-not-detect-monitor-after-unlock-ubuntu/copilot-history-chat.md)
-
-[research_report.md](linux/fix-monitors-layout-auto-change-or-can-not-detect-monitor-after-unlock-ubuntu/research_report.md)
-
-[MOV_THUMBNAIL_FIX_README.md](linux/fix-MOV-video-thumbnail-not-show-in-nautilus/MOV_THUMBNAIL_FIX_README.md)
+[fix-MOV-video-thumbnail-not-show-in-nautilus.md](linux/fix-MOV-video-thumbnail-not-show-in-nautilus/fix-MOV-video-thumbnail-not-show-in-nautilus.md)
 
 [virtual-camera-show-an-image.md](linux/virtual-camera-show-an-image/virtual-camera-show-an-image.md)
 
+[merge_images_video_into_video.md](linux/merge_images_video_into_video/merge_images_video_into_video.md)
+
 [virtual-camera.md](linux/virtual-camera/virtual-camera.md)
-
-[LICENSE.md](linux/virtual-camera/.venv/lib/python3.11/site-packages/numpy/random/LICENSE.md)
-
-[AUTHORS.md](linux/virtual-camera/.venv/lib/python3.11/site-packages/black-25.1.0.dist-info/licenses/AUTHORS.md)
 

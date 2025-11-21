@@ -6,7 +6,7 @@
 
 📁 FILES CREATED:
   • fix-mov-thumbnails.sh         - Complete automated script
-  • MOV_THUMBNAIL_FIX_README.md   - Detailed documentation
+  • fix-MOV-video-thumbnail-not-show-in-nautilus.md   - Detailed documentation
   • QUICK_START.txt               - This file
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

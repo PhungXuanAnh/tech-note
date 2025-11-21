@@ -6,7 +6,11 @@ import json
 def find_pattern(pattern, path):
     result = []
     for root, dirs, files in os.walk(path):
+        if ".venv" in root:
+                continue
         for name in files:
+            if ".venv" in name:
+                continue
             if fnmatch.fnmatch(name, pattern):
                 result.append(os.path.join(root, name))
     return result
