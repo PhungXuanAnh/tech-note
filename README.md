@@ -76,9 +76,9 @@ devops
 
 [kubernetes-setup-using-kubeadm.md](devops/kubernetes/kubernetes-setup-using-kubeadm.md)
 
-[create_open_vpn_server.md](devops/VPN/create_open_vpn_server.md)
+[VPN-hamachi-free-5-machines.md](devops/VPN/VPN-hamachi-free-5-machines.md)
 
-[VPN-hamachi.md](devops/VPN/VPN-hamachi.md)
+[create_open_vpn_server.md](devops/VPN/create_open_vpn_server.md)
 
 [vpn_free.md](devops/VPN/vpn_free/vpn_free.md)
 
