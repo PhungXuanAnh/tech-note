@@ -14,7 +14,10 @@ export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:${LD_LIB
 
 # Configuration
 declare -A RESOLUTIONS=(["1080p"]="1920:1080" ["4k"]="3840:2160" ["8k"]="7680:4320")
-declare -A BITRATES=(["1080p"]="20M" ["4k"]="60M" ["8k"]="150M")
+# YouTube 8K bitrate requirements: 80-160 Mbps minimum for proper 8K processing
+# Using 200M to ensure we comfortably exceed YouTube's 80M minimum
+# Even after concatenation, should maintain >100M bitrate
+declare -A BITRATES=(["1080p"]="20M" ["4k"]="60M" ["8k"]="200M")
 
 DEFAULT_RES="8k"
 DEFAULT_FPS="30"
@@ -80,20 +83,42 @@ detect_gpu() {
 }
 
 # Build codec params
+# IMPORTANT: -g 30 = keyframe every 1 second (at 30fps) for YouTube preview thumbnails
+# Without frequent keyframes, YouTube shows green/corrupted preview thumbnails
+# 
+# YouTube 8K Requirements:
+# - Minimum bitrate: 80-100 Mbps (we use 200M target to ensure >100M achieved)
+# - Use CBR with large bufsize to ensure consistent high bitrate
+# - Without high bitrate, YouTube won't process video at 8K resolution
 codec_params() {
-    local res="$1" gpu="$2" preset="$3" hevc="$4" br="${BITRATES[$res]}"
+    local res="$1" gpu="$2" preset="$3" hevc="$4" fps="$5" br="${BITRATES[$res]}"
+    
+    # Keyframe interval = 1 second (fps frames) for YouTube compatibility
+    # This ensures preview thumbnails work properly
+    local gop="$fps"
+    
+    # Calculate bufsize as 2x bitrate for CBR mode
+    local bufsize
+    if [[ "$res" == "8k" ]]; then
+        bufsize="400M"  # 2x 200M for adequate buffer
+    else
+        bufsize=$(echo "$br" | sed 's/M/*2M/')
+    fi
     
     if [[ "$gpu" == "true" ]]; then
         if [[ "$res" == "8k" && "$hevc" == "true" ]]; then
-            echo "-c:v hevc_nvenc -preset $preset -rc vbr -cq 18 -b:v $br -multipass fullres -profile:v main10 -bf 3 -g 60"
+            # For 8K: Use CBR mode with large bufsize to force high bitrate
+            # maxrate=minrate=bitrate ensures true constant bitrate
+            echo "-c:v hevc_nvenc -preset $preset -rc cbr -b:v $br -maxrate $br -minrate $br -bufsize $bufsize -2pass 1 -profile:v main10 -tier high -bf 3 -g $gop -keyint_min $gop"
         else
-            echo "-c:v h264_nvenc -preset $preset -rc vbr -cq 20 -b:v $br -multipass fullres -profile:v high -bf 3 -g 60"
+            echo "-c:v h264_nvenc -preset $preset -rc vbr -cq 20 -b:v $br -multipass fullres -profile:v high -bf 3 -g $gop -keyint_min $gop"
         fi
     else
         if [[ "$res" == "8k" ]]; then
-            echo "-c:v libx265 -preset slow -crf 18 -b:v $br -profile:v high -bf 3 -g 60"
+            # For 8K CPU encoding: Use CBR-like with min/max constraints
+            echo "-c:v libx265 -preset slow -x265-params \"bitrate=${br//M/000}:vbv-bufsize=${bufsize//M/000}:vbv-maxrate=${br//M/000}:min-keyint=$gop:keyint=$gop\" -profile:v main10 -bf 3"
         else
-            echo "-c:v libx264 -preset slow -crf 20 -b:v $br -profile:v high -bf 3 -g 60"
+            echo "-c:v libx264 -preset slow -crf 20 -b:v $br -profile:v high -bf 3 -g $gop -keyint_min $gop"
         fi
     fi
 }
@@ -180,8 +205,8 @@ main() {
     echo -e "${Y}Detecting GPU and testing NVENC...${N}"
     read -r gpu preset hevc <<< $(detect_gpu)
     
-    # Build codec
-    codec=$(codec_params "$res" "$gpu" "$preset" "$hevc")
+    # Build codec (pass fps for keyframe interval calculation)
+    codec=$(codec_params "$res" "$gpu" "$preset" "$hevc" "$fps")
     
     echo -e "${C}Configuration:${N}"
     echo -e "  Resolution: ${G}$res ($w x $h)${N}"
@@ -231,21 +256,28 @@ main() {
     mkdir -p "$tmp"
     
     # Build scale filter based on mode
+    # IMPORTANT: Add colorspace conversion to BT.709 (YouTube standard) to prevent color shift
+    # This fixes the yellow/red tint issue especially with MOV files from iPhones
+    color_convert="colorspace=all=bt709:iall=bt709:fast=1"
+    
     case "$scale_mode" in
         fit)
-            scale_filter="scale=$w:$h:force_original_aspect_ratio=decrease,pad=$w:$h:(ow-iw)/2:(oh-ih)/2:black"
+            scale_filter="scale=$w:$h:force_original_aspect_ratio=decrease,pad=$w:$h:(ow-iw)/2:(oh-ih)/2:black,$color_convert"
             ;;
         crop)
-            scale_filter="scale=$w:$h:force_original_aspect_ratio=increase,crop=$w:$h"
+            scale_filter="scale=$w:$h:force_original_aspect_ratio=increase,crop=$w:$h,$color_convert"
             ;;
         stretch)
-            scale_filter="scale=$w:$h"
+            scale_filter="scale=$w:$h,$color_convert"
             ;;
         *)
             echo -e "${R}Invalid scale mode: $scale_mode${N}"
             exit 1
             ;;
     esac
+    
+    # Color metadata flags for YouTube compatibility (BT.709 standard)
+    color_metadata="-color_primaries bt709 -color_trc bt709 -colorspace bt709"
     
     # Process all files in order
     echo -e "${Y}Processing timeline in order...${N}"
@@ -270,7 +302,7 @@ main() {
             ffmpeg -hide_banner -loglevel error \
                 -loop 1 -framerate "$fps" -i "$media_in" -t "$img_dur" \
                 -vf "$scale_filter,format=yuv420p" \
-                $codec \
+                $codec $color_metadata \
                 -y "$clip_out" 2>&1 | grep -v "^$" || true
                 
         elif is_video "$media_in"; then
@@ -282,7 +314,7 @@ main() {
             ffmpeg -hide_banner -loglevel error \
                 -i "$media_in" \
                 -vf "$scale_filter,format=yuv420p,fps=$fps" \
-                $codec \
+                $codec $color_metadata \
                 -c:a aac -b:a 320k -ar 48000 -ac 2 \
                 -y "$clip_out" 2>&1 | grep -v "^$" || true
         fi
