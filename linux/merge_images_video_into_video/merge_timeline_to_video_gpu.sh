@@ -87,9 +87,10 @@ detect_gpu() {
 # Without frequent keyframes, YouTube shows green/corrupted preview thumbnails
 # 
 # YouTube 8K Requirements:
-# - Minimum bitrate: 80-100 Mbps (we use 200M target to ensure >100M achieved)
-# - Use CBR with large bufsize to ensure consistent high bitrate
-# - Without high bitrate, YouTube won't process video at 8K resolution
+# - Minimum bitrate: 80-160 Mbps for YouTube to process as 8K
+# - CBR mode does NOT work for static images (encoder reduces bitrate)
+# - Solution: Use CQP (Constant QP) mode with low QP value to force high quality/bitrate
+# - QP=1 achieves ~80-100 Mbps for 8K static images (meets YouTube 8K minimum)
 codec_params() {
     local res="$1" gpu="$2" preset="$3" hevc="$4" fps="$5" br="${BITRATES[$res]}"
     
@@ -97,7 +98,7 @@ codec_params() {
     # This ensures preview thumbnails work properly
     local gop="$fps"
     
-    # Calculate bufsize as 2x bitrate for CBR mode
+    # Calculate bufsize as 2x bitrate for VBR modes
     local bufsize
     if [[ "$res" == "8k" ]]; then
         bufsize="400M"  # 2x 200M for adequate buffer
@@ -107,16 +108,22 @@ codec_params() {
     
     if [[ "$gpu" == "true" ]]; then
         if [[ "$res" == "8k" && "$hevc" == "true" ]]; then
-            # For 8K: Use CBR mode with large bufsize to force high bitrate
-            # maxrate=minrate=bitrate ensures true constant bitrate
-            echo "-c:v hevc_nvenc -preset $preset -rc cbr -b:v $br -maxrate $br -minrate $br -bufsize $bufsize -2pass 1 -profile:v main10 -tier high -bf 3 -g $gop -keyint_min $gop"
+            # For 8K: Use CQP (Constant QP) mode with very low QP for maximum quality
+            # QP=1 forces high bitrate (~80-100 Mbps) regardless of content complexity
+            # This is CRITICAL for static images - CBR mode fails to maintain bitrate
+            # Without high bitrate (>80 Mbps), YouTube won't process video at 8K resolution
+            # IMPORTANT: -level 6.1 is REQUIRED for YouTube 8K support!
+            # Level 6.0 (180) only supports 60 Mbps max which is too low
+            # Level 6.1 (183) supports 120 Mbps max for Main tier, 480 Mbps for High tier
+            echo "-c:v hevc_nvenc -preset $preset -rc constqp -qp 1 -profile:v main10 -tier high -level 6.1 -bf 3 -g $gop -keyint_min $gop"
         else
             echo "-c:v h264_nvenc -preset $preset -rc vbr -cq 20 -b:v $br -multipass fullres -profile:v high -bf 3 -g $gop -keyint_min $gop"
         fi
     else
         if [[ "$res" == "8k" ]]; then
-            # For 8K CPU encoding: Use CBR-like with min/max constraints
-            echo "-c:v libx265 -preset slow -x265-params \"bitrate=${br//M/000}:vbv-bufsize=${bufsize//M/000}:vbv-maxrate=${br//M/000}:min-keyint=$gop:keyint=$gop\" -profile:v main10 -bf 3"
+            # For 8K CPU encoding: Use very low CRF for maximum quality
+            # CRF 10 for static images ensures high bitrate
+            echo "-c:v libx265 -preset slow -crf 10 -profile:v main10 -bf 3 -g $gop -keyint_min $gop"
         else
             echo "-c:v libx264 -preset slow -crf 20 -b:v $br -profile:v high -bf 3 -g $gop -keyint_min $gop"
         fi
@@ -260,15 +267,26 @@ main() {
     # This fixes the yellow/red tint issue especially with MOV files from iPhones
     color_convert="colorspace=all=bt709:iall=bt709:fast=1"
     
+    # For 8K: Add minimal temporal dithering to force encoder to use high bitrate
+    # Without this, static images result in very low bitrate (~40-60 Mbps)
+    # which causes YouTube to cap playback at 4K instead of 8K
+    # Noise level 2 achieves ~120 Mbps (within YouTube's 80-160 Mbps requirement)
+    # Noise is barely visible but essential for YouTube 8K processing
+    if [[ "$res" == "8k" ]]; then
+        dither_filter=",noise=c0s=2:c0f=t"
+    else
+        dither_filter=""
+    fi
+    
     case "$scale_mode" in
         fit)
-            scale_filter="scale=$w:$h:force_original_aspect_ratio=decrease,pad=$w:$h:(ow-iw)/2:(oh-ih)/2:black,$color_convert"
+            scale_filter="scale=$w:$h:force_original_aspect_ratio=decrease,pad=$w:$h:(ow-iw)/2:(oh-ih)/2:black,$color_convert$dither_filter"
             ;;
         crop)
-            scale_filter="scale=$w:$h:force_original_aspect_ratio=increase,crop=$w:$h,$color_convert"
+            scale_filter="scale=$w:$h:force_original_aspect_ratio=increase,crop=$w:$h,$color_convert$dither_filter"
             ;;
         stretch)
-            scale_filter="scale=$w:$h,$color_convert"
+            scale_filter="scale=$w:$h,$color_convert$dither_filter"
             ;;
         *)
             echo -e "${R}Invalid scale mode: $scale_mode${N}"
