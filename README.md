@@ -208,6 +208,8 @@ linux
 
 [fix-MOV-video-thumbnail-not-show-in-nautilus.md](linux/fix-MOV-video-thumbnail-not-show-in-nautilus/fix-MOV-video-thumbnail-not-show-in-nautilus.md)
 
+[setup-grub-default-option-is-oem.md](linux/grub/setup-grub-default-option-is-oem.md)
+
 [virtual-camera-show-an-image.md](linux/virtual-camera-show-an-image/virtual-camera-show-an-image.md)
 
 [merge_images_video_into_video.md](linux/merge_images_video_into_video/merge_images_video_into_video.md)

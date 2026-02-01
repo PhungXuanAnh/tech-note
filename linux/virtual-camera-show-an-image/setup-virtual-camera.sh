@@ -18,11 +18,13 @@ set -e  # Exit on any error
 
 # --- Configuration ---
 DEFAULT_IMAGE="sun.png"
-VIDEO_NR=17
+VIDEO_NR=19
 DEFAULT_DEVICE="/dev/video$VIDEO_NR"
 DEFAULT_CARD_LABEL="VirtualCamera"
+# NOTE: to avoid image distortion, match the resolution aspect ratio to the image's aspect ratio.
 # RESOLUTION="1280x720"
-RESOLUTION="1280x1278"
+# RESOLUTION="1280x1278"
+RESOLUTION="1920x1080"
 FRAMERATE="30"
 PIX_FMT="yuv420p"
 
