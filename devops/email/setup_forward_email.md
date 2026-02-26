@@ -1,0 +1,1 @@
+follow the instruction in this folder https://github.com/PhungXuanAnh/python-note-personal/tree/master/setup_forward_email
