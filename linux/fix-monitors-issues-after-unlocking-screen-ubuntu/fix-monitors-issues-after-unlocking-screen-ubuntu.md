@@ -5,6 +5,7 @@
 This repository contains scripts to automatically fix multi-monitor detection issues that occur after screen lock/unlock cycles on Ubuntu systems with NVIDIA graphics. For example after lock/unlock screen these issues can happen:
 - Can not detect monitor
 - Monitor's layout is changed automatically
+- Monitor Shows "No Signal" After Unlock (BadMatch Error)
 
 ### 🚀 One-Line Installation
 
@@ -33,6 +34,12 @@ chmod +x setup-monitor-fix.sh && ./setup-monitor-fix.sh
 
 - ✅ **Automatic Detection**: Analyzes your current monitor setup
 - ✅ **Zero Configuration**: No manual editing of monitor positions required
+- ✅ **Smart Fix**: Only applies fix when layout issue is detected (instant unlock when no problem)
+- ✅ **CRTC Initialization**: Pre-initializes display controllers with `--auto` before positioning
+- ✅ **DPMS Wake**: Forces monitors to wake from power-saving before configuration
+- ✅ **Retry Logic**: Up to 5 attempts with progressive backoff for reliable recovery
+- ✅ **Layout Verification**: Confirms the fix was actually applied correctly
+- ✅ **Cooldown Protection**: Prevents double-triggering from rapid D-Bus signals
 - ✅ **Service Management**: Full systemd integration with auto-restart
 - ✅ **Logging**: Comprehensive logging for troubleshooting
 - ✅ **Testing Tools**: Built-in test scripts and diagnostics
@@ -260,14 +267,24 @@ Check script syntax: `bash -n ~/.local/bin/fix-monitors.sh`
 **Issue**: Overlapping monitor coordinates (e.g., multiple monitors at position 0,0)
 **Solution**: This is a common cause of display conflicts. Re-run the setup script or manually edit `~/.local/bin/fix-monitors.sh` to fix monitor positioning. Ensure each monitor has unique, non-overlapping coordinates.
 
+**Issue**: `BadMatch (invalid parameter attributes)` error on `RRSetCrtcConfig` after unlock
+**Solution**: This occurs when NVIDIA CRTCs aren't properly re-initialized after DPMS wake. The updated fix script handles this by running `xrandr --auto` for each output before applying specific positions. Re-run `./setup-monitor-fix.sh` to get the updated script.
+
+**Issue**: Monitor shows "No Signal" after unlock but is detected in Display Settings  
+**Solution**: The GPU knows the monitor is connected (via EDID) but isn't sending video signal because the CRTC wasn't initialized. The fix script's `xrandr --auto` step forces CRTC initialization. If using an older version of the fix script, re-run `./setup-monitor-fix.sh`.
+
 ### 📚 Understanding the Solution
 
 This fix addresses a common issue where NVIDIA drivers fail to properly restore multi-monitor configurations after screen lock/unlock cycles. The solution:
 
-1. **Monitors D-Bus Events**: Listens for screen unlock signals
-2. **Restores Configuration**: Applies the correct xrandr command after unlock
-3. **Handles Timing**: Waits for desktop stabilization before applying changes
-4. **Provides Logging**: Tracks all events for troubleshooting
+1. **Monitors D-Bus Events**: Listens for screen unlock signals via `org.gnome.ScreenSaver` `ActiveChanged` signals
+2. **Detects Issues**: Checks actual monitor layout against expected configuration after unlock — only fixes when there's a real problem
+3. **DPMS Wake**: Forces DPMS on (`xset dpms force on`) to wake monitors from power-saving state
+4. **CRTC Initialization**: Runs `xrandr --auto` for each output to properly initialize CRTCs that were disabled during DPMS
+5. **Restores Configuration**: Applies the exact xrandr positioning command with retry logic (up to 5 attempts)
+6. **Verification**: Confirms the layout was actually applied correctly by checking xrandr output
+7. **Cooldown**: Uses timestamp-based cooldown (30s) to prevent double-triggering from rapid D-Bus signals
+8. **Provides Logging**: Tracks all events for troubleshooting
 
 ### 🤝 Contributing
 
@@ -376,3 +393,54 @@ tail -f ~/.local/share/monitor-fix.log
 **Resolution**: Updated the fix script configuration to match new layout and restarted service.
 
 **Recommendation**: When rearranging monitors, always run `./setup-monitor-fix.sh` to automatically detect and update the configuration.
+
+---
+
+### Case Study: Monitor Shows "No Signal" After Unlock (BadMatch Error)
+**Situation**: After lock/unlock, one external monitor shows "No Signal" despite being detected in Display Settings. The fix service was running but the xrandr command was failing.
+
+**Date**: March 13, 2026
+
+**System**: Lenovo Legion 5 (RTX 4070 Laptop GPU), NVIDIA driver 590.48.01
+
+**Layout**:
+- HDMI-0: 1920×1080 at (0,0) - Left monitor
+- DP-1: 1920×1080 at (1920,0) - Right monitor
+- DP-4: 2560×1600 at (741,1080) - Primary (laptop screen, centered below)
+
+**Symptoms**:
+1. After lock/unlock, one monitor shows "No Signal" (no video output)
+2. Display Settings still detects all monitors as connected
+3. Service logs show `BadMatch (invalid parameter attributes)` error on `RRSetCrtcConfig`
+4. Even when xrandr succeeds on retry, double-triggering corrupts the layout (DP-4 ends up at 0+0, overlapping other monitors)
+
+**Root Cause**: After screen lock, NVIDIA DPMS (Display Power Management Signaling) powers down all monitor outputs. When unlocking:
+1. **CRTC not re-initialized**: The NVIDIA driver doesn't fully re-initialize the CRTC (display controller) for all outputs when waking from DPMS. This causes `BadMatch` when xrandr tries to configure a CRTC that isn't ready.
+2. **Position reset**: NVIDIA/Mutter resets DP-4's position to 0+0 instead of the configured 741+1080, causing overlapping monitors.
+3. **Double D-Bus signals**: The `ActiveChanged` signal fires twice during unlock, causing the fix to run twice — the second run can corrupt the layout that the first run fixed.
+
+**Resolution**:
+The fix script was completely rewritten with four key improvements:
+
+1. **Layout-aware fixing**: Instead of blindly applying xrandr on every unlock, the script first checks if the current layout matches the expected configuration. If the layout is already correct (no issue detected), it skips the fix entirely — making unlock instant when there's no problem.
+
+2. **CRTC pre-initialization**: Before applying specific positioning, the script runs `xrandr --output <name> --auto` for each monitor. This forces the NVIDIA driver to auto-detect and initialize all CRTCs, ensuring they're ready for configuration.
+
+3. **DPMS force wake**: Runs `xset dpms force on` to explicitly wake all monitors from power-saving before any xrandr operations.
+
+4. **Timestamp-based cooldown**: Uses a timestamp file (`/tmp/monitor-fix-last-<uid>`) with a 30-second cooldown window. When the second D-Bus signal fires, the cooldown check prevents the second fix from running, avoiding layout corruption.
+
+**Before (broken flow)**:
+```
+unlock → sleep 2 → xrandr (BadMatch!) → retry → xrandr OK → 
+second trigger → xrandr (cannot find mode!) → retry → xrandr (wrong positions) → CORRUPT
+```
+
+**After (fixed flow)**:
+```
+unlock → sleep 2 → check layout → issue detected → DPMS on → xrandr --auto → 
+xrandr positions → verify OK → DONE
+second trigger → cooldown check → SKIP
+```
+
+**Key Lesson**: The `BadMatch` error on `RRSetCrtcConfig` with NVIDIA drivers after DPMS is caused by uninitialized CRTCs. Running `xrandr --auto` before applying specific positions forces CRTC initialization and resolves the issue. Always use a cooldown mechanism to prevent double-triggering from rapid D-Bus signals.

@@ -204,9 +204,9 @@ linux
 
 [iPhone_Ubuntu_File_Transfer_Guide.md](linux/iphone/iPhone_Ubuntu_File_Transfer_Guide.md)
 
-[pulseaudio-setup-virtual-audio-streams.md](linux/pulseaudio/setup-virtual-audio-streams/pulseaudio-setup-virtual-audio-streams.md)
+[fix-monitors-issues-after-unlocking-screen-ubuntu.md](linux/fix-monitors-issues-after-unlocking-screen-ubuntu/fix-monitors-issues-after-unlocking-screen-ubuntu.md)
 
-[fix-monitors-layout-auto-change-or-can-not-detect-monitor-after-unlock-ubuntu.md](linux/fix-monitors-layout-auto-change-or-can-not-detect-monitor-after-unlock-ubuntu/fix-monitors-layout-auto-change-or-can-not-detect-monitor-after-unlock-ubuntu.md)
+[pulseaudio-setup-virtual-audio-streams.md](linux/pulseaudio/setup-virtual-audio-streams/pulseaudio-setup-virtual-audio-streams.md)
 
 [fix-MOV-video-thumbnail-not-show-in-nautilus.md](linux/fix-MOV-video-thumbnail-not-show-in-nautilus/fix-MOV-video-thumbnail-not-show-in-nautilus.md)
 
