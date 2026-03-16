@@ -212,6 +212,8 @@ linux
 
 [setup-grub-default-option-is-oem.md](linux/grub/setup-grub-default-option-is-oem.md)
 
+[fix-usb-camera-autosuspend.md](linux/fix-usb-camera-autosuspend/fix-usb-camera-autosuspend.md)
+
 [virtual-camera-show-an-image.md](linux/virtual-camera-show-an-image/virtual-camera-show-an-image.md)
 
 [merge_images_video_into_video.md](linux/merge_images_video_into_video/merge_images_video_into_video.md)
