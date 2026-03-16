@@ -27,19 +27,21 @@ chmod +x setup-monitor-fix.sh && ./setup-monitor-fix.sh
 2. **Monitor Detection**: Automatically detects your current monitor configuration
 3. **Script Generation**: Creates a custom monitor fix script for your specific setup
 4. **Service Installation**: Sets up a systemd user service to run automatically
-5. **Configuration Sync**: Synchronizes monitor settings between user and GDM3
-6. **Testing Tools**: Creates test scripts for troubleshooting
+5. **monitors.xml Cleanup**: Removes stale monitor configurations that confuse Mutter
+6. **Configuration Sync**: Synchronizes monitor settings between user and GDM3
+7. **Testing Tools**: Creates test scripts for troubleshooting
 
 ### 🎯 Features
 
 - ✅ **Automatic Detection**: Analyzes your current monitor setup
 - ✅ **Zero Configuration**: No manual editing of monitor positions required
-- ✅ **Smart Fix**: Only applies fix when layout issue is detected (instant unlock when no problem)
-- ✅ **CRTC Initialization**: Pre-initializes display controllers with `--auto` before positioning
+- ✅ **Polling Detection**: Polls layout for 5 seconds after unlock to catch delayed Mutter resets (prevents race conditions)
+- ✅ **Fast Path Fix**: Tries direct xrandr positioning first (~3s), falls back to `--auto` CRTC initialization only if needed
+- ✅ **monitors.xml Cleanup**: Removes stale configurations with old connector names that confuse Mutter
 - ✅ **DPMS Wake**: Forces monitors to wake from power-saving before configuration
 - ✅ **Retry Logic**: Up to 5 attempts with progressive backoff for reliable recovery
 - ✅ **Layout Verification**: Confirms the fix was actually applied correctly
-- ✅ **Cooldown Protection**: Prevents double-triggering from rapid D-Bus signals
+- ✅ **Cooldown Protection**: Prevents double-triggering from rapid D-Bus signals (30s cooldown)
 - ✅ **Service Management**: Full systemd integration with auto-restart
 - ✅ **Logging**: Comprehensive logging for troubleshooting
 - ✅ **Testing Tools**: Built-in test scripts and diagnostics
@@ -273,18 +275,51 @@ Check script syntax: `bash -n ~/.local/bin/fix-monitors.sh`
 **Issue**: Monitor shows "No Signal" after unlock but is detected in Display Settings  
 **Solution**: The GPU knows the monitor is connected (via EDID) but isn't sending video signal because the CRTC wasn't initialized. The fix script's `xrandr --auto` step forces CRTC initialization. If using an older version of the fix script, re-run `./setup-monitor-fix.sh`.
 
+**Issue**: Fix script logs "Layout is already correct, no fix needed" but monitors are wrong  
+**Solution**: This is a race condition — the script checked too early (before Mutter reset the layout). The updated script uses polling (checks every 1s for 5s) instead of a single check. Re-run `./setup-monitor-fix.sh` to get the updated script.
+
+**Issue**: Stale `monitors.xml` with old connector names causing recurring layout resets  
+**Solution**: `~/.config/monitors.xml` accumulates old configurations. Check for stale connectors: `grep '<connector>' ~/.config/monitors.xml` and compare with `xrandr --query | grep connected`. Re-run `./setup-monitor-fix.sh` — it now automatically cleans stale configs.
+
 ### 📚 Understanding the Solution
 
 This fix addresses a common issue where NVIDIA drivers fail to properly restore multi-monitor configurations after screen lock/unlock cycles. The solution:
 
 1. **Monitors D-Bus Events**: Listens for screen unlock signals via `org.gnome.ScreenSaver` `ActiveChanged` signals
-2. **Detects Issues**: Checks actual monitor layout against expected configuration after unlock — only fixes when there's a real problem
+2. **Polls for Issues**: After unlock, polls the layout every 1 second for 5 seconds to catch delayed resets from Mutter (prevents race condition where layout appears correct initially but gets reset later)
 3. **DPMS Wake**: Forces DPMS on (`xset dpms force on`) to wake monitors from power-saving state
-4. **CRTC Initialization**: Runs `xrandr --auto` for each output to properly initialize CRTCs that were disabled during DPMS
-5. **Restores Configuration**: Applies the exact xrandr positioning command with retry logic (up to 5 attempts)
+4. **Fast Path Fix**: Tries applying the exact xrandr positioning command directly first (~3s), without the slower `--auto` CRTC initialization
+5. **Fallback CRTC Initialization**: If the fast path fails (BadMatch error), initializes CRTCs with `xrandr --auto` and retries
 6. **Verification**: Confirms the layout was actually applied correctly by checking xrandr output
 7. **Cooldown**: Uses timestamp-based cooldown (30s) to prevent double-triggering from rapid D-Bus signals
-8. **Provides Logging**: Tracks all events for troubleshooting
+8. **monitors.xml Cleanup**: The setup script removes stale configurations from `~/.config/monitors.xml` that use old connector names
+9. **Provides Logging**: Tracks all events for troubleshooting
+
+#### What is Mutter?
+
+**Mutter** is GNOME's window manager and compositor. It handles window placement, desktop effects, and **monitor configuration**. When you lock/unlock your screen, Mutter re-reads `~/.config/monitors.xml` to determine where to place each monitor. If `monitors.xml` contains stale configurations with old connector names (e.g., `eDP-1` instead of `DP-4`), Mutter picks the wrong configuration and falls back to default positioning (all monitors at 0,0), causing "No Signal" on displaced monitors.
+
+#### Understanding monitors.xml
+
+`~/.config/monitors.xml` is where GNOME stores your monitor layout configurations. **Important behavior**: GNOME **appends** a new configuration block every time you change display settings, but **never removes old ones**. Over time, stale configs accumulate with outdated connector names (e.g., from before switching to NVIDIA drivers, or from previous monitor arrangements). Since Mutter uses the **first matching** configuration, stale entries at the top can override the correct layout.
+
+**To avoid stale configs**: Always run `./setup-monitor-fix.sh` after changing your monitor setup. The setup script now includes automatic monitors.xml cleanup that:
+1. Detects current connected monitors and their connector names
+2. Removes all configuration blocks that reference non-existent connectors
+3. Keeps only the most recent valid configuration
+4. Syncs the cleaned config to GDM3
+
+You can also manually clean monitors.xml:
+```bash
+# View current configs  
+grep '<connector>' ~/.config/monitors.xml
+
+# Check current connectors
+xrandr --query | grep " connected "
+
+# If they don't match, re-run setup
+./setup-monitor-fix.sh
+```
 
 ### 🤝 Contributing
 
@@ -444,3 +479,46 @@ second trigger → cooldown check → SKIP
 ```
 
 **Key Lesson**: The `BadMatch` error on `RRSetCrtcConfig` with NVIDIA drivers after DPMS is caused by uninitialized CRTCs. Running `xrandr --auto` before applying specific positions forces CRTC initialization and resolves the issue. Always use a cooldown mechanism to prevent double-triggering from rapid D-Bus signals.
+
+---
+
+### Case Study: Stale monitors.xml Causing Recurring Layout Resets (Race Condition)
+**Situation**: Despite the fix service running and logging successful restores, the monitor "No Signal" issue kept recurring on every lock/unlock cycle. The fix script sometimes reported "Layout is already correct, no fix needed" — but then the layout would reset seconds later.
+
+**Date**: March 16, 2026
+
+**System**: Lenovo Legion 5 (RTX 4070 Laptop GPU), NVIDIA driver 590.48.01
+
+**Root Causes**: Two combined issues:
+
+**1. Stale `~/.config/monitors.xml`** (primary cause):
+The file had 5 configuration blocks accumulated over time from different setups. The first-matched configuration used old connector names (`eDP-1`, `HDMI-1-0`, `DP-1-1`) from before switching to NVIDIA drivers. The current NVIDIA connector names are (`DP-4`, `HDMI-0`, `DP-1`). When Mutter (GNOME's window manager) tried to apply the old config after unlock, it couldn't match connectors and fell back to default positioning — putting DP-4 at position 0+0, overlapping with HDMI-0, causing "No Signal" on displaced monitors.
+
+**2. Race condition in layout check** (secondary cause):
+The fix script checked the layout only once, 1-2 seconds after unlock. At that point, the layout was still momentarily correct (Mutter hadn't reset it yet). The script declared "no fix needed" and exited. Mutter then applied the stale config, resetting the layout — but the fix script had already finished.
+
+**Resolution**:
+
+1. **Cleaned `monitors.xml`**: Removed all 4 stale configuration blocks, keeping only the one with correct NVIDIA connector names. Reduced from 287 lines (5 configs) to 59 lines (1 config).
+
+2. **Synced to GDM3**: Copied cleaned config to `/var/lib/gdm3/.config/monitors.xml` (GDM3 had a different x-position: 605 vs correct 741).
+
+3. **Added polling detection**: Instead of a single layout check, the script now polls every 1 second for up to 5 seconds. If any poll detects an issue, it starts the fix. This catches delayed Mutter resets.
+
+4. **Added fast path**: The fix tries applying the xrandr position command directly first (0.5s) without the slower `--auto` CRTC initialization (which takes 3-5s). Falls back to `--auto` only if the direct command fails.
+
+5. **Added `clean_monitors_xml()` to setup script**: Automatically removes stale config blocks when running `./setup-monitor-fix.sh`.
+
+**Before (broken flow)**:
+```
+unlock → sleep 1 → check layout → "OK" (false positive) → DONE
+              ... 3 seconds later → Mutter resets DP-4 to 0+0 → No Signal!
+```
+
+**After (fixed flow)**:
+```
+unlock → poll 1s → poll 2s → poll detects DP-4 at 0+0 → DPMS on →
+direct xrandr 0.5s → layout OK → verified → DONE (total ~3-6s)
+```
+
+**Key Lesson**: GNOME's `monitors.xml` accumulates stale configurations over time. When connector names change (e.g., switching graphics drivers, rearranging cables), old configs with wrong connector names cause Mutter to fail and fall back to default positioning. Always run `./setup-monitor-fix.sh` after system changes — it now includes automatic monitors.xml cleanup. For the fix script, a single layout check after unlock is insufficient due to timing; polling is required to catch delayed resets.

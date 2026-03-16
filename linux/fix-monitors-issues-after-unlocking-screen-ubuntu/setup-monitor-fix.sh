@@ -281,34 +281,42 @@ restore_monitors() {
     fi
     echo "$now" > "$LAST_RESTORE_FILE"
 
-    log_msg "Screen unlocked, checking monitor layout..."
+    log_msg "Screen unlocked, polling monitor layout..."
 
-    # Quick check: wait 2 seconds for desktop to settle, then check if layout is OK
-    sleep 2
+    # Poll layout multiple times over 5 seconds to catch delayed resets
+    # Mutter may report correct layout initially, then reset it after DPMS wake
     local status
-    status=$(check_layout)
+    local poll_interval=1
+    local poll_count=5
+    local issue_found=false
+    local last_status=""
 
-    if [ "$status" = "ok" ]; then
-        log_msg "Layout is already correct, no fix needed"
+    for i in $(seq 1 $poll_count); do
+        sleep $poll_interval
+        status=$(check_layout)
+        if [ "$status" != "ok" ]; then
+            issue_found=true
+            last_status="$status"
+            log_msg "Poll $i/$poll_count: issue detected: $status"
+            break
+        fi
+    done
+
+    if [ "$issue_found" = "false" ]; then
+        log_msg "Layout stable after ${poll_count}s polling, no fix needed"
         date +%s > "$LAST_RESTORE_FILE"
         return
     fi
 
-    log_msg "Issue detected: $status — starting fix..."
+    status="$last_status"
+    log_msg "Issue confirmed: $status — starting fix..."
 
     # Step 1: Force DPMS on to wake all monitors
     xset dpms force on 2>/dev/null
     log_msg "DPMS forced on"
+    sleep 0.5
 
-    # Step 2: Brief wait for monitor hardware to wake
-    sleep 2
-
-    # Step 3: Initialize all CRTCs with --auto
-    log_msg "Initializing outputs with --auto..."
-AUTO_COMMANDS_PLACEHOLDER
-    sleep 2
-
-    # Step 4: Apply exact positioning with retries
+    # Step 2: Try applying exact layout directly (fast path, skip --auto)
     local max_retries=5
     local retry=1
     while [ $retry -le $max_retries ]; do
@@ -318,7 +326,7 @@ AUTO_COMMANDS_PLACEHOLDER
         local rc=$?
 
         if [ $rc -eq 0 ] && [ -z "$output" ]; then
-            sleep 1
+            sleep 0.5
             status=$(check_layout)
             if [ "$status" = "ok" ]; then
                 log_msg "Layout restored and verified on attempt $retry"
@@ -331,7 +339,14 @@ AUTO_COMMANDS_PLACEHOLDER
             log_msg "Attempt $retry failed (rc=$rc): $output"
         fi
 
-        sleep $((retry * 2))
+        # On first failure, initialize CRTCs with --auto before next retry
+        if [ $retry -eq 1 ]; then
+            log_msg "Initializing outputs with --auto..."
+AUTO_COMMANDS_PLACEHOLDER
+            sleep 1
+        else
+            sleep $((retry * 1))
+        fi
         retry=$((retry + 1))
     done
 
@@ -455,10 +470,105 @@ setup_service() {
     echo ""
 }
 
+# Function to clean monitors.xml - remove stale configurations
+clean_monitors_xml() {
+    print_step "Cleaning monitors.xml (removing stale configurations)..."
+
+    local monitors_xml="$HOME/.config/monitors.xml"
+    if [ ! -f "$monitors_xml" ]; then
+        print_warning "No monitors.xml found — will be created by GNOME when you change display settings"
+        return
+    fi
+
+    # Get current connected monitors (connector names)
+    local current_connectors
+    current_connectors=$(xrandr --query 2>/dev/null | grep " connected " | awk '{print $1}' | sort)
+    local num_current
+    num_current=$(echo "$current_connectors" | wc -l)
+
+    print_status "Current connected monitors: $(echo $current_connectors | tr '\n' ' ')"
+
+    # Back up before cleaning
+    cp "$monitors_xml" "${monitors_xml}.bak.$(date +%Y%m%d-%H%M%S)"
+
+    # Use Python to parse and clean the XML (bash XML parsing is fragile)
+    python3 << 'CLEANEOF'
+import xml.etree.ElementTree as ET
+import sys, os
+
+monitors_xml = os.path.expanduser("~/.config/monitors.xml")
+current_connectors = set()
+
+# Get current connected monitors from xrandr
+import subprocess
+xrandr = subprocess.check_output(["xrandr", "--query"], text=True)
+for line in xrandr.split("\n"):
+    if " connected " in line:
+        current_connectors.add(line.split()[0])
+
+try:
+    tree = ET.parse(monitors_xml)
+    root = tree.getroot()
+except ET.ParseError as e:
+    print(f"ERROR: Failed to parse monitors.xml: {e}", file=sys.stderr)
+    sys.exit(1)
+
+configs = root.findall("configuration")
+original_count = len(configs)
+kept = []
+
+for config in configs:
+    connectors_in_config = set()
+    for monitor in config.iter("monitor"):
+        spec = monitor.find("monitorspec")
+        if spec is not None:
+            connector = spec.find("connector")
+            if connector is not None and connector.text:
+                connectors_in_config.add(connector.text)
+
+    # Keep config if ALL its connectors match current ones
+    if connectors_in_config and connectors_in_config.issubset(current_connectors):
+        kept.append(config)
+
+if not kept:
+    print(f"WARNING: No configs match current connectors {current_connectors}. Keeping all.")
+    sys.exit(0)
+
+# Keep only the LAST matching config (most recent)
+# Remove all configs, then add back only the last match
+for config in configs:
+    root.remove(config)
+root.append(kept[-1])
+
+tree.write(monitors_xml, xml_declaration=False)
+
+# Add XML header manually (ET doesn't write the version attribute correctly)
+with open(monitors_xml, "r") as f:
+    content = f.read()
+if not content.startswith("<monitors"):
+    with open(monitors_xml, "w") as f:
+        f.write(content)
+
+removed = original_count - 1
+print(f"Cleaned: kept 1 config, removed {removed} stale config(s) (from {original_count} total)")
+CLEANEOF
+
+    local rc=$?
+    if [ $rc -eq 0 ]; then
+        print_status "monitors.xml cleaned successfully"
+    else
+        print_warning "monitors.xml cleanup had issues (backup preserved)"
+    fi
+    echo ""
+}
+
 # Function to sync monitor configurations
 sync_monitor_configs() {
     print_step "Synchronizing monitor configurations..."
-    
+
+    # Clean stale configs first
+    clean_monitors_xml
+
     if [ -f "$HOME/.config/monitors.xml" ]; then
         if sudo cp "$HOME/.config/monitors.xml" "/var/lib/gdm3/.config/" 2>/dev/null; then
             print_status "Monitor configuration synchronized with GDM3"
