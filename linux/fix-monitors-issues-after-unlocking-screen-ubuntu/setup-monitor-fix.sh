@@ -210,7 +210,7 @@ create_monitor_script() {
     done
     
     # Create the script
-    cat > "$HOME/.local/bin/fix-monitors.sh" << 'MAINEOF'
+    cat > "$HOME/.local/bin/fix-monitors-auto.sh" << 'MAINEOF'
 #!/bin/bash
 
 # Monitor Fix Script for Multi-Monitor Setup
@@ -377,26 +377,26 @@ done
 MAINEOF
     
     # Replace placeholders with actual values
-    sed -i "s|XRANDR_COMMAND_PLACEHOLDER|$XRANDR_CMD|g" "$HOME/.local/bin/fix-monitors.sh"
-    sed -i "s|PRIMARY_PLACEHOLDER|$PRIMARY_MONITOR|g" "$HOME/.local/bin/fix-monitors.sh"
-    sed -i "s|MONITOR_NAMES_PLACEHOLDER|$MONITOR_NAMES_LIST|g" "$HOME/.local/bin/fix-monitors.sh"
+    sed -i "s|XRANDR_COMMAND_PLACEHOLDER|$XRANDR_CMD|g" "$HOME/.local/bin/fix-monitors-auto.sh"
+    sed -i "s|PRIMARY_PLACEHOLDER|$PRIMARY_MONITOR|g" "$HOME/.local/bin/fix-monitors-auto.sh"
+    sed -i "s|MONITOR_NAMES_PLACEHOLDER|$MONITOR_NAMES_LIST|g" "$HOME/.local/bin/fix-monitors-auto.sh"
     
     # Replace layout declarations placeholder
     local escaped_layouts
     escaped_layouts=$(echo -e "$LAYOUT_DECLARATIONS" | sed 's/[&/\]/\\&/g')
-    sed -i "/LAYOUT_DECLARATIONS_PLACEHOLDER/c\\$escaped_layouts" "$HOME/.local/bin/fix-monitors.sh"
+    sed -i "/LAYOUT_DECLARATIONS_PLACEHOLDER/c\\$escaped_layouts" "$HOME/.local/bin/fix-monitors-auto.sh"
     
     # Replace auto commands placeholder
     local escaped_auto
     escaped_auto=$(echo -e "$AUTO_CMDS" | sed 's/[&/\]/\\&/g')
-    sed -i "/AUTO_COMMANDS_PLACEHOLDER/c\\$escaped_auto" "$HOME/.local/bin/fix-monitors.sh"
+    sed -i "/AUTO_COMMANDS_PLACEHOLDER/c\\$escaped_auto" "$HOME/.local/bin/fix-monitors-auto.sh"
     
     # Make script executable
-    chmod +x "$HOME/.local/bin/fix-monitors.sh"
+    chmod +x "$HOME/.local/bin/fix-monitors-auto.sh"
     
     # Validate script syntax
-    if bash -n "$HOME/.local/bin/fix-monitors.sh"; then
-        print_status "Monitor fix script created and validated at $HOME/.local/bin/fix-monitors.sh"
+    if bash -n "$HOME/.local/bin/fix-monitors-auto.sh"; then
+        print_status "Monitor fix script created and validated at $HOME/.local/bin/fix-monitors-auto.sh"
     else
         print_error "Script syntax validation failed!"
         exit 1
@@ -420,7 +420,7 @@ After=graphical-session.target
 
 [Service]
 Type=simple
-ExecStart=%h/.local/bin/fix-monitors.sh
+ExecStart=%h/.local/bin/fix-monitors-auto.sh
 Restart=always
 RestartSec=10
 Environment=DISPLAY=:1
@@ -685,7 +685,7 @@ display_summary() {
     echo "✅ Automated monitoring for screen unlock events"
     echo ""
     echo -e "${BLUE}Files created:${NC}"
-    echo "📁 $HOME/.local/bin/fix-monitors.sh (main script)"
+    echo "📁 $HOME/.local/bin/fix-monitors-auto.sh (main script)"
     echo "📁 $HOME/.config/systemd/user/monitor-fix.service (systemd service)"
     echo "📁 $HOME/.local/bin/test-monitor-fix.sh (test script)"
     echo "📁 $HOME/.local/bin/fix-monitors-manual (manual fix)"

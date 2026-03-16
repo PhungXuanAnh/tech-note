@@ -59,7 +59,7 @@ chmod +x setup-monitor-fix.sh && ./setup-monitor-fix.sh
 After running the setup script, the following files will be created:
 
 ```
-~/.local/bin/fix-monitors.sh           # Main monitor fix script
+~/.local/bin/fix-monitors-auto.sh           # Main monitor fix script
 ~/.config/systemd/user/monitor-fix.service  # Systemd service
 ~/.local/bin/test-monitor-fix.sh       # Test and diagnostic script
 ~/monitor-fix-setup.log                # Installation log
@@ -151,7 +151,7 @@ If you've rearranged your physical monitors or changed display settings:
 xrandr --query | grep connected
 
 # Manually edit the fix script
-nano ~/.local/bin/fix-monitors.sh
+nano ~/.local/bin/fix-monitors-auto.sh
 
 # Update the xrandr command, then restart service
 systemctl --user restart monitor-fix.service
@@ -176,7 +176,7 @@ If monitors have conflicting positions (common after layout changes):
 xrandr --query | grep -E "connected.*[0-9]+x[0-9]+\+[0-9]+\+[0-9]+"
 
 # Fix by re-running setup or manually editing the script
-vim ~/.local/bin/fix-monitors.sh
+vim ~/.local/bin/fix-monitors-auto.sh
 systemctl --user restart monitor-fix.service
 ```
 
@@ -218,17 +218,17 @@ The system creates several log files for monitoring:
 xrandr --query | grep -E "(Screen 0|connected)"
 
 # Verify monitor fix script configuration
-cat ~/.local/bin/fix-monitors.sh | grep -A5 -B5 xrandr
+cat ~/.local/bin/fix-monitors-auto.sh | grep -A5 -B5 xrandr
 
 # Compare with actual current layout
 echo "=== Current Layout ===" && xrandr --query | grep connected
-echo "=== Script Configuration ===" && grep -A3 "Execute the xrandr command" ~/.local/bin/fix-monitors.sh
+echo "=== Script Configuration ===" && grep -A3 "Execute the xrandr command" ~/.local/bin/fix-monitors-auto.sh
 ```
 
 #### Custom Monitor Layout
 If you need to modify the monitor layout after installation:
 
-1. Edit the script: `vim ~/.local/bin/fix-monitors.sh`
+1. Edit the script: `vim ~/.local/bin/fix-monitors-auto.sh`
 2. Update the xrandr command in the script
 3. Restart the service: `systemctl --user restart monitor-fix.service`
 
@@ -260,13 +260,13 @@ To change your display arrangement:
 **Solution**: The monitor fix script may have syntax errors. Common issues:
 - Missing `done` statement in while loop
 - Incorrect D-Bus parsing (looking for multi-line output on single line)
-Check script syntax: `bash -n ~/.local/bin/fix-monitors.sh`
+Check script syntax: `bash -n ~/.local/bin/fix-monitors-auto.sh`
 
 **Issue**: D-Bus events not being detected by the service
 **Solution**: The script may be using incorrect pattern matching for D-Bus output. D-Bus signals put `member=ActiveChanged` and `boolean false` on separate lines. The script needs to use state-based parsing, not single-line pattern matching.
 
 **Issue**: Overlapping monitor coordinates (e.g., multiple monitors at position 0,0)
-**Solution**: This is a common cause of display conflicts. Re-run the setup script or manually edit `~/.local/bin/fix-monitors.sh` to fix monitor positioning. Ensure each monitor has unique, non-overlapping coordinates.
+**Solution**: This is a common cause of display conflicts. Re-run the setup script or manually edit `~/.local/bin/fix-monitors-auto.sh` to fix monitor positioning. Ensure each monitor has unique, non-overlapping coordinates.
 
 **Issue**: `BadMatch (invalid parameter attributes)` error on `RRSetCrtcConfig` after unlock
 **Solution**: This occurs when NVIDIA CRTCs aren't properly re-initialized after DPMS wake. The updated fix script handles this by running `xrandr --auto` for each output before applying specific positions. Re-run `./setup-monitor-fix.sh` to get the updated script.
@@ -404,7 +404,7 @@ tail -f ~/.local/share/monitor-fix.log
 - **Use for**: Troubleshooting, verifying setup
 
 ### 🔧 Manual Files
-- `~/.local/bin/fix-monitors.sh` - Main monitor restoration script
+- `~/.local/bin/fix-monitors-auto.sh` - Main monitor restoration script
 - `~/.config/systemd/user/monitor-fix.service` - Service configuration  
 - `~/.local/share/monitor-fix.log` - Activity logs
 
