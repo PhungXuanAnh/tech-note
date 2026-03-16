@@ -142,6 +142,48 @@ generate_xrandr_command() {
     print_status "Monitor layouts detected:"
     echo -e "$MONITOR_LAYOUTS"
     echo ""
+    
+    # Detect nvidia-settings MetaMode for USB-C hub signal fix
+    # USB-C hubs may drop the DP-to-HDMI signal after DPMS wake.
+    # Cycling the MetaMode (remove monitor then re-add) forces NVIDIA to
+    # fully tear down and recreate the display pipeline.
+    METAMODE_FULL=""
+    METAMODE_REDUCED=""
+    if command_exists nvidia-settings; then
+        METAMODE_FULL=$(nvidia-settings -t -q CurrentMetaMode 2>/dev/null | head -1)
+        if [ -n "$METAMODE_FULL" ]; then
+            # Strip the "id=XX, switchable=..., source=... :: " prefix if present
+            METAMODE_FULL=$(echo "$METAMODE_FULL" | sed 's/^.*:: //')
+            print_status "NVIDIA MetaMode detected: $METAMODE_FULL"
+            
+            # Build a reduced MetaMode by removing any DPY entries for DP-* monitors
+            # (these are the ones typically connected via USB-C hubs)
+            # Parse monitor names to find DP-* outputs and their DPY mappings
+            METAMODE_REDUCED="$METAMODE_FULL"
+            METAMODE_DP_OFF_CMDS=""
+            for mon in $MONITOR_NAMES_LIST; do
+                if [[ "$mon" == DP-* ]]; then
+                    # Find the DPY-N identifier for this monitor from nvidia-settings
+                    local dpy_id
+                    dpy_id=$(nvidia-settings -q dpys 2>/dev/null | grep -B1 "($mon)" | grep -oP 'dpy:\d+' | head -1)
+                    if [ -n "$dpy_id" ]; then
+                        local dpy_name="DPY-${dpy_id#dpy:}"
+                        # Remove this DPY entry from the MetaMode (entry is "DPY-N: ...")
+                        # Each entry is separated by ", DPY-" 
+                        METAMODE_REDUCED=$(echo "$METAMODE_REDUCED" | sed -E "s/,?\s*${dpy_name}:[^,]*(,|$)/\1/g" | sed 's/^, //' | sed 's/, $//')
+                        METAMODE_DP_OFF_CMDS="${METAMODE_DP_OFF_CMDS}xrandr --output $mon --off 2>/dev/null || true\n        "
+                        print_status "Will cycle $mon ($dpy_name) via MetaMode for USB-C hub fix"
+                    fi
+                fi
+            done
+            
+            if [ "$METAMODE_REDUCED" = "$METAMODE_FULL" ]; then
+                print_warning "No DP-* monitors found for MetaMode cycling"
+                METAMODE_FULL=""
+                METAMODE_REDUCED=""
+            fi
+        fi
+    fi
 }
 
 # Function to check system requirements
@@ -227,6 +269,12 @@ LAYOUT_DECLARATIONS_PLACEHOLDER
 PRIMARY_OUTPUT="PRIMARY_PLACEHOLDER"
 MONITOR_NAMES="MONITOR_NAMES_PLACEHOLDER"
 
+# MetaMode strings for nvidia-settings (fixes USB-C hub signal drops)
+# When a USB-C hub drops the DP-to-HDMI signal after DPMS wake, cycling the
+# MetaMode forces NVIDIA to tear down and recreate the display pipeline.
+METAMODE_FULL="METAMODE_FULL_PLACEHOLDER"
+METAMODE_REDUCED="METAMODE_REDUCED_PLACEHOLDER"
+
 log_msg() {
     echo "$(date '+%Y-%m-%d %H:%M:%S'): $1" >> "$LOG_FILE"
 }
@@ -281,13 +329,31 @@ restore_monitors() {
     fi
     echo "$now" > "$LAST_RESTORE_FILE"
 
-    log_msg "Screen unlocked, polling monitor layout..."
+    log_msg "Screen unlocked, starting monitor restore..."
 
-    # Poll layout multiple times over 5 seconds to catch delayed resets
-    # Mutter may report correct layout initially, then reset it after DPMS wake
+    # Step 1: Force DPMS on to wake all monitors
+    xset dpms force on 2>/dev/null
+    log_msg "DPMS forced on"
+    sleep 0.5
+
+    # Step 2: Cycle DP monitors via nvidia-settings MetaMode to fix USB-C hub
+    # signal drops. The hub's DP-to-HDMI converter may not re-initialize after
+    # DPMS wake, causing "HDMI no signal" even though xrandr shows correct layout.
+    if [ -n "$METAMODE_FULL" ] && [ -n "$METAMODE_REDUCED" ]; then
+        log_msg "Cycling DP monitors via nvidia-settings MetaMode (USB-C hub fix)..."
+        nvidia-settings --assign "CurrentMetaMode=${METAMODE_REDUCED}" 2>/dev/null || true
+        # Also turn off the DP output via xrandr for thorough pipeline teardown
+        METAMODE_DP_OUTPUT_PLACEHOLDER
+        sleep 15
+        nvidia-settings --assign "CurrentMetaMode=${METAMODE_FULL}" 2>/dev/null || true
+        sleep 2
+        log_msg "MetaMode cycle complete"
+    fi
+
+    # Step 3: Poll layout to check if xrandr fix is also needed
     local status
     local poll_interval=1
-    local poll_count=5
+    local poll_count=3
     local issue_found=false
     local last_status=""
 
@@ -297,26 +363,21 @@ restore_monitors() {
         if [ "$status" != "ok" ]; then
             issue_found=true
             last_status="$status"
-            log_msg "Poll $i/$poll_count: issue detected: $status"
+            log_msg "Poll $i/$poll_count: layout issue detected: $status"
             break
         fi
     done
 
     if [ "$issue_found" = "false" ]; then
-        log_msg "Layout stable after ${poll_count}s polling, no fix needed"
+        log_msg "Layout correct after MetaMode cycle + ${poll_count}s polling"
         date +%s > "$LAST_RESTORE_FILE"
         return
     fi
 
     status="$last_status"
-    log_msg "Issue confirmed: $status — starting fix..."
+    log_msg "Layout issue: $status — applying xrandr fix..."
 
-    # Step 1: Force DPMS on to wake all monitors
-    xset dpms force on 2>/dev/null
-    log_msg "DPMS forced on"
-    sleep 0.5
-
-    # Step 2: Try applying exact layout directly (fast path, skip --auto)
+    # Step 4: Try applying exact layout directly (fast path)
     local max_retries=5
     local retry=1
     while [ $retry -le $max_retries ]; do
@@ -380,6 +441,15 @@ MAINEOF
     sed -i "s|XRANDR_COMMAND_PLACEHOLDER|$XRANDR_CMD|g" "$HOME/.local/bin/fix-monitors-auto.sh"
     sed -i "s|PRIMARY_PLACEHOLDER|$PRIMARY_MONITOR|g" "$HOME/.local/bin/fix-monitors-auto.sh"
     sed -i "s|MONITOR_NAMES_PLACEHOLDER|$MONITOR_NAMES_LIST|g" "$HOME/.local/bin/fix-monitors-auto.sh"
+    
+    # Replace MetaMode placeholders
+    sed -i "s|METAMODE_FULL_PLACEHOLDER|$METAMODE_FULL|g" "$HOME/.local/bin/fix-monitors-auto.sh"
+    sed -i "s|METAMODE_REDUCED_PLACEHOLDER|$METAMODE_REDUCED|g" "$HOME/.local/bin/fix-monitors-auto.sh"
+    
+    # Replace DP output off commands placeholder
+    local escaped_dp_off
+    escaped_dp_off=$(echo -e "$METAMODE_DP_OFF_CMDS" | sed 's/[&/\]/\\&/g')
+    sed -i "/METAMODE_DP_OUTPUT_PLACEHOLDER/c\\$escaped_dp_off" "$HOME/.local/bin/fix-monitors-auto.sh"
     
     # Replace layout declarations placeholder
     local escaped_layouts

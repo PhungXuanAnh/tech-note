@@ -38,6 +38,7 @@ chmod +x setup-monitor-fix.sh && ./setup-monitor-fix.sh
 - ✅ **Polling Detection**: Polls layout for 5 seconds after unlock to catch delayed Mutter resets (prevents race conditions)
 - ✅ **Fast Path Fix**: Tries direct xrandr positioning first (~3s), falls back to `--auto` CRTC initialization only if needed
 - ✅ **monitors.xml Cleanup**: Removes stale configurations with old connector names that confuse Mutter
+- ✅ **USB-C Hub Signal Fix**: Cycles NVIDIA MetaMode to force DP-to-HDMI signal re-negotiation on USB-C hubs (fixes "HDMI no signal" after DPMS wake)
 - ✅ **DPMS Wake**: Forces monitors to wake from power-saving before configuration
 - ✅ **Retry Logic**: Up to 5 attempts with progressive backoff for reliable recovery
 - ✅ **Layout Verification**: Confirms the fix was actually applied correctly
@@ -59,7 +60,8 @@ chmod +x setup-monitor-fix.sh && ./setup-monitor-fix.sh
 After running the setup script, the following files will be created:
 
 ```
-~/.local/bin/fix-monitors-auto.sh           # Main monitor fix script
+~/.local/bin/fix-monitors-auto.sh           # Main monitor fix script (auto, triggered by screen unlock)
+/usr/local/bin/fix-monitors-manual          # Manual fix command (install separately from fix-monitors-manual.sh)
 ~/.config/systemd/user/monitor-fix.service  # Systemd service
 ~/.local/bin/test-monitor-fix.sh       # Test and diagnostic script
 ~/monitor-fix-setup.log                # Installation log
@@ -274,6 +276,9 @@ Check script syntax: `bash -n ~/.local/bin/fix-monitors-auto.sh`
 **Issue**: Monitor shows "No Signal" after unlock but is detected in Display Settings  
 **Solution**: The GPU knows the monitor is connected (via EDID) but isn't sending video signal because the CRTC wasn't initialized. The fix script's `xrandr --auto` step forces CRTC initialization. If using an older version of the fix script, re-run `./setup-monitor-fix.sh`.
 
+**Issue**: Monitor connected via USB-C hub shows "HDMI no signal" after unlock, but is detected in Display Settings  
+**Solution**: The USB-C hub's internal DP-to-HDMI converter chip fails to re-initialize after DPMS wake. The fix script cycles the NVIDIA MetaMode (removes the display, waits 15 seconds for the hub to fully reset, then re-adds it). This forces full DP link re-training. If using an older version, re-run `./setup-monitor-fix.sh`. For manual recovery, run `fix-monitors-manual`.
+
 **Issue**: Fix script logs "Layout is already correct, no fix needed" but monitors are wrong  
 **Solution**: This is a race condition — the script checked too early (before Mutter reset the layout). The updated script uses polling (checks every 1s for 5s) instead of a single check. Re-run `./setup-monitor-fix.sh` to get the updated script.
 
@@ -285,18 +290,53 @@ Check script syntax: `bash -n ~/.local/bin/fix-monitors-auto.sh`
 This fix addresses a common issue where NVIDIA drivers fail to properly restore multi-monitor configurations after screen lock/unlock cycles. The solution:
 
 1. **Monitors D-Bus Events**: Listens for screen unlock signals via `org.gnome.ScreenSaver` `ActiveChanged` signals
-2. **Polls for Issues**: After unlock, polls the layout every 1 second for 5 seconds to catch delayed resets from Mutter (prevents race condition where layout appears correct initially but gets reset later)
-3. **DPMS Wake**: Forces DPMS on (`xset dpms force on`) to wake monitors from power-saving state
-4. **Fast Path Fix**: Tries applying the exact xrandr positioning command directly first (~3s), without the slower `--auto` CRTC initialization
-5. **Fallback CRTC Initialization**: If the fast path fails (BadMatch error), initializes CRTCs with `xrandr --auto` and retries
-6. **Verification**: Confirms the layout was actually applied correctly by checking xrandr output
-7. **Cooldown**: Uses timestamp-based cooldown (30s) to prevent double-triggering from rapid D-Bus signals
-8. **monitors.xml Cleanup**: The setup script removes stale configurations from `~/.config/monitors.xml` that use old connector names
-9. **Provides Logging**: Tracks all events for troubleshooting
+2. **DPMS Wake**: Forces DPMS on (`xset dpms force on`) to wake monitors from power-saving state
+3. **USB-C Hub Signal Fix**: Cycles NVIDIA MetaMode — removes DP monitors from the active configuration, turns them off via xrandr, waits 15 seconds for the USB-C hub's DP-to-HDMI converter to fully reset, then re-adds them. This forces the NVIDIA driver to do full DP link training, which re-establishes the signal through the hub.
+4. **Polls for Issues**: After the MetaMode cycle, polls the layout every 1 second for 5 seconds to catch delayed resets from Mutter
+5. **Fast Path Fix**: Tries applying the exact xrandr positioning command directly first (~3s), without the slower `--auto` CRTC initialization
+6. **Fallback CRTC Initialization**: If the fast path fails (BadMatch error), initializes CRTCs with `xrandr --auto` and retries
+7. **Verification**: Confirms the layout was actually applied correctly by checking xrandr output
+8. **Cooldown**: Uses timestamp-based cooldown (30s) to prevent double-triggering from rapid D-Bus signals
+9. **monitors.xml Cleanup**: The setup script removes stale configurations from `~/.config/monitors.xml` that use old connector names
+10. **Provides Logging**: Tracks all events for troubleshooting
 
 #### What is Mutter?
 
 **Mutter** is GNOME's window manager and compositor. It handles window placement, desktop effects, and **monitor configuration**. When you lock/unlock your screen, Mutter re-reads `~/.config/monitors.xml` to determine where to place each monitor. If `monitors.xml` contains stale configurations with old connector names (e.g., `eDP-1` instead of `DP-4`), Mutter picks the wrong configuration and falls back to default positioning (all monitors at 0,0), causing "No Signal" on displaced monitors.
+
+#### USB-C Hub Signal Drop — Root Cause and Fix Investigation
+
+**Problem**: A monitor connected via **HDMI → USB-C hub → USB-C port on laptop** shows "HDMI no signal" after screen unlock, even though `xrandr` reports it as connected with the correct resolution. The monitor appears active in Display Settings and NVIDIA thinks it's outputting signal, but the physical screen is black.
+
+**Root Cause**: The USB-C hub contains an internal DP-to-HDMI converter chip. When DPMS puts the display to sleep, the NVIDIA GPU stops sending DisplayPort signal over USB-C Alt Mode. The hub's converter chip detects no signal and enters standby. When DPMS wakes up and the GPU resumes sending DP signal, the converter chip sometimes fails to re-initialize. The GPU successfully does link training and believes it's outputting frames, but the hub's converter isn't forwarding them to the HDMI output.
+
+**Why `xrandr` shows everything "ok"**: `xrandr` queries the GPU's state, not the hub's state. Since the GPU successfully completed DP link training and has EDID data from the monitor (obtained before the hub went to sleep), xrandr reports the monitor as connected and active. The signal break is between the hub's DP input and its HDMI output — invisible to the GPU.
+
+**Approaches tried and results**:
+
+| Approach | Delay | Result |
+|----------|-------|--------|
+| `xrandr --output DP-1 --off` then `--mode 1920x1080` | N/A | ❌ Did not work — xrandr on/off doesn't force NVIDIA to tear down/recreate the full DP pipeline |
+| DPMS force off/on + `xrandr --auto` | N/A | ❌ Did not work — DPMS toggle alone doesn't reset the hub |
+| `nvidia-settings` MetaMode remove/add (3s delay) | 3s | ⚠️ Worked once manually on an already-stuck display, but failed after real lock/unlock |
+| `nvidia-settings` MetaMode remove/add (5s delay) | 5s | ⚠️ Intermittent — worked several lock/unlock cycles, then failed |
+| MetaMode remove + `xrandr --off` + MetaMode add (8s) | 8s | ⚠️ Worked manually in stuck state, but failed in auto-fix right after unlock |
+| MetaMode remove + `xrandr --off` + MetaMode add (15s) | 15s | ✅ **Reliable** — works consistently across multiple lock/unlock cycles |
+
+**Key findings**:
+- `xrandr` off/on alone is insufficient — it tells X11 about the display but doesn't force NVIDIA to fully tear down the DP pipeline
+- `nvidia-settings` MetaMode cycling forces NVIDIA to completely remove/recreate the display pipeline, including full DP link training
+- The USB-C hub's converter chip needs **at least 15 seconds** after signal teardown to fully power down and reset
+- Adding `xrandr --output DP-1 --off` alongside MetaMode removal provides a more thorough teardown (GPU-level + X11-level)
+- The hub's behavior is probabilistic with shorter delays — sometimes it resets in 5s, sometimes it needs 15s
+
+**Final working fix sequence**:
+1. Remove DP monitor from NVIDIA MetaMode (GPU stops DP signal)
+2. Turn off DP output via xrandr (X11 deactivates output)
+3. Wait 15 seconds (hub's converter chip fully resets)
+4. Re-add DP monitor to NVIDIA MetaMode (GPU does full DP link training, hub detects signal and starts converting)
+5. Wait 2 seconds (link stabilization)
+6. Apply xrandr layout (fix any position changes caused by MetaMode cycling)
 
 #### Understanding monitors.xml
 
