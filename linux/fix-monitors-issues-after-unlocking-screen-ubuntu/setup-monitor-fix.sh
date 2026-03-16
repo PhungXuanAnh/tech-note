@@ -639,6 +639,37 @@ EOF
     echo ""
 }
 
+# Create manual fix script
+create_manual_fix_script() {
+    print_step "Creating manual fix script..."
+
+    cat > "$HOME/.local/bin/fix-monitors-manual" << EOF
+#!/bin/bash
+# Manual monitor fix — run this if the auto service didn't fix the layout
+# Usage: fix-monitors-manual
+set -euo pipefail
+
+echo "Current layout:"
+xrandr --query | grep -E "^\S+ connected"
+
+echo ""
+echo "Forcing DPMS on..."
+xset dpms force on
+sleep 0.5
+
+echo "Applying layout..."
+$XRANDR_CMD
+
+echo ""
+echo "Verified:"
+xrandr --query | grep -E "^\S+ connected"
+EOF
+
+    chmod +x "$HOME/.local/bin/fix-monitors-manual"
+    print_status "Manual fix script created at $HOME/.local/bin/fix-monitors-manual"
+    echo ""
+}
+
 # Function to display summary
 display_summary() {
     echo -e "${GREEN}================================================${NC}"
@@ -657,13 +688,15 @@ display_summary() {
     echo "📁 $HOME/.local/bin/fix-monitors.sh (main script)"
     echo "📁 $HOME/.config/systemd/user/monitor-fix.service (systemd service)"
     echo "📁 $HOME/.local/bin/test-monitor-fix.sh (test script)"
+    echo "📁 $HOME/.local/bin/fix-monitors-manual (manual fix)"
     echo "📁 $LOG_FILE (setup log)"
     echo ""
     echo -e "${BLUE}Useful commands:${NC}"
     echo "🔍 Check service status: systemctl --user status monitor-fix.service"
     echo "📋 View service logs: journalctl --user -u monitor-fix.service -f"
     echo "🧪 Test setup: ~/.local/bin/test-monitor-fix.sh"
-    echo "🔄 Restart service: systemctl --user restart monitor-fix.service"
+    echo "� Manual fix: fix-monitors-manual"
+    echo "�🔄 Restart service: systemctl --user restart monitor-fix.service"
     echo ""
     echo -e "${BLUE}Monitor configuration:${NC}"
     echo "$CURRENT_CONFIG"
@@ -708,6 +741,7 @@ main() {
     sync_monitor_configs
     check_kernel_params
     create_test_script
+    create_manual_fix_script
     
     display_summary
     

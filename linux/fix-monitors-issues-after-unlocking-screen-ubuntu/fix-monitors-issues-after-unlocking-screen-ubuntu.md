@@ -163,12 +163,11 @@ systemctl --user restart monitor-fix.service
 ~/.local/bin/test-monitor-fix.sh
 ```
 
-**⚡ Option 4: Quick Update (Experimental)**
+**🔧 Option 4: Manual Fix**
 ```bash
-# Use the experimental quick update script
-./quick-update-monitors.sh
+# Run the manual fix script
+fix-monitors-manual
 ```
-This attempts to auto-detect and apply layout changes quickly. Use with caution for complex layouts.
 
 #### Overlapping Monitor Coordinates
 If monitors have conflicting positions (common after layout changes):
@@ -390,13 +389,12 @@ tail -f ~/.local/share/monitor-fix.log
 - Updates existing installations intelligently
 - **Use for**: Fresh installs, major layout changes, reliable updates
 
-### ⚡ `quick-update-monitors.sh`  
-**Experimental quick update tool**
-- Rapid detection and update of monitor layouts
-- Minimal user interaction required
-- Creates backup before changes
-- **Use for**: Minor position adjustments, quick fixes
-- **Caution**: May need manual adjustment for complex layouts
+### ⚡ `fix-monitors-manual`
+**Manual fix tool** (created by setup or install separately)
+- Forces DPMS on and applies the correct xrandr layout
+- Run when the auto service didn't catch the issue
+- Safe to run multiple times
+- **Use for**: Quick manual recovery when monitors are wrong
 
 ### 🧪 `test-monitor-fix.sh`
 **Diagnostic and testing tool** (created automatically)
