@@ -1,0 +1,10 @@
+[Unit]
+Description=Monitor Legion EC CPU power-throttle and notify to drain EC
+
+[Service]
+Type=oneshot
+# Cho notify-send tìm thấy session bus của phiên đăng nhập (%t = XDG_RUNTIME_DIR)
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=%t/bus
+# Có thể chỉnh ngưỡng ở đây, ví dụ:
+# Environment=FREQ_BASE_MHZ=2400 LOAD_BUSY_PCT=50 NOTIFY_COOLDOWN_S=300
+ExecStart=%h/.local/bin/legion-throttle-monitor.sh
