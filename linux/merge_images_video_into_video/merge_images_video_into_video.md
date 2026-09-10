@@ -8,12 +8,63 @@
 
 ### Basic Usage (GPU Version - Recommended)
 
-Merge images AND videos into a single 8K timeline video for YouTube. Processes files in alphanumeric order (natural timeline order)
+Merge images AND videos into a single timeline video for YouTube. Processes files in alphanumeric order (natural timeline order)
 
 ```bash
 cd /path/to/your/images
-~/repo/tech-note/linux/merge_images_video_into_video/merge_timeline_to_video_gpu.sh --resolution 8k --duration 1
+~/repo/tech-note/linux/merge_images_video_into_video/merge_timeline_to_video_gpu.sh --dry-run   # check the plan first
+~/repo/tech-note/linux/merge_images_video_into_video/merge_timeline_to_video_gpu.sh
 ```
+
+> **Do NOT pass `--resolution 8k` by reflex.** See
+> [Choosing a resolution](#-choosing-a-resolution-read-this-before-picking-8k) — v2 defaults to
+> `--resolution auto`, which reads your source files and picks the canvas for you.
+
+### timeline merger v2.0 - what changed and why
+
+v1 hardcoded 8K + `-rc constqp -qp 1`. On a 175-second wedding timeline that produced a
+**9.5 GB file at 436 Mbps with no audio at all**. Three separate problems:
+
+| Problem in v1 | Effect | v2 |
+|---|---|---|
+| `-rc constqp -qp 1` | Near-lossless intermediate at ~436 Mbps. YouTube re-encodes and caps its own output around 50 Mbps, so ~90% of that file was thrown away on upload. | `-rc vbr -cq 20 -b:v 0 -maxrate <tier>` — constant *quality*, so simple stills cost little and complex motion gets the bits. Same 175s timeline lands around 20 Mbps at 4K / 45 Mbps at 8K. |
+| `noise=c0s=2:c0f=t` added deliberately | Injected grain to "force the bitrate up so YouTube processes it as 8K". YouTube assigns its encoding tier by **resolution**, not by upload bitrate — so this only added the most expensive-to-compress signal there is, and YouTube then spent bits reproducing the grain instead of the photo. | Removed entirely. |
+| Stills had no audio track; final `concat -c copy` | The first clip determined the output stream layout, so the muxer silently dropped every audio stream. **Output had zero audio.** | Every clip is muxed with an identical AAC 48 kHz stereo track (`anullsrc` silence for stills), and the concat re-encodes audio once to remove AAC frame-boundary DTS gaps. |
+
+Other v2 fixes:
+
+- **`--resolution auto`** picks the smallest ladder tier that covers your largest source, capped at 4K.
+- **`--orientation auto`** — with vertical phone clips on a 16:9 canvas, ~2/3 of every frame is black bars that still consume bitrate. `auto` votes by runtime.
+- **Per-file colour matrix.** v1 forced `iall=bt709` on everything. iPhone clips tagged Display-P3 / smpte170m were converted from the wrong source space — that was the yellow/red tint. v2 probes `color_space` per file and only converts when it actually differs.
+- **Stills convert RGB→YUV with `out_color_matrix=bt709`.** Without it ffmpeg uses the BT.601 matrix while the file is tagged BT.709, which shifts colour on every photo.
+- **10-bit (`main10` / `p010le`)** when NVENC supports it — removes banding in skies and skin before YouTube's re-encode compounds it. Probed at startup, falls back to 8-bit.
+- **Lanczos scaling** instead of the default bilinear.
+- **`--duration` default is now 4s, not 1s.** YouTube's encoder needs roughly a second after a cut to sharpen up, so 1-second stills are blurry for most of their screen time.
+- **Previous outputs are skipped** so a re-run does not ingest its own result.
+- `--dry-run` prints the canvas decision without encoding.
+
+## 🎯 Choosing a resolution (read this before picking 8K)
+
+**Upscaling never adds detail.** A 720x1280 phone clip stretched onto an 8K canvas is still a
+720x1280 clip — just 12x heavier to store and upload.
+
+**The grain of truth behind "upload in 4K/8K":** YouTube allocates bitrate by resolution, not by
+how good the picture actually is. The same footage gets ~8 Mbps VP9 at 1080p but ~20 Mbps at 4K,
+so upscaling really does reduce compression artefacts. **That benefit is essentially saturated at
+4K.** Going to 8K costs 5-10x the file size, hours of extra upload, 1-3 days of YouTube 8K
+processing, and reaches the <0.5% of viewers with an 8K display.
+
+Rule of thumb:
+
+| Your source | Upload at |
+|---|---|
+| Phone video, max 1080p | **4K** |
+| 4K video | **4K** (native) |
+| Mostly high-res stills (>4000px), little video | 4K; 8K only if stills are the point and you accept the size |
+| Mixed stills + 1080p video (the common case) | **4K** |
+
+Also: a 16:9 canvas full of vertical phone clips wastes most of its pixels on black bars that
+still cost bitrate. Try `--orientation auto` or `--pad blur`.
 
 Merge video only:
 
