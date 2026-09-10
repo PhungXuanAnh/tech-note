@@ -43,6 +43,11 @@ DEFAULT_SCALE_MODE="fit"
 DEFAULT_PAD="black"
 DEFAULT_ORIENT="landscape"
 DEFAULT_CQ="20"
+# Concurrent ffmpeg processes. NOT the core count: each job is only ~1-1.5 cores
+# of CPU work, and past a handful the limit becomes NVENC throughput, memory
+# bandwidth and RAM (an 8K job holds far bigger frame buffers than a 4K one),
+# not spare cores. 0 = auto.
+DEFAULT_JOBS="0"
 DEFAULT_AUDIO_BR="192k"
 
 # Colors
@@ -57,6 +62,7 @@ N='\033[0m'
 # GPU / codec capability detection
 # ═══════════════════════════════════════════════════════════════
 TMPDIR_WORK=""
+NV_PRESET_OVERRIDE=""
 USE_GPU=false
 NV_PRESET="p4"
 HAS_HEVC=false
@@ -88,8 +94,15 @@ detect_gpu() {
     USE_GPU=true
     echo -e "${G}✓ NVENC available - GPU: $gpu${N}" >&2
 
-    if   [[ "$gpu" =~ RTX\ (50|40|30) ]]; then NV_PRESET="p7"
-    elif [[ "$gpu" =~ RTX\ 20 ]] || [[ "$gpu" =~ GTX\ 16 ]]; then NV_PRESET="p6"
+    # p7 is the slowest preset and, measured on a 4s 4K still, takes 3.26s
+    # against p5's 1.73s for 2.9% more bytes at the same CQ - i.e. the same
+    # visual quality, just reached less efficiently. Since NVENC (not the CPU)
+    # is the bottleneck once stills are scaled only once, and YouTube re-encodes
+    # the upload anyway, p5 is the better default. Override with --preset.
+    if [[ -n "$NV_PRESET_OVERRIDE" ]]; then
+        NV_PRESET="$NV_PRESET_OVERRIDE"
+    elif [[ "$gpu" =~ RTX\ (50|40|30) ]]; then NV_PRESET="p5"
+    elif [[ "$gpu" =~ RTX\ 20 ]] || [[ "$gpu" =~ GTX\ 16 ]]; then NV_PRESET="p5"
     else NV_PRESET="p4"; fi
 
     if nvenc_probe -c:v hevc_nvenc; then
@@ -143,11 +156,13 @@ has_audio() {
     [[ "$n" -gt 0 ]]
 }
 
-# Echo "<matrix> <hdr>" for a video.
+# Echo "<cs_matrix> <hdr> <z_matrix>" for a video.
 #
-# <matrix> is the input colour matrix translated into a name the `colorspace`
-# filter actually accepts - ffprobe reports e.g. `bt2020nc` but the filter only
-# knows `bt2020`, and feeding it the raw name is a hard error, not a warning.
+# The two filters that can do the conversion disagree on names, and each rejects
+# the other's spelling outright:
+#   colorspace  knows bt2020,    NOT bt2020nc
+#   zscale      knows bt2020nc,  NOT bt2020
+# So <cs_matrix> is spelled for `colorspace` and <z_matrix> for `zscale`.
 # Anything unmappable degrades to bt709, which makes the conversion a no-op.
 #
 # <hdr> is "hlg", "pq" or "sdr". HDR transfers cannot go through the
@@ -159,21 +174,25 @@ probe_colour() {
     trc=$(ffprobe -v error -select_streams v:0 -show_entries stream=color_transfer \
             -of default=noprint_wrappers=1:nokey=1 "$1" 2>/dev/null || true)
 
-    local matrix hdr="sdr"
+    local matrix zmatrix hdr="sdr"
     case "$cs" in
-        bt2020nc|bt2020_ncl|bt2020c|bt2020_cl|bt2020) matrix="bt2020" ;;
-        smpte170m)   matrix="smpte170m" ;;
-        smpte240m)   matrix="smpte240m" ;;
-        bt470bg)     matrix="bt470bg" ;;
-        bt601-6-525) matrix="bt601-6-525" ;;
-        bt601-6-625) matrix="bt601-6-625" ;;
-        *)           matrix="bt709" ;;   # bt709, unknown, gbr, ycgco, fcc, ...
+        bt2020nc|bt2020_ncl)  matrix="bt2020";       zmatrix="bt2020nc" ;;
+        bt2020c|bt2020_cl)    matrix="bt2020";       zmatrix="bt2020c"  ;;
+        bt2020)               matrix="bt2020";       zmatrix="bt2020nc" ;;
+        smpte170m)            matrix="smpte170m";    zmatrix="smpte170m" ;;
+        smpte240m)            matrix="smpte240m";    zmatrix="smpte2400m" ;;
+        bt470bg)              matrix="bt470bg";      zmatrix="bt470bg" ;;
+        bt601-6-525)          matrix="bt601-6-525";  zmatrix="170m" ;;
+        bt601-6-625)          matrix="bt601-6-625";  zmatrix="470bg" ;;
+        *)                    matrix="bt709";        zmatrix="bt709" ;;
     esac
     case "$trc" in
         arib-std-b67) hdr="hlg" ;;
         smpte2084)    hdr="pq"  ;;
     esac
-    echo "$matrix $hdr"
+    # An HDR file with no usable matrix tag is BT.2020 in practice.
+    if [[ "$hdr" != "sdr" && "$zmatrix" == "bt709" ]]; then zmatrix="bt2020nc"; fi
+    echo "$matrix $hdr $zmatrix"
 }
 
 # ffmpeg cannot decode HEIC/HEIF (no libheif in most builds), so those stills are
@@ -266,7 +285,7 @@ build_filter() {
     local kind="$1" imatrix="${2:-bt709}"
     local pre="" fit="" out=""
 
-    local hdr="${3:-sdr}"
+    local hdr="${3:-sdr}" zmatrix="${4:-bt2020nc}"
     if [[ "$kind" == "video" ]]; then
         if [[ "$hdr" != "sdr" ]] && [[ "$HAS_ZSCALE" == "true" ]]; then
             # HLG/PQ. The `colorspace` filter has no idea what these transfers
@@ -274,7 +293,7 @@ build_filter() {
             # linear light instead, otherwise the clip comes out grey and flat.
             local itrc="arib-std-b67"
             [[ "$hdr" == "pq" ]] && itrc="smpte2084"
-            pre="zscale=tin=${itrc}:min=${imatrix}:pin=bt2020:t=linear:npl=100,\
+            pre="zscale=tin=${itrc}:min=${zmatrix}:pin=bt2020:t=linear:npl=100,\
 format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,\
 zscale=t=bt709:m=bt709:r=tv,"
         elif [[ "$imatrix" != "bt709" ]]; then
@@ -307,7 +326,74 @@ zscale=t=bt709:m=bt709:r=tv,"
         *) echo -e "${R}Invalid scale mode: $SCALE_MODE${N}" >&2; exit 1 ;;
     esac
 
-    echo "${out},setsar=1,fps=${FPS},format=${PIX_FMT}"
+    if [[ "$kind" == "image" ]]; then
+        # Scale/pad/blur ONCE, then repeat the finished frame. Feeding a still
+        # through `-loop 1` instead runs the whole chain per output frame, i.e.
+        # ${FPS} x duration identical 4K lanczos scales per photo (120 of them
+        # for a 4s still at 30fps). Same bytes out, ~9x less work.
+        echo "${out},setsar=1,format=${PIX_FMT},loop=loop=-1:size=1:start=0,fps=${FPS}"
+    else
+        echo "${out},setsar=1,fps=${FPS},format=${PIX_FMT}"
+    fi
+}
+
+# ═══════════════════════════════════════════════════════════════
+# Encode one clip. Silent: the result goes to $TMPDIR_WORK/status_<idx> so that
+# parallel jobs cannot interleave their output halfway through a line.
+# ═══════════════════════════════════════════════════════════════
+encode_clip() {
+    local idx="$1" f="$2" kind="$3"
+    local pad_idx; pad_idx=$(printf "%05d" "$idx")
+    local clip_out="$TMPDIR_WORK/clip_${pad_idx}.mp4"
+    local status="$TMPDIR_WORK/status_${pad_idx}"
+    local log="$TMPDIR_WORK/log_${pad_idx}"
+    local -a cmd
+    local note=""
+
+    if [[ "$kind" == "image" ]]; then
+        local src; src=$(decodable_input "$f" "$pad_idx")
+        if [[ -z "$src" ]]; then
+            printf 'fail\tcannot decode\n' > "$status"; return 0
+        fi
+        # No `-loop 1` here on purpose - the loop happens after the filters.
+        cmd=(ffmpeg -hide_banner -loglevel error -i "$src"
+             -f lavfi -i "anullsrc=channel_layout=stereo:sample_rate=48000"
+             -t "$IMG_DUR"
+             -filter_complex "$(build_filter image)[vout]"
+             -map "[vout]" -map 1:a:0)
+    else
+        local mtx hdr zmtx; read -r mtx hdr zmtx <<< "$(probe_colour "$f")"
+        [[ "$hdr" != "sdr" ]] && note="[${hdr^^}→SDR] "
+        if has_audio "$f"; then
+            cmd=(ffmpeg -hide_banner -loglevel error -i "$f"
+                 -filter_complex "$(build_filter video "$mtx" "$hdr" "$zmtx")[vout]"
+                 -map "[vout]" -map 0:a:0)
+        else
+            cmd=(ffmpeg -hide_banner -loglevel error -i "$f"
+                 -f lavfi -i "anullsrc=channel_layout=stereo:sample_rate=48000"
+                 -filter_complex "$(build_filter video "$mtx" "$hdr" "$zmtx")[vout]"
+                 -map "[vout]" -map 1:a:0)
+        fi
+    fi
+
+    # Identical audio layout on EVERY clip is what makes `concat -c copy`
+    # keep the sound instead of silently dropping it.
+    cmd+=("${CODEC_ARGS[@]}"
+          -color_primaries bt709 -color_trc bt709 -colorspace bt709
+          -c:a aac -b:a "$DEFAULT_AUDIO_BR" -ar 48000 -ac 2
+          -af "aresample=async=1:first_pts=0,apad" -shortest
+          -r "$FPS" -video_track_timescale 90000
+          -y "$clip_out")
+
+    "${cmd[@]}" >"$log" 2>&1 || true
+
+    if [[ -s "$clip_out" ]]; then
+        printf 'ok\t%s%s\n' "$note" "$(du -h "$clip_out" | cut -f1)" > "$status"
+    else
+        rm -f "$clip_out"
+        printf 'fail\t%s\n' "$(tr '\n' ' ' < "$log" | cut -c1-140)" > "$status"
+    fi
+    return 0
 }
 
 usage() {
@@ -328,6 +414,10 @@ Options:
   -p, --pad          black | blur   (fit mode only)     (default: ${DEFAULT_PAD})
   -q, --quality      CQ/CRF, lower = better & bigger    (default: ${DEFAULT_CQ})
                      18 = archival, 20 = excellent, 23 = fine for YouTube
+  -j, --jobs         Clips encoded concurrently            (default: 4, 2 at 8K)
+                     Not the core count - see the note below.
+  -P, --preset       NVENC preset p1(fast)..p7(slow)        (default: p5)
+                     p7 costs ~2x the time for ~3% fewer bytes at equal quality.
   -o, --output       Output filename
   -n, --dry-run      Print the plan and size estimate, encode nothing
   -h, --help         This help
@@ -341,6 +431,11 @@ Why the defaults are what they are:
   * No synthetic noise is added. Noise is the most expensive thing to encode and
     it steals bits from real detail in YouTube's re-encode.
   * Stills get a silent audio track so the final concat keeps your videos' sound.
+  * Only the ENCODE runs on the GPU. Decode and every filter (scale, pad, blur,
+    tone-map, colour conversion) run on the CPU, and swscale is effectively
+    single-threaded, so one clip at a time uses ~1 core and leaves NVENC idle.
+    --jobs is what fills the machine; more than ~6 stops helping because NVENC
+    throughput and memory bandwidth become the limit, not spare cores.
 
 Examples:
   $0                          # auto canvas, 4s per photo, sound preserved
@@ -358,6 +453,7 @@ main() {
     SCALE_MODE="$DEFAULT_SCALE_MODE"
     PAD_MODE="$DEFAULT_PAD"
     local cq="$DEFAULT_CQ"
+    JOBS="$DEFAULT_JOBS"
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -368,6 +464,8 @@ main() {
             -s|--scale)       SCALE_MODE="$2"; shift 2 ;;
             -p|--pad)         PAD_MODE="$2"; shift 2 ;;
             -q|--quality)     cq="$2"; shift 2 ;;
+            -j|--jobs)        JOBS="$2"; shift 2 ;;
+            -P|--preset)      NV_PRESET_OVERRIDE="$2"; shift 2 ;;
             -o|--output)      out="$2"; shift 2 ;;
             -n|--dry-run)     dry=true; shift ;;
             -h|--help)        usage; exit 0 ;;
@@ -483,6 +581,21 @@ main() {
     fi
     build_codec_args "$res" "$FPS" "$cq"
 
+    if [[ "$JOBS" -le 0 ]]; then
+        local cores; cores=$(nproc 2>/dev/null || echo 4)
+        # Kept low deliberately. Each concurrent NVENC session allocates its
+        # own input buffers in VRAM, and on an 8 GB laptop card shared with a
+        # browser, ~10 concurrent 4K sessions hit both
+        #   CreateInputBuffer failed: out of memory
+        # and the driver's session cap
+        #   OpenEncodeSessionEx failed: incompatible client key (21)
+        # Measured gain is small anyway: 1 job 59.7s, 3 jobs 51.8s, 6 jobs 49.4s
+        # on 17 stills - because NVENC, not the CPU, is the limit once stills are
+        # scaled only once. Failures are retried serially regardless.
+        if [[ "$res" == "8k" ]]; then JOBS=2; else JOBS=4; fi
+        if [[ "$JOBS" -gt "$cores" ]]; then JOBS="$cores"; fi
+    fi
+
     local est_total_secs
     est_total_secs=$(awk "BEGIN{printf \"%.0f\", $est_video_secs + $img_count * $IMG_DUR}")
 
@@ -495,6 +608,8 @@ main() {
     echo -e "  Still duration:  ${G}${IMG_DUR}s${N}"
     echo -e "  Scale / pad:     ${G}${SCALE_MODE} / ${PAD_MODE}${N}"
     echo -e "  Rate control:    ${G}CQ ${cq}, cap ${MAXRATE[$res]}${N}"
+    echo -e "  Parallel jobs:   ${G}${JOBS}${N}"
+    echo -e "  NVENC preset:    ${G}${NV_PRESET}${N}"
     echo -e "  Encoder:         ${G}${CODEC_ARGS[1]} (${PIX_FMT})${N}"
     echo -e "  Content:         ${B}${img_count}${N} images + ${B}${vid_count}${N} videos"
     [[ $live_count -gt 0 ]] && echo -e "                   ${Y}${live_count} Live Photo stills skipped (MOV used instead)${N}"
@@ -513,67 +628,71 @@ main() {
     trap 'rm -rf "${TMPDIR_WORK:-}"' EXIT
     local tmp="$TMPDIR_WORK"
 
-    echo -e "${Y}Encoding clips...${N}"
-    local idx=1 failed=0
+    echo -e "${Y}Encoding ${total} clips, ${JOBS} at a time...${N}"
+    local failed=0
     local start_time; start_time=$(date +%s)
 
+    # One ffmpeg per clip, JOBS of them at once. Sequentially this pipeline uses
+    # roughly one core out of $(nproc) and leaves NVENC idle most of the time,
+    # because decode and every filter run on the CPU while only the encode is on
+    # the GPU. Running several clips concurrently is what actually fills both.
     local i
     for ((i=0; i<total; i++)); do
-        local f="${items[$i]}" kind="${kinds[$i]}"
-        local bn; bn=$(basename "$f")
-        local clip_out; clip_out="$tmp/clip_$(printf "%05d" "$idx").mp4"
-        local -a cmd
-
-        if [[ "$kind" == "image" ]]; then
-            echo -ne "${Y}[$idx/$total]${N} 📸 $bn ${C}(still → ${IMG_DUR}s)${N} ... "
-            local src; src=$(decodable_input "$f" "$(printf "%05d" "$idx")")
-            if [[ -z "$src" ]]; then
-                echo -e "${R}✗ cannot decode${N}"; failed=$((failed+1)); idx=$((idx+1)); continue
-            fi
-            cmd=(ffmpeg -hide_banner -loglevel error
-                 -loop 1 -framerate "$FPS" -i "$src"
-                 -f lavfi -i "anullsrc=channel_layout=stereo:sample_rate=48000"
-                 -t "$IMG_DUR"
-                 -filter_complex "$(build_filter image)[vout]"
-                 -map "[vout]" -map 1:a:0)
-        else
-            local dur; dur=$(probe_duration "$f")
-            printf -v dur "%.1f" "$dur"
-            echo -ne "${Y}[$idx/$total]${N} 🎬 $bn ${C}(video ${dur}s)${N} ... "
-            local mtx hdr; read -r mtx hdr <<< "$(probe_colour "$f")"
-            [[ "$hdr" != "sdr" ]] && echo -ne "${C}[${hdr^^}→SDR] ${N}"
-            if has_audio "$f"; then
-                cmd=(ffmpeg -hide_banner -loglevel error -i "$f"
-                     -filter_complex "$(build_filter video "$mtx" "$hdr")[vout]"
-                     -map "[vout]" -map 0:a:0)
-            else
-                cmd=(ffmpeg -hide_banner -loglevel error -i "$f"
-                     -f lavfi -i "anullsrc=channel_layout=stereo:sample_rate=48000"
-                     -filter_complex "$(build_filter video "$mtx" "$hdr")[vout]"
-                     -map "[vout]" -map 1:a:0)
-            fi
-        fi
-
-        # Identical audio layout on EVERY clip is what makes `concat -c copy`
-        # keep the sound instead of silently dropping it.
-        cmd+=("${CODEC_ARGS[@]}"
-              -color_primaries bt709 -color_trc bt709 -colorspace bt709
-              -c:a aac -b:a "$DEFAULT_AUDIO_BR" -ar 48000 -ac 2
-              -af "aresample=async=1:first_pts=0,apad" -shortest
-              -r "$FPS" -video_track_timescale 90000
-              -y "$clip_out")
-
-        if "${cmd[@]}" 2>&1 | grep -v '^$' >&2; then :; fi
-
-        if [[ -s "$clip_out" ]]; then
-            echo -e "${G}✓ $(du -h "$clip_out" | cut -f1)${N}"
-        else
-            echo -e "${R}✗ failed${N}"
-            failed=$((failed+1))
-            rm -f "$clip_out"
-        fi
-        idx=$((idx+1))
+        while [[ $(jobs -rp | wc -l) -ge $JOBS ]]; do
+            wait -n 2>/dev/null || true
+            printf "\r  ${C}%d/%d done${N}   " "$(ls "$tmp"/status_* 2>/dev/null | wc -l)" "$total"
+        done
+        encode_clip "$((i+1))" "${items[$i]}" "${kinds[$i]}" &
     done
+    wait
+    printf "\r%*s\r" 40 ""
+
+    # Now report in timeline order - parallel jobs finish out of order.
+    for ((i=0; i<total; i++)); do
+        local idx=$((i+1))
+        local bn; bn=$(basename "${items[$i]}")
+        local icon="📸" what="still → ${IMG_DUR}s"
+        if [[ "${kinds[$i]}" == "video" ]]; then
+            icon="🎬"
+            local d; d=$(probe_duration "${items[$i]}"); printf -v d "%.1f" "$d"
+            what="video ${d}s"
+        fi
+        local st="$tmp/status_$(printf "%05d" "$idx")"
+        local state="" detail=""
+        [[ -f "$st" ]] && IFS=$'\t' read -r state detail < "$st"
+        printf "%b[%d/%d]%b %s %s %b(%s)%b " "$Y" "$idx" "$total" "$N" "$icon" "$bn" "$C" "$what" "$N"
+        if [[ "$state" == "ok" ]]; then
+            echo -e "${G}✓ ${detail}${N}"
+        else
+            echo -e "${R}✗ ${detail:-failed}${N}"
+            failed=$((failed+1))
+        fi
+    done
+
+    # A clip can fail purely because too many NVENC sessions were live at once
+    # (VRAM or the driver's session cap). Those are transient, so retry the
+    # failures one at a time before accepting any loss.
+    if [[ $failed -gt 0 ]]; then
+        echo -e "${Y}Retrying $failed failed clip(s) serially...${N}"
+        local recovered=0
+        for ((i=0; i<total; i++)); do
+            local ridx=$((i+1))
+            local rst="$tmp/status_$(printf "%05d" "$ridx")"
+            local rstate=""
+            [[ -f "$rst" ]] && IFS=$'\t' read -r rstate _ < "$rst"
+            [[ "$rstate" == "ok" ]] && continue
+            encode_clip "$ridx" "${items[$i]}" "${kinds[$i]}"
+            local nstate=""
+            [[ -f "$rst" ]] && IFS=$'\t' read -r nstate _ < "$rst"
+            if [[ "$nstate" == "ok" ]]; then
+                echo -e "  ${G}✓ recovered: $(basename "${items[$i]}")${N}"
+                recovered=$((recovered+1))
+            else
+                echo -e "  ${R}✗ still failing: $(basename "${items[$i]}")${N}"
+            fi
+        done
+        failed=$((failed - recovered))
+    fi
 
     local elapsed=$(( $(date +%s) - start_time ))
     echo ""

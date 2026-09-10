@@ -43,6 +43,81 @@ Other v2 fixes:
 - **Previous outputs are skipped** so a re-run does not ingest its own result.
 - `--dry-run` prints the canvas decision without encoding.
 
+## ⚡ Why CPU is pegged and the GPU looks idle
+
+Only the **encode** step runs on the GPU (NVENC). Decode and *every* filter -
+`scale`, `pad`, `gblur`, `tonemap`, `colorspace`, `format` - run on the CPU, and
+swscale is effectively single-threaded here. NVENC encodes 4K HEVC far faster
+than one CPU thread can feed it, so the GPU waits. Caught live mid-run:
+
+```
+ffmpeg          CPU 110%   <- 1.1 cores out of 32
+GPU util          5%
+encoder util      0%       <- NVENC idle, waiting on the CPU
+```
+
+Three changes fixed it. Full 66-clip folder: **881s -> 110s (8x)**, with the
+output unchanged (326.2s duration either way, 549 MB -> 553 MB).
+
+**1. Stills were scaled once per output frame, not once.** `-loop 1` repeats the
+image *before* the filter chain, so a 4s still at 30fps ran the whole
+lanczos-scale-to-4K chain **120 times** on 120 identical frames. Scaling once and
+repeating the finished frame with `loop=loop=-1:size=1` is the same bytes out:
+
+| | one 7008x4672 still, 4s |
+|---|---|
+| `-loop 1` (scale 120x) | 32.65s |
+| scale once, then `loop` | **3.52s** |
+
+Byte-identical output (932685 bytes both). 9.3x less work, zero quality change.
+
+**2. Clips are now encoded `--jobs` at a time** instead of strictly one after
+another. This is *not* the core count - see below.
+
+**3. NVENC preset p7 -> p5.** Measured on a 4s 4K still: p7 3.26s, p5 1.73s, for
+2.9% more bytes at the same CQ. Same CQ means the same visual quality - the
+slower preset just reaches it with fewer bits. Not worth 2x the time for an
+intermediate YouTube is going to re-encode anyway. Override with `--preset p7`.
+
+### `--jobs` is not the number of CPU cores
+
+Cores were never the constraint - CPU sat at ~155% (1.5 of 32) even at 6 jobs.
+Once stills are scaled only once, **NVENC is the bottleneck**, and it has hard
+limits. Measured on 17 large stills:
+
+| jobs | time | result |
+|---|---|---|
+| 1 | 36.4s | ok |
+| 4 | 27.0s | ok (default) |
+| 6 | 25.9s | ok, +4% over 4 jobs |
+| 10 | - | clips **fail** |
+| 16 | - | 9 of 17 clips **fail** |
+
+At high concurrency each NVENC session allocates its own VRAM input buffers and
+an 8 GB laptop card shared with a browser runs out:
+
+```
+CreateInputBuffer failed: out of memory (10)
+OpenEncodeSessionEx failed: incompatible client key (21)   <- driver session cap
+```
+
+Default is 4 (2 at 8K). Failed clips are **retried serially** afterwards, so a
+transient GPU-side failure can never silently drop a clip from the timeline -
+which is exactly how v1 lost six files without saying so.
+
+### What does NOT help: moving the filters to the GPU
+
+`-hwaccel cuda` for GPU decode measured **slower**: 18.33s -> 19.79s. Copying
+frames back from VRAM for the CPU filters costs more than the CPU decode saved.
+
+A full GPU pipeline is not possible in this ffmpeg build anyway - it ships
+`scale_cuda`, `overlay_cuda` and `yadif_cuda`, but there is no `pad_cuda`,
+`gblur_cuda`, `colorspace_cuda` or `tonemap_cuda`. The frame has to come back to
+system memory for padding, blurred backdrops, HDR tone-mapping and colour
+conversion regardless, and each round trip costs more than it saves. It is also
+moot now: NVENC is the limit, so moving filters onto the GPU would only make the
+GPU queue behind itself.
+
 ## 🎯 Choosing a resolution (read this before picking 8K)
 
 **Upscaling never adds detail.** A 720x1280 phone clip stretched onto an 8K canvas is still a
