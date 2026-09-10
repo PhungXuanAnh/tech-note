@@ -1,0 +1,20 @@
+[Unit]
+Description=Luu EDID that cua panel eDP de X dung khi doc EDID that bai
+# KHONG dung ConditionPathExists=/sys/class/drm/card0-eDP-1/edid:
+# systemd danh gia dieu kien luc ~7.8s, con connector DRM chi ra doi khi
+# nvidia-drm khoi tao xong luc ~8.5s -> unit bi skip vinh vien.
+# Cung KHONG dung After=systemd-udev-settle.service: unit do la "static" va
+# khong bao gio duoc kich hoat, nen dong After= hoan toan vo tac dung.
+# Viec cho connector do chinh script xu ly, co gioi han thoi gian.
+Before=display-manager.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/edp-edid-cache.py
+# Chan tren cung, phong truong hop script treo. Script tu no da gioi han 20s
+# va luon exit 0, nen boot khong bao gio bi chan.
+TimeoutStartSec=30
+
+[Install]
+WantedBy=graphical.target
