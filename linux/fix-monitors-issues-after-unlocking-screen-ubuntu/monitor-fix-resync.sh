@@ -42,8 +42,25 @@ done <<< "$CONNECTED"
 
 PRIMARY=$(echo "$XR" | grep -E "^\S+ connected primary" | awk '{print $1}')
 
+# Doc refresh rate DANG CHAY cua mot output tu ket qua xrandr --query.
+# Dong mode dang duoc dung co dau '*', vi du:
+#     DP-4 connected primary 2560x1600+651+1080 (...) 340mm x 220mm
+#        2560x1600     60.00 + 240.00*
+# -> tra ve "240.00". Dau '+' (preferred) va '*' deu bi cat bo.
+current_rate() {
+    local out="$1"
+    echo "$XR" | awk -v o="$out" '
+        $1 == o && $2 == "connected" { inblock = 1; next }
+        /^[^ \t]/                    { inblock = 0 }
+        inblock {
+            for (i = 1; i <= NF; i++)
+                if ($i ~ /\*/) { gsub(/[*+]/, "", $i); print $i; exit }
+        }'
+}
+
 # Build layout lines + DP-* cycle list from the current xrandr geometry
 LAYOUT_LINES=""
+RATE_LINES=""
 DP_CYCLE=""
 NAMES=""
 while IFS= read -r line; do
@@ -51,6 +68,11 @@ while IFS= read -r line; do
     geom=$(echo "$line" | grep -oP '\d+x\d+\+\d+\+\d+' | head -1)
     [ -n "$geom" ] || continue
     LAYOUT_LINES="${LAYOUT_LINES}LAYOUT=${name} ${geom}\n"
+    # Luu ca refresh rate. Neu khong luu, fix-monitors-auto.sh se goi
+    # 'xrandr --mode WxH' khong kem --rate, va xrandr chon rate uu tien theo
+    # EDID -> man 240Hz bi am tham keo ve 60Hz sau moi lan mo khoa.
+    rate=$(current_rate "$name")
+    [ -n "$rate" ] && RATE_LINES="${RATE_LINES}RATE=${name} ${rate}\n"
     NAMES="$NAMES $name"
     # Cycle only external DP-* monitors (USB-C hub). Skip the primary output,
     # which is the laptop's own panel (DP-4 here) and must never be turned off.
@@ -107,6 +129,7 @@ tmp=$(mktemp)
     [ -n "$PRIMARY" ] && echo "PRIMARY=$PRIMARY"
     echo "DP_CYCLE=$DP_CYCLE"
     echo -en "$LAYOUT_LINES"
+    echo -en "$RATE_LINES"
     [ -n "$METAMODE_FULL" ] && echo "METAMODE_FULL=$METAMODE_FULL"
     [ -n "$METAMODE_REDUCED" ] && echo "METAMODE_REDUCED=$METAMODE_REDUCED"
 } > "$tmp"

@@ -560,3 +560,53 @@ direct xrandr 0.5s → layout OK → verified → DONE (total ~3-6s)
 ```
 
 **Key Lesson**: GNOME's `monitors.xml` accumulates stale configurations over time. When connector names change (e.g., switching graphics drivers, rearranging cables), old configs with wrong connector names cause Mutter to fail and fall back to default positioning. Always run `./setup-monitor-fix.sh` after system changes — it now includes automatic monitors.xml cleanup. For the fix script, a single layout check after unlock is insufficient due to timing; polling is required to catch delayed resets.
+
+---
+
+## Cập nhật 2026-09-10: giữ refresh rate
+
+### Vấn đề
+
+Bộ script này sinh ra để khôi phục **vị trí** và **độ phân giải** sau khi mở khoá màn hình. Refresh rate chưa bao giờ nằm trong phạm vi — không có trong `layout.env`, không có trong code, không có trong tài liệu.
+
+Hệ quả: hàm `apply_exact_layout()` gọi `xrandr --output DP-4 --mode 2560x1600` **không kèm `--rate`**, mà xrandr khi đó chọn rate ưu tiên theo EDID. Với panel BOE NE160QDM-NZB, preferred là 60Hz (240Hz nằm trong DisplayID extension). Kết quả là **màn 240Hz bị âm thầm kéo về 60Hz sau mỗi lần mở khoá**.
+
+Đường thứ hai cũng dính: bước cycle MetaMode dùng `nvidia-auto-select`, cũng chọn preferred. Và `check_layout()` chỉ so `WxH+X+Y` nên không phát hiện được sai lệch này.
+
+Đây là loại lỗi khó thấy: script chạy đúng những gì nó được viết ra để làm, chỉ là nó âm thầm vứt đi một thuộc tính mà nó không biết là mình cần giữ.
+
+### Đã sửa
+
+**`monitor-fix-resync.sh`** — thêm hàm `current_rate()` đọc rate đang chạy từ `xrandr --query` (token có dấu `*`), rồi ghi thêm dòng `RATE=<output> <rate>` vào `layout.env`:
+
+```
+LAYOUT=DP-4 2560x1600+651+1080
+RATE=DP-4 240.00               ← mới
+```
+
+Lưu ý ca khó: với `2560x1600  60.00 + 240.00*` thì `60.00` mang dấu `+` (preferred) còn `240.00` mang dấu `*` (đang dùng). Phải bắt theo `*`, không phải `+`.
+
+**`fix-monitors-auto.sh`** — ba chỗ:
+
+1. `load_layout_config()` đọc `RATE=` vào mảng `EXPECTED_RATE`
+2. `check_layout()` so cả rate, trả về `wrong_rate:<output>:current=X:expected=Y`
+3. `apply_exact_layout()` truyền `--rate` khi có
+
+Nhờ (2), sai lệch rate sau bước MetaMode được luồng sửa lỗi sẵn có phát hiện và khắc phục — không phải thêm code path mới.
+
+**Tương thích ngược:** `layout.env` cũ không có dòng `RATE=` thì không ép rate, hành vi y như trước.
+
+**Lợi ích ngoài dự kiến:** sau khi panel được đặt rate tường minh, `nvidia-settings -q CurrentMetaMode` trả về `DPY-5: 2560x1600_240` thay vì `nvidia-auto-select`, nên `METAMODE_FULL`/`METAMODE_REDUCED` trong `layout.env` cũng tự khoá đúng 240Hz.
+
+### Kiểm thử
+
+```
+check_layout       -> wrong_rate:DP-4:current=60.00:expected=240.00
+apply_exact_layout -> rc=0, không lỗi
+check_layout       -> ok
+xrandr             -> 2560x1600  60.00 +  240.00*
+```
+
+### Liên quan
+
+Xem `linux/fix-edp-edid-flicker/` — lỗi đọc EDID panel lúc boot. Khác gốc rễ nhưng cùng triệu chứng bề mặt (mất layout), vì mutter khớp cấu hình bằng danh tính `vendor + product + serial`.

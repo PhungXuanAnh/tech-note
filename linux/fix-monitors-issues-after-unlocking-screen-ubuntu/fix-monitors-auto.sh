@@ -21,6 +21,8 @@ COOLDOWN_SECONDS=30
 LAYOUT_CONFIG="$HOME/.local/share/monitor-fix/layout.env"
 
 declare -A EXPECTED_LAYOUT
+# Refresh rate mong doi cho tung output. Rong = khong ep rate (giu hanh vi cu).
+declare -A EXPECTED_RATE
 EXPECTED_LAYOUT[HDMI-0]="1920x1080+43+0"
 EXPECTED_LAYOUT[DP-1]="1920x1080+1963+0"
 EXPECTED_LAYOUT[DP-4]="2560x1600+0+1080"
@@ -40,9 +42,12 @@ METAMODE_FULL='DPY-5: nvidia-auto-select @2560x1600 +0+1080 {ViewPortIn=2560x160
 #   METAMODE_FULL=<nvidia metamode string>
 #   METAMODE_REDUCED=<nvidia metamode string without the DP-* entries>
 #   LAYOUT=<output> <WxH+X+Y>   (repeated per monitor)
+#   RATE=<output> <refresh>     (repeated per monitor; optional, older configs
+#                                have none and then no rate is forced)
 load_layout_config() {
     [ -f "$LAYOUT_CONFIG" ] || return 1
     local -A _new_layout=()
+    local -A _new_rate=()
     local _primary="" _dpcycle="" _mfull="" _mreduced="" key val
     while IFS='=' read -r key val; do
         case "$key" in
@@ -51,6 +56,7 @@ load_layout_config() {
             METAMODE_FULL)    _mfull="$val" ;;
             METAMODE_REDUCED) _mreduced="$val" ;;
             LAYOUT)           _new_layout["${val%% *}"]="${val#* }" ;;
+            RATE)             _new_rate["${val%% *}"]="${val#* }" ;;
         esac
     done < "$LAYOUT_CONFIG"
     # Only override if we parsed at least one monitor
@@ -59,6 +65,9 @@ load_layout_config() {
     declare -gA EXPECTED_LAYOUT
     local k
     for k in "${!_new_layout[@]}"; do EXPECTED_LAYOUT["$k"]="${_new_layout[$k]}"; done
+    unset EXPECTED_RATE
+    declare -gA EXPECTED_RATE
+    for k in "${!_new_rate[@]}"; do EXPECTED_RATE["$k"]="${_new_rate[$k]}"; done
     [ -n "$_primary" ]  && PRIMARY_OUTPUT="$_primary"
     DP_CYCLE_OUTPUTS="$_dpcycle"
     [ -n "$_mfull" ]    && METAMODE_FULL="$_mfull"
@@ -69,6 +78,19 @@ load_layout_config
 
 log_msg() {
     echo "$(date '+%Y-%m-%d %H:%M:%S'): $1" >> "$LOG_FILE"
+}
+
+# Doc refresh rate DANG CHAY cua mot output.
+#   $1 = ket qua 'xrandr --query', $2 = ten output
+# Dong mode dang dung co dau '*', vi du "   2560x1600     60.00 + 240.00*"
+current_rate_of() {
+    echo "$1" | awk -v o="$2" '
+        $1 == o && $2 == "connected" { inblock = 1; next }
+        /^[^ \t]/                    { inblock = 0 }
+        inblock {
+            for (i = 1; i <= NF; i++)
+                if ($i ~ /\*/) { gsub(/[*+]/, "", $i); print $i; exit }
+        }'
 }
 
 check_layout() {
@@ -101,6 +123,20 @@ check_layout() {
             echo "wrong_layout:${output}:current=${current_geom}:expected=${expected}"
             return 1
         fi
+
+        # Kiem tra ca refresh rate. Can thiet vi buoc cycle MetaMode o tren dung
+        # 'nvidia-auto-select', luon chon rate uu tien theo EDID (60Hz) va do do
+        # am tham keo man 240Hz xuong 60Hz. Chi so sanh khi layout.env co RATE,
+        # nen file cu van chay y nhu truoc.
+        local expected_rate="${EXPECTED_RATE[$output]:-}"
+        if [ -n "$expected_rate" ]; then
+            local current_rate
+            current_rate=$(current_rate_of "$xrandr_output" "$output")
+            if [ "$current_rate" != "$expected_rate" ]; then
+                echo "wrong_rate:${output}:current=${current_rate:-none}:expected=${expected_rate}"
+                return 1
+            fi
+        fi
     done
 
     echo "ok"
@@ -116,6 +152,7 @@ apply_exact_layout() {
         pos="${geom#*+}"           # X+Y
         pos="${pos/+/x}"           # X+Y -> XxY
         cmd+=(--output "$output" --mode "$res")
+        [ -n "${EXPECTED_RATE[$output]:-}" ] && cmd+=(--rate "${EXPECTED_RATE[$output]}")
         [ "$output" = "$PRIMARY_OUTPUT" ] && cmd+=(--primary)
         cmd+=(--pos "$pos")
     done
