@@ -16,6 +16,10 @@ cd /path/to/your/images
 ~/repo/tech-note/linux/merge_images_video_into_video/merge_timeline_to_video_gpu.sh
 ```
 
+No flags needed. The defaults are the recommended settings: `auto` canvas capped
+at 4K, 4s per still, blurred backdrop instead of black bars, CQ 20, 4 clips in
+parallel, NVENC preset p5.
+
 > **Do NOT pass `--resolution 8k` by reflex.** See
 > [Choosing a resolution](#-choosing-a-resolution-read-this-before-picking-8k) — v2 defaults to
 > `--resolution auto`, which reads your source files and picks the canvas for you.

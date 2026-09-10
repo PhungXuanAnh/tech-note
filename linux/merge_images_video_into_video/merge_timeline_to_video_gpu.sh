@@ -40,7 +40,10 @@ DEFAULT_IMG_DURATION="4"   # 1s is too short: YouTube's encoder needs ~1s after
                            # a cut to sharpen up, so 1s stills look permanently
                            # blurry on YouTube. 3-5s is the sweet spot.
 DEFAULT_SCALE_MODE="fit"
-DEFAULT_PAD="black"
+# Blurred backdrop rather than black bars. Phone footage is mostly vertical, so
+# on a 16:9 canvas `black` spends roughly two thirds of every frame - and of the
+# bitrate - on nothing. Pass `--pad black` for hard bars.
+DEFAULT_PAD="blur"
 DEFAULT_ORIENT="landscape"
 DEFAULT_CQ="20"
 # Concurrent ffmpeg processes. NOT the core count: each job is only ~1-1.5 cores
@@ -411,7 +414,7 @@ Options:
   -f, --fps          Frame rate                         (default: ${DEFAULT_FPS})
   -d, --duration     Seconds per still image            (default: ${DEFAULT_IMG_DURATION})
   -s, --scale        fit | crop | stretch               (default: ${DEFAULT_SCALE_MODE})
-  -p, --pad          black | blur   (fit mode only)     (default: ${DEFAULT_PAD})
+  -p, --pad          blur | black   (fit mode only)     (default: ${DEFAULT_PAD})
   -q, --quality      CQ/CRF, lower = better & bigger    (default: ${DEFAULT_CQ})
                      18 = archival, 20 = excellent, 23 = fine for YouTube
   -j, --jobs         Clips encoded concurrently            (default: 4, 2 at 8K)
@@ -438,9 +441,10 @@ Why the defaults are what they are:
     throughput and memory bandwidth become the limit, not spare cores.
 
 Examples:
-  $0                          # auto canvas, 4s per photo, sound preserved
-  $0 -r 4k -p blur            # 4K, blurred backdrop instead of black bars
-  $0 -O auto -n               # show what it would do for vertical-heavy sets
+  $0                          # everything on sensible defaults - just run it
+  $0 -n                       # show the plan (canvas, jobs, preset) first
+  $0 -p black                 # hard black bars instead of a blurred backdrop
+  $0 -O auto                  # pick canvas orientation from the footage
   $0 -r 8k -q 22              # force 8K, still ~1/8 the size of v1
 EOF
 }
