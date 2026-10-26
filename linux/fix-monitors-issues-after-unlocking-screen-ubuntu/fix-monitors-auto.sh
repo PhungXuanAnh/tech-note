@@ -6,9 +6,10 @@
 # DP-1: 1920x1080 at position 1963,0 (top-right monitor)
 # DP-4: 2560x1600 at position 0,1080 (primary, bottom)
 #
-# Also fixes USB-C hub signal drops where xrandr shows correct layout but
-# the monitor shows "HDMI no signal" because the hub's DP-to-HDMI converter
-# didn't re-initialize after DPMS wake. Fixed by cycling nvidia-settings MetaMode.
+# Does NOT reset the USB-C hub on unlock: the hub already drops and re-asserts
+# DP-1 by itself when the screens wake, and a second forced reset blacked out
+# all monitors for ~20s on every unlock. If DP-1 really stays on "no signal",
+# run fix-monitors-manual (bound to a keyboard shortcut) to reset the hub.
 
 LOG_FILE="$HOME/.local/share/monitor-fix.log"
 LAST_RESTORE_FILE="/tmp/monitor-fix-last-$(id -u)"
@@ -27,20 +28,14 @@ EXPECTED_LAYOUT[HDMI-0]="1920x1080+43+0"
 EXPECTED_LAYOUT[DP-1]="1920x1080+1963+0"
 EXPECTED_LAYOUT[DP-4]="2560x1600+0+1080"
 PRIMARY_OUTPUT="DP-4"
-
-# DP-* outputs to cycle via nvidia-settings MetaMode (USB-C hub signal fix)
-DP_CYCLE_OUTPUTS="DP-1"
-
-# MetaMode strings for nvidia-settings (DPY-1 = DP-1, DPY-4 = HDMI-0, DPY-5 = DP-4)
-METAMODE_REDUCED='DPY-5: nvidia-auto-select @2560x1600 +0+1080 {ViewPortIn=2560x1600, ViewPortOut=2560x1600+0+0}, DPY-4: nvidia-auto-select @1920x1080 +43+0 {ViewPortIn=1920x1080, ViewPortOut=1920x1080+0+0}'
-METAMODE_FULL='DPY-5: nvidia-auto-select @2560x1600 +0+1080 {ViewPortIn=2560x1600, ViewPortOut=2560x1600+0+0}, DPY-1: nvidia-auto-select @1920x1080 +1963+0 {ViewPortIn=1920x1080, ViewPortOut=1920x1080+0+0}, DPY-4: nvidia-auto-select @1920x1080 +43+0 {ViewPortIn=1920x1080, ViewPortOut=1920x1080+0+0}'
+# nvidia MetaMode of the known-good layout; applying it is a single modeset
+METAMODE_FULL=""
 
 # Load layout data from the resync-generated config, overriding the defaults above.
-# File format (one key=value per line, split on the first '='):
+# File format (one key=value per line, split on the first '='; the DP_CYCLE and
+# METAMODE_REDUCED keys are only used by fix-monitors-manual.sh):
 #   PRIMARY=<output>
-#   DP_CYCLE=<space-separated DP-* outputs>
 #   METAMODE_FULL=<nvidia metamode string>
-#   METAMODE_REDUCED=<nvidia metamode string without the DP-* entries>
 #   LAYOUT=<output> <WxH+X+Y>   (repeated per monitor)
 #   RATE=<output> <refresh>     (repeated per monitor; optional, older configs
 #                                have none and then no rate is forced)
@@ -48,15 +43,13 @@ load_layout_config() {
     [ -f "$LAYOUT_CONFIG" ] || return 1
     local -A _new_layout=()
     local -A _new_rate=()
-    local _primary="" _dpcycle="" _mfull="" _mreduced="" key val
+    local _primary="" _mfull="" key val
     while IFS='=' read -r key val; do
         case "$key" in
-            PRIMARY)          _primary="$val" ;;
-            DP_CYCLE)         _dpcycle="$val" ;;
-            METAMODE_FULL)    _mfull="$val" ;;
-            METAMODE_REDUCED) _mreduced="$val" ;;
-            LAYOUT)           _new_layout["${val%% *}"]="${val#* }" ;;
-            RATE)             _new_rate["${val%% *}"]="${val#* }" ;;
+            PRIMARY)       _primary="$val" ;;
+            METAMODE_FULL) _mfull="$val" ;;
+            LAYOUT)        _new_layout["${val%% *}"]="${val#* }" ;;
+            RATE)          _new_rate["${val%% *}"]="${val#* }" ;;
         esac
     done < "$LAYOUT_CONFIG"
     # Only override if we parsed at least one monitor
@@ -68,10 +61,8 @@ load_layout_config() {
     unset EXPECTED_RATE
     declare -gA EXPECTED_RATE
     for k in "${!_new_rate[@]}"; do EXPECTED_RATE["$k"]="${_new_rate[$k]}"; done
-    [ -n "$_primary" ]  && PRIMARY_OUTPUT="$_primary"
-    DP_CYCLE_OUTPUTS="$_dpcycle"
-    [ -n "$_mfull" ]    && METAMODE_FULL="$_mfull"
-    [ -n "$_mreduced" ] && METAMODE_REDUCED="$_mreduced"
+    [ -n "$_primary" ] && PRIMARY_OUTPUT="$_primary"
+    METAMODE_FULL="$_mfull"
     return 0
 }
 load_layout_config
@@ -159,26 +150,35 @@ apply_exact_layout() {
     "${cmd[@]}" 2>&1
 }
 
-wait_for_modes() {
-    # Wait for all monitors to report their modes (they may take time after DPMS wake)
-    local max_wait=10
+# One modeset instead of xrandr's one per output (~1.5s instead of ~4s).
+# Prints the check_layout status afterwards.
+apply_metamode() {
+    [ -n "$METAMODE_FULL" ] || { echo "no_metamode"; return 1; }
+    nvidia-settings --assign "CurrentMetaMode=${METAMODE_FULL}" >/dev/null 2>&1
+    check_layout
+}
+
+all_outputs_active() {
+    local xrandr_output output
+    xrandr_output=$(xrandr --query 2>/dev/null)
+    for output in "${!EXPECTED_LAYOUT[@]}"; do
+        echo "$xrandr_output" | grep "^${output} connected" | grep -qP '\d+x\d+\+\d+\+\d+' || return 1
+    done
+    return 0
+}
+
+# After a DPMS wake the USB-C hub drops DP-1 and re-adds it up to ~15s later.
+# Driving DP-1 with xrandr before Mutter has re-enabled it makes the hub reset again.
+wait_for_active_outputs() {
+    local max_wait=20 i
     for i in $(seq 1 $max_wait); do
-        local modes_ok=true
-        for output in "${!EXPECTED_LAYOUT[@]}"; do
-            local expected_res="${EXPECTED_LAYOUT[$output]}"
-            expected_res="${expected_res%%+*}"  # extract WxH
-            if ! xrandr --query 2>/dev/null | grep -A30 "^${output} connected" | grep -q "${expected_res}"; then
-                modes_ok=false
-                break
-            fi
-        done
-        if $modes_ok; then
-            log_msg "All monitor modes available after ${i}s"
+        if all_outputs_active; then
+            log_msg "All outputs active after ${i}s"
             return 0
         fi
         sleep 1
     done
-    log_msg "WARNING: Some modes still not available after ${max_wait}s, trying anyway"
+    log_msg "WARNING: not all outputs active after ${max_wait}s, trying anyway"
     return 1
 }
 
@@ -200,7 +200,7 @@ restore_monitors() {
 
     # Reload layout data (regenerated by monitor-fix-resync when Display Settings change)
     if load_layout_config; then
-        log_msg "Loaded layout config: primary=${PRIMARY_OUTPUT} dp_cycle='${DP_CYCLE_OUTPUTS}'"
+        log_msg "Loaded layout config: primary=${PRIMARY_OUTPUT}"
     fi
 
     # Step 1: Force DPMS on to wake all monitors
@@ -208,53 +208,36 @@ restore_monitors() {
     log_msg "DPMS forced on"
     sleep 0.5
 
-    # Step 1.5: Wait for monitor modes to become available
-    wait_for_modes
-
-    # Step 2: Cycle DP outputs via nvidia-settings MetaMode to fix USB-C hub
-    # signal drops. The hub's DP-to-HDMI converter may not re-initialize after
-    # DPMS wake, causing "HDMI no signal" even though xrandr shows correct layout.
-    # This forces NVIDIA to fully tear down and recreate the DP pipeline.
-    if [ -n "$METAMODE_FULL" ] && [ -n "$METAMODE_REDUCED" ] && [ -n "$DP_CYCLE_OUTPUTS" ]; then
-        log_msg "Cycling DP outputs (${DP_CYCLE_OUTPUTS}) via nvidia-settings MetaMode (USB-C hub fix)..."
-        nvidia-settings --assign "CurrentMetaMode=${METAMODE_REDUCED}" 2>/dev/null || true
-        for _dp in $DP_CYCLE_OUTPUTS; do
-            xrandr --output "$_dp" --off 2>/dev/null || true
-        done
-        sleep 15
-        nvidia-settings --assign "CurrentMetaMode=${METAMODE_FULL}" 2>/dev/null || true
-        sleep 2
-        log_msg "MetaMode cycle complete"
+    # Step 1.5: Wait until Mutter has re-enabled every output. If we had to wait,
+    # Mutter is still mid-change, so give it a few seconds to finish (Step 2).
+    local poll_count=1
+    if ! all_outputs_active; then
+        wait_for_active_outputs
+        poll_count=3
     fi
 
-    # Step 3: Poll layout to check if xrandr fix is also needed
+    # Step 2: Check layout
     local status
-    local poll_interval=1
-    local poll_count=3
-    local issue_found=false
-    local last_status=""
-
     for i in $(seq 1 $poll_count); do
-        sleep $poll_interval
         status=$(check_layout)
-        if [ "$status" != "ok" ]; then
-            issue_found=true
-            last_status="$status"
-            log_msg "Poll $i/$poll_count: layout issue detected: $status"
-            break
+        if [ "$status" = "ok" ]; then
+            log_msg "Layout correct (poll $i/$poll_count)"
+            date +%s > "$LAST_RESTORE_FILE"
+            return
         fi
+        sleep 1
     done
 
-    if [ "$issue_found" = "false" ]; then
-        log_msg "Layout correct after MetaMode cycle + ${poll_count}s polling"
+    log_msg "Layout issue: $status — applying MetaMode..."
+    status=$(apply_metamode)
+    if [ "$status" = "ok" ]; then
+        log_msg "Layout restored via MetaMode"
         date +%s > "$LAST_RESTORE_FILE"
         return
     fi
+    log_msg "MetaMode did not fix layout ($status) — applying xrandr fix..."
 
-    status="$last_status"
-    log_msg "Layout issue: $status — applying xrandr fix..."
-
-    # Step 4: Try applying exact layout directly (fast path)
+    # Step 3: Try applying exact layout directly (fast path)
     local max_retries=5
     local retry=1
     while [ $retry -le $max_retries ]; do
@@ -293,20 +276,100 @@ restore_monitors() {
     date +%s > "$LAST_RESTORE_FILE"
 }
 
-unlock_detected=false
+# While the screen is locked and the monitors sleep, the USB-C hub drops and
+# re-adds DP-1, and Mutter sometimes leaves DP-4 at +0+0 after re-adding it.
+# Fixing it on the lock screen (on display change or when the monitors wake)
+# means nothing is left to redo after unlock.
+fix_layout_while_locked() {
+    xset q 2>/dev/null | grep -q "Monitor is On" || return
+    if ! all_outputs_active; then
+        log_msg "Locked: waiting, not all outputs active (USB-C hub still resetting?)"
+        return
+    fi
+    local status
+    status=$(check_layout)
+    case "$status" in
+        wrong_layout:*|wrong_rate:*) ;;
+        *)
+            log_msg "Locked: layout $status"
+            return
+            ;;
+    esac
+    log_msg "Locked: layout issue: $status — applying MetaMode..."
+    status=$(apply_metamode)
+    if [ "$status" = "ok" ]; then
+        log_msg "Locked: layout restored via MetaMode"
+        return
+    fi
+    local output
+    output=$(apply_exact_layout)
+    log_msg "Locked: MetaMode gave $status, xrandr fix done (rc=$?) ${output} -> $(check_layout)"
+}
 
-dbus-monitor --session "type='signal',interface='org.gnome.ScreenSaver'" | \
-while read -r line; do
-    if echo "$line" | grep -q "member=ActiveChanged"; then
-        unlock_detected=true
+# Seconds without MonitorsChanged (or since the monitors woke) before the layout
+# counts as settled
+SETTLE_SECONDS=2
+
+active_changed=false
+locked=false
+monitor_on=true
+monitors_changed_at=""
+
+dbus-monitor --session \
+    "type='signal',interface='org.gnome.ScreenSaver',member='ActiveChanged'" \
+    "type='signal',interface='org.gnome.Mutter.DisplayConfig',member='MonitorsChanged'" | \
+while true; do
+    read -r -t 1 line
+    rc=$?
+    # read returns >128 on timeout; anything else non-zero means dbus-monitor exited
+    if [ $rc -ne 0 ] && [ $rc -le 128 ]; then
+        break
     fi
 
-    if [[ "$unlock_detected" == "true" ]] && echo "$line" | grep -q "boolean false"; then
-        restore_monitors
-        unlock_detected=false
+    if [ $rc -eq 0 ]; then
+        case "$line" in
+            *member=ActiveChanged*)
+                active_changed=true
+                ;;
+            *member=MonitorsChanged*)
+                if [ "$locked" = "true" ]; then
+                    [ -z "$monitors_changed_at" ] && log_msg "Locked: monitors changed"
+                    monitors_changed_at=$(date +%s)
+                fi
+                ;;
+            *"boolean true"*)
+                if [ "$active_changed" = "true" ] && [ "$locked" = "false" ]; then
+                    locked=true
+                    log_msg "Screen locked"
+                fi
+                active_changed=false
+                ;;
+            *"boolean false"*)
+                if [ "$active_changed" = "true" ]; then
+                    locked=false
+                    monitors_changed_at=""
+                    restore_monitors
+                fi
+                active_changed=false
+                ;;
+        esac
     fi
 
-    if echo "$line" | grep -q "member=" && ! echo "$line" | grep -q "member=ActiveChanged"; then
-        unlock_detected=false
+    if [ "$locked" = "true" ]; then
+        if xset q 2>/dev/null | grep -q "Monitor is On"; then
+            if [ "$monitor_on" = "false" ]; then
+                log_msg "Locked: monitors woke up"
+                monitors_changed_at=$(date +%s)
+            fi
+            monitor_on=true
+        else
+            [ "$monitor_on" = "true" ] && log_msg "Locked: monitors went to sleep"
+            monitor_on=false
+        fi
+    fi
+
+    if [ -n "$monitors_changed_at" ] && [ $(( $(date +%s) - monitors_changed_at )) -ge $SETTLE_SECONDS ]; then
+        monitors_changed_at=""
+        fix_layout_while_locked
     fi
 done

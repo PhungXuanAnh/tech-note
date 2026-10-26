@@ -17,6 +17,7 @@ declare -A EXPECTED_LAYOUT=(
     [DP-1]="1920x1080+1963+0"
     [DP-4]="2560x1600+0+1080"
 )
+declare -A EXPECTED_RATE
 PRIMARY_OUTPUT="DP-4"
 DP_CYCLE_OUTPUTS="DP-1"
 # MetaMode strings for nvidia-settings (DPY-1 = DP-1, DPY-4 = HDMI-0, DPY-5 = DP-4)
@@ -26,6 +27,7 @@ METAMODE_FULL='DPY-5: nvidia-auto-select @2560x1600 +0+1080 {ViewPortIn=2560x160
 load_layout_config() {
     [ -f "$LAYOUT_CONFIG" ] || return 1
     local -A _new=()
+    local -A _new_rate=()
     local _primary="" _dpcycle="" _full="" _reduced="" key val
     while IFS='=' read -r key val; do
         case "$key" in
@@ -34,6 +36,7 @@ load_layout_config() {
             METAMODE_FULL)    _full="$val" ;;
             METAMODE_REDUCED) _reduced="$val" ;;
             LAYOUT)           _new["${val%% *}"]="${val#* }" ;;
+            RATE)             _new_rate["${val%% *}"]="${val#* }" ;;
         esac
     done < "$LAYOUT_CONFIG"
     [ "${#_new[@]}" -gt 0 ] || return 1
@@ -41,6 +44,7 @@ load_layout_config() {
     declare -gA EXPECTED_LAYOUT
     local k
     for k in "${!_new[@]}"; do EXPECTED_LAYOUT["$k"]="${_new[$k]}"; done
+    for k in "${!_new_rate[@]}"; do EXPECTED_RATE["$k"]="${_new_rate[$k]}"; done
     [ -n "$_primary" ]  && PRIMARY_OUTPUT="$_primary"
     DP_CYCLE_OUTPUTS="$_dpcycle"
     [ -n "$_full" ]     && METAMODE_FULL="$_full"
@@ -115,6 +119,7 @@ apply_layout() {
         pos="${geom#*+}"           # X+Y
         pos="${pos/+/x}"           # X+Y -> XxY
         cmd+=(--output "$output" --mode "$res")
+        [ -n "${EXPECTED_RATE[$output]:-}" ] && cmd+=(--rate "${EXPECTED_RATE[$output]}")
         [ "$output" = "$PRIMARY_OUTPUT" ] && cmd+=(--primary)
         cmd+=(--pos "$pos")
     done

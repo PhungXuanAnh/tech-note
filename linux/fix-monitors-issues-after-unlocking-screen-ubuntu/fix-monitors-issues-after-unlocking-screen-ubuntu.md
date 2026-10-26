@@ -610,3 +610,105 @@ xrandr             -> 2560x1600  60.00 +  240.00*
 ### Liên quan
 
 Xem `linux/fix-edp-edid-flicker/` — lỗi đọc EDID panel lúc boot. Khác gốc rễ nhưng cùng triệu chứng bề mặt (mất layout), vì mutter khớp cấu hình bằng danh tính `vendor + product + serial`.
+
+## Cập nhật 2026-10-26: bỏ bước reset hub USB-C tự động khi mở khoá
+
+### Triệu chứng
+
+Mỗi lần mở khoá: màn laptop sáng, rồi màn HDMI-0, màn DP-1 (qua hub USB-C) vẫn đen; sau đó cả 3 màn đen; chờ thêm một lúc cả 3 mới sáng lại. Tổng cộng 1–2 phút.
+
+### Nguyên nhân: chính bước "USB-C Hub Signal Fix" của script
+
+`fix-monitors-auto.sh` chạy bước cycle MetaMode **vô điều kiện** sau mỗi lần mở khoá: gỡ DP-1 khỏi MetaMode, chờ 15s, gắn lại. Timeline journal lần mở khoá lúc 09:18 (lọc `DFP-1: disconnected`, `Setting mode`, `gkr-pam`):
+
+```
+09:17:34  đánh thức màn hình  -> hub TỰ ngắt DP-1 (HPD drop), 3s sau cắm lại, Mutter modeset x6
+09:18:07  nhập mật khẩu xong
+09:18:09  script gỡ DP-1 khỏi MetaMode               -> màn 3 đen
+09:18:19  hub hết tín hiệu 10s, ngắt DP-1 (HPD drop)
+09:18:20  Mutter thấy mất màn, cấu hình lại (DP-4 về +0+0)  -> cả 3 màn mất đồng bộ
+09:18:23  DP-1 quay lại, Mutter modeset tiếp
+09:18:26  Mutter khôi phục layout +651+1080
+09:18:28  script gắn lại MetaMode FULL -> modeset nữa
+09:18:34  ổn định
+```
+
+Tức là ~25s sau khi nhập mật khẩu có **8 lần modeset**; mỗi lần màn ASUS VY249 phải đồng bộ lại tín hiệu vài giây, nên người dùng thấy đen nhiều lần và lâu hơn nhiều so với log.
+
+Log 3 ngày (23–26/10) cho thấy cùng một mẫu: hub **tự** reset DP-1 (ngắt rồi cắm lại) ngay khi màn hình thức dậy từ DPMS, trước cả khi nhập mật khẩu. Lần reset thứ hai do script ép là thừa.
+
+Không phát hiện được trạng thái "hub kẹt" một cách tự động: DP-1 không trả lời DDC/CI qua hub (`ddcutil getvcp d6` báo `DDC communication failed`), và phía GPU vẫn thấy link DP bình thường.
+
+### Đã sửa
+
+- **`fix-monitors-auto.sh`**: bỏ bước cycle MetaMode. Sau khi mở khoá chỉ kiểm tra layout (poll 5s, vì Mutter có thể reset trễ) và chỉ chạy `xrandr` khi layout sai. Layout đúng thì không có modeset nào.
+- **`fix-monitors-manual.sh`**: vẫn giữ bước reset hub, giờ là đường dự phòng khi DP-1 thật sự kẹt "no signal". Thêm đọc `RATE=` từ `layout.env` và truyền `--rate`, nếu không lệnh này sẽ kéo màn 240Hz về 60Hz (cùng lỗi đã sửa cho script auto ngày 2026-09-10).
+- **Phím tắt `Ctrl+Super+M`** chạy `/usr/local/bin/fix-monitors-manual` (GNOME custom keybinding `custom5`).
+- `~/.local/bin/fix-monitors-auto.sh` đổi lại thành symlink về repo, đúng như `setup-monitor-fix.sh` cài; trước đó nó là bản copy nên sửa repo không có tác dụng.
+
+### Nếu DP-1 vẫn đen sau khi mở khoá
+
+Nhấn `Ctrl+Super+M`, chờ ~20s. Nếu chuyện này xảy ra thường xuyên thì cần tìm cách phát hiện tự động thay vì quay lại cycle vô điều kiện.
+
+### Bổ sung: `monitors.xml` lưu màn laptop ở 60Hz
+
+Lần mở khoá đầu tiên sau khi sửa (09:41) chỉ mất ~7s, nhưng script vẫn phải sửa `wrong_rate:DP-4:current=60.00:expected=240.00` (3 modeset, màn 1 và 3 đen ~4s). Nguyên nhân: trong `~/.config/monitors.xml`, cấu hình 3 màn lưu DP-4 `<rate>60</rate>`, nên mỗi lần Mutter áp lại cấu hình đã lưu thì màn laptop về 60Hz.
+
+Settings → Displays **không** cho thấy lỗi này: nó hiện trạng thái đang chạy (240Hz, do script đã sửa), không hiện cấu hình đã lưu.
+
+Sửa bằng cách gọi `org.gnome.Mutter.DisplayConfig.ApplyMonitorsConfig` với method `2` (persistent), cùng layout và mode `2560x1600@240`. Đây là cách Settings ghi `monitors.xml` khi bấm Apply. Backup: `~/.config/monitors.xml.bak-20261026`.
+
+### Bổ sung: sửa layout ngay trên màn hình khoá
+
+Lần mở khoá 10:03 tần số đã đúng, nhưng script vẫn phải sửa `wrong_layout:DP-4:current=2560x1600+0+0` (3 modeset, ~4s). Journal lúc đang khoá:
+
+```
+09:59:16  màn thức dậy -> hub ngắt DP-1 -> Mutter áp cấu hình 2 màn (DP-4 +0+0, HDMI-0 +2560+0)
+09:59:30  DP-1 quay lại -> Mutter thêm DP-1, HDMI-0 về +0+0
+09:59:33  Mutter đưa DP-4 về +651+1080            <- lần này đúng
+10:00:33  (lần thức dậy sau) dừng ở DP-4 +0+0      <- thiếu bước cuối, giữ nguyên tới lúc mở khoá
+```
+
+Mutter không ổn định ở bước cuối khi hub cắm lại DP-1 trong lúc khoá. Script giờ nghe thêm tín hiệu `org.gnome.Mutter.DisplayConfig.MonitorsChanged`. Khi **đang khoá** và màn hình đang bật (`xset q` → `Monitor is On`), sau 3s không còn thay đổi nào thì gọi `check_layout`, và nếu `wrong_layout`/`wrong_rate` thì áp layout bằng `xrandr` ngay trên màn hình khoá. Lúc mở khoá không còn gì phải sửa.
+
+Chỉ chạy khi đang khoá, vì lúc không khoá `MonitorsChanged` cũng bắn khi người dùng đổi Display Settings, và khi đó không được kéo layout về bản cũ (việc cập nhật `layout.env` là của `monitor-fix-resync`). Bỏ qua khi màn hình tắt, để không đánh thức màn hình lúc đang ngủ.
+
+### Bổ sung: sửa lúc màn hình thức dậy, chờ hub, sửa bằng 1 modeset
+
+Thử tự động bằng `loginctl lock-session` → `xset dpms force off` (150s) → `xset dpms force on` → `sudo loginctl unlock-session` cho thấy thêm 3 điều:
+
+1. **Hub ngắt DP-1 lúc màn hình đang tắt** (~15s sau DPMS off), không chỉ lúc thức dậy. Mutter cấu hình lại khi màn tắt và có lúc để DP-4 ở `+0+0`. Lúc màn hình thức dậy không có `MonitorsChanged` nào, nên phải bắt chính thời điểm thức dậy: khi đang khoá, vòng lặp đọc `xset q` mỗi giây, thấy `Monitor is On` chuyển từ tắt sang bật thì sau 2s kiểm tra layout.
+2. **Không được sửa khi hub đang reset.** Lần mở khoá 10:15 script gọi `xrandr` lúc DP-1 chưa được Mutter bật lại, làm hub ngắt DP-1 thêm lần nữa (~19s). Giờ cả hai đường (khoá và mở khoá) đều chờ `all_outputs_active` (mọi output có geometry) rồi mới sửa. Sau khi mở khoá, nếu output đã bật sẵn thì sửa ngay, chỉ chờ thêm 3s khi Mutter đang dở tay.
+3. **`nvidia-settings --assign CurrentMetaMode=<METAMODE_FULL>` sửa layout bằng 1 modeset (~1,5s)**, còn `xrandr` mất 3 modeset (~4s, mỗi output một lần). MetaMode đã khoá sẵn `2560x1600_240`. Giờ MetaMode là cách sửa chính, `xrandr` là dự phòng.
+
+Kết quả đo:
+
+| Trường hợp | Trước | Sau |
+|---|---|---|
+| Mở khoá 4s sau khi thức, layout bị Mutter làm sai lúc màn tắt | sửa sau khi mở khoá, 3 modeset | sửa trên màn hình khoá (10:29:18, 1 modeset); sau khi mở khoá: không modeset |
+| Mở khoá 1s sau khi thức | — | layout đúng, không modeset |
+| Khoá ngắn (40s, hub không ngắt) | — | không modeset |
+
+### Log để debug
+
+`~/.local/share/monitor-fix.log` giờ ghi đủ mốc để dựng lại timeline của một lần khoá/mở khoá:
+
+```
+11:31:27: Screen locked
+11:31:35: Locked: monitors went to sleep
+11:31:48: Locked: monitors woke up
+11:31:52: Locked: layout issue: wrong_layout:DP-4:current=2560x1600+0+0:... — applying MetaMode...
+11:31:53: Locked: layout restored via MetaMode
+11:31:53: Locked: monitors changed
+11:31:56: Locked: layout ok
+11:34:11: Screen unlocked, starting monitor restore...
+11:34:11: Layout correct (poll 1/1)
+```
+
+Đối chiếu với log của X server để thấy hub ngắt DP-1 và các lần modeset:
+
+```bash
+journalctl --since "<giờ>" -o short-iso | grep -E "DFP-1: disconnected|Setting mode|gkr-pam"
+```
+
+`gkr-pam: unlocked login keyring` là lúc nhập mật khẩu đúng; `Setting mode` là mỗi lần modeset (mỗi lần màn chớp đen).
