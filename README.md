@@ -6,6 +6,16 @@ This repo is my note about technical
 
 **Chú ý**: Cách nhanh nhất để tìm tài liệu đầy đủ về một công cụ nào đó là tìm với từ khóa: 'awesome-[tên công cụ]'
 
+softwares
+---
+
+Installation guides; downloads are hosted in the private [softwares repository](https://github.com/alexander1307xa/softwares/releases) and require an authorized GitHub account.
+
+- [Burp Suite Professional](softwares/burpsuite_pro.md)
+- [DBeaver Ultimate Edition](softwares/dbeaver-ultimate-edition.md)
+- [Studio 3T for MongoDB](softwares/studio-3t-for-mongo.md)
+- [GoldenDict and English resources](softwares/english.md)
+
 database
 ---
 
