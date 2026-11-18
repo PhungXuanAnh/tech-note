@@ -23,7 +23,13 @@ dmesg gắn nhãn `ACPI BIOS Error (bug)` (DPTF `IETM._OSC` fail do DSDT thiếu
 > **🔥 Cập nhật 2026-07 (lần 2) — ĐÍNH CHÍNH LỚN:** thủ phạm kẹp công suất trên boot
 > hiện tại là **`thermald --adaptive`** (nghe theo bảng DPTF firmware), KHÔNG phải EC.
 > Sau khi chỉnh thermald đã **unlock 140W / 5107MHz** — vượt xa mức 55W. Chi tiết ở
-> mục 🔥 bên dưới. Fix static 55W ở đây giờ bị thermald (đã chỉnh) đặt 140W đè lên.
+> mục 🔥 bên dưới.
+
+> **📏 Cập nhật 2026-11 — đo lại tải nặng kéo dài (đính chính mục 🔥):** 140W chỉ là
+> PL1 ở **MSR** và chỉ thấy được ở tải ngắn/ít nhân. Tải all-core **kéo dài** vẫn bị
+> **MMIO PL1 = 55W** kẹp (CPU theo giới hạn **thấp hơn** trong 2 giới hạn) → ~2500MHz
+> all-core @~70°C. **Đây là trạng thái bình thường, KHÔNG phải lỗi throttle.** Chi tiết ở
+> mục 📏 bên dưới.
 
 **Cách sửa (đã tích hợp vào `cpupower.service`, tự chạy mỗi lần boot):**
 
@@ -97,12 +103,55 @@ sudo systemctl daemon-reload && sudo systemctl restart thermald
 
 **Khôi phục:** `sudo rm /etc/systemd/system/thermald.service.d/override.conf /etc/thermald/thermal-conf.xml && sudo systemctl daemon-reload && sudo systemctl restart thermald`
 
-> **Đánh đổi (trung thực):** dưới 95°C CPU kéo hết công suất (tới 140W) nên **tải nặng
-> all-core sẽ nóng nhanh, chạy quanh 92–97°C**. PROCHOT phần cứng vẫn chặn ~100°C (không
-> hại chip). Fan vẫn ~2900–3600 RPM (ép cao hơn không được), nên **giới hạn thật giờ là
-> TẢN NHIỆT, không phải PL nữa**: tác vụ bursty / 1-vài nhân boost thoải mái tới ~5GHz;
-> all-core bền vững thì bị nhiệt ghì (vẫn hơn hẳn mức kẹt 2.2GHz cũ). Muốn mát/êm hơn:
+> **Đánh đổi (trung thực):** tác vụ bursty / 1-vài nhân boost thoải mái tới ~5GHz. Tải
+> all-core chỉ chạy ~150W @95–98°C trong **~10s đầu** (theo PL2), sau đó bị **MMIO PL1
+> 55W** kẹp về ~2500MHz @~70°C (xem mục 📏) — **không** phải chạy liên tục 92–97°C như
+> ghi trước đây. PROCHOT phần cứng vẫn chặn ~100°C (không hại chip). Muốn mát/êm hơn:
 > hạ trip (vd `90000`).
+
+---
+
+## 📏 Cập nhật 2026-11 — đo lại: tải all-core kéo dài bị kẹp ở MMIO PL1 55W (bình thường)
+
+**Triệu chứng dễ nhầm với lỗi:** build Rust 32 luồng, htop toàn bộ nhân ~100% nhưng không
+nhân nào lên 5.5GHz (P-core ~2700, E-core ~2400MHz), 67°C, quạt 2500 RPM.
+
+**Hai giới hạn PL1 cùng có hiệu lực — CPU theo cái THẤP hơn:**
+
+```
+/sys/class/powercap/intel-rapl:0       PL1 = 140W  (MSR, thermald đặt)
+/sys/class/powercap/intel-rapl-mmio:0  PL1 =  55W  (MMIO, cpupower.service ghi)
+                                       PL2 = 190W, time window ~32s
+```
+
+**Đo `stress-ng --cpu 32` 80s + `turbostat` (mẫu 5s), cấu hình hiện tại:**
+
+| Thời điểm | PkgWatt | Bzy_MHz | PkgTmp |
+|---|---|---|---|
+| 0–5s (PL2) | 151W | 3956 | 98°C |
+| 5–10s | 113W | 3451 | 72°C |
+| **≥10s (ổn định)** | **54.9W** | **~2500** | **~70°C** |
+
+Quạt 2500–2700 RPM — khớp gần như y hệt ảnh htop lúc build.
+
+**Kết luận:**
+
+- **Không phải lỗi throttle cũ.** Lỗi cũ: PL1 trôi 10–33W, xung kẹt ≤2200MHz. Lần này PL1
+  đứng đúng 55W và vài giây đầu vẫn lên 151W / 3.9GHz.
+- **Không nhân nào lên 5.5GHz khi tải hết nhân là bình thường:** 5.5GHz chỉ dành cho 1–2
+  nhân khi các nhân khác rảnh; 55W chia cho 32 luồng thì mỗi nhân chỉ được ~2.5GHz.
+- **Nâng MMIO PL1 quá 55W bằng sysfs KHÔNG được:**
+  `constraint_0_max_power_uw = 55000000` → ghi `90000000` bị kernel trả `Invalid argument`.
+  Mức trần này do firmware cấp (nhiều khả năng từ bảng DPTF), không phải do EC ghi đè.
+- **Driver `legion_laptop` cũng không giúp được:** các file `cpu_longterm_powerlimit`,
+  `cpu_shortterm_powerlimit`... trả `Invalid argument` (WMI không hỗ trợ trên máy này),
+  và đổi `platform_profile` sang `balanced-performance` (custom) không có tác dụng.
+- Con đường còn lại là ghi thẳng thanh ghi MMIO (MCHBAR) bằng `devmem` — **không khuyến
+  nghị**: dễ sai, vượt mức firmware cho phép, và chỉ đổi được all-core ~2.5GHz lấy nhiệt
+  cao hơn. Ở 55W máy mát (~70°C), êm, tác vụ thường ngày vẫn boost tới ~5GHz.
+
+**→ Không cần fix thêm.** Vẫn giữ dòng ghi 55W trong `cpupower.service` để phòng trạng thái
+lỗi PL1 tụt 10–33W.
 
 Hàm cài tự động: **`setup_thermald_performance_in_Legion_laptop()`** trong
 `new-os-install-Ubuntu.sh` (guard `hostname==Legion`).
@@ -148,6 +197,10 @@ Test tải 32 nhân, tự ngắt nếu package temp ≥96°C:
 > `thermald --adaptive` mới là thứ kẹp công suất khi máy đang chạy, không phải EC. Sau
 > khi chỉnh thermald đo được **PL1 140W / 5107MHz**. Xem mục 🔥 "thủ phạm thật là
 > thermald `--adaptive`" ở trên.
+>
+> **📏 ĐÍNH CHÍNH lần nữa (2026-11):** với tải all-core **kéo dài**, mức 55W là **có thật**
+> — nhưng nguồn gốc là trần **MMIO PL1 `max_power_uw` = 55W** do firmware cấp, không
+> phải EC kẹp qua PECI. 140W chỉ áp dụng cho tải ngắn/ít nhân. Xem mục 📏.
 
 ---
 
@@ -252,9 +305,11 @@ ExecStart=/bin/sh -c 'echo 55000000 > /sys/class/powercap/intel-rapl-mmio:0/cons
 ```
 
 → governor=performance + platform_profile=performance (tầng A) + ghi PL1=55W (tầng B).
-Đổi `55000000` sang mức khác (vd `90000000`=90W) nếu muốn all-core mạnh hơn.
+**Không** đổi lên mức cao hơn (vd `90000000`): kernel từ chối vì
+`constraint_0_max_power_uw` của MMIO chỉ là 55W.
 
-> **Lưu ý (2026-07 lần 2):** dòng ghi PL1=55W ở đây giờ **bị `thermald` (đã chỉnh Option
-> B) đặt 140W đè lên** khi nhiệt <95°C → static 55W hầu như vô hiệu, nhưng **vẫn giữ lại**
-> vì 2 dòng governor/platform_profile (tầng A) vẫn cần. Phần "nới công suất" thật sự nay
-> do **`setup_thermald_performance_in_Legion_laptop()`** đảm nhiệm.
+> **Lưu ý (2026-11):** dòng ghi PL1=55W **vẫn có hiệu lực** — thermald chỉ đặt 140W ở PL1
+> **MSR** (`intel-rapl:0`), còn CPU theo giới hạn thấp hơn nên tải all-core kéo dài vẫn
+> dừng ở 55W (xem mục 📏). Ghi chú cũ "thermald đè lên → static 55W hầu như vô hiệu" là
+> sai. Phần thermald (`setup_thermald_performance_in_Legion_laptop()`) chỉ nới cho tải
+> ngắn/ít nhân.
