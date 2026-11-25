@@ -92,6 +92,8 @@ devops
 
 [vpn_free.md](devops/VPN/vpn_free/vpn_free.md)
 
+[cloudflare-warp-local-socks5-proxy-for-single-domain.md](devops/VPN/cloudflare-warp-local-socks5-proxy-for-single-domain.md)
+
 [jenkins-SSH-remote-hosts.md](devops/jenkins/jenkins-SSH-remote-hosts.md)
 
 [jenkins-configure-notification.md](devops/jenkins/jenkins-configure-notification.md)
